@@ -1,6 +1,19 @@
-# Turborepo starter
+# Student Management System
 
-This Turborepo starter is maintained by the Turborepo core team.
+A comprehensive student management system built with modern web technologies, featuring Turborepo for monorepo structure.
+
+## Features
+
+- Add new students with comprehensive information
+- Edit existing student details
+- View student information in a clean interface
+- Search for students by name or ID
+- Delete student records
+- Responsive design for all devices
+
+## Structure
+
+This project uses a monorepo structure with Turborepo:
 
 ## Using this example
 

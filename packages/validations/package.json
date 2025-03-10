@@ -1,0 +1,15 @@
+{
+	"name": "validations",
+	"version": "0.0.0",
+	"private": true,
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"scripts": {
+		"lint": "eslint \"**/*.ts*\"",
+		"check-types": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"eslint": "^8.53.0",
+		"typescript": "^5.0.4"
+	}
+}

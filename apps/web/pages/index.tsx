@@ -1,0 +1,229 @@
+import { useState, useEffect } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
+import { Input } from "@repo/ui";
+import { Button } from "@repo/ui";
+import { SearchIcon, BarChart4, Rows, Users2 } from "lucide-react";
+import AddStudentForm from "../src/components/AddStudentForm";
+import EditStudentForm from "../src/components/EditStudentForm";
+import StudentTable from "../src/components/StudentTable";
+import ConfirmDialog from "../src/components/ConfirmDialog";
+import StatCard from "../src/components/StatCard";
+import Dashboard from "../src/components/Dashboard";
+import { Student } from "../types";
+import { useToastContext } from "../src/context/toast-context";
+
+export default function HomePage() {
+  const { toast } = useToastContext();
+
+  const [students, setStudents] = useState<Student[]>(() => {
+    if (typeof window !== "undefined") {
+      const savedStudents = localStorage.getItem("students");
+      return savedStudents ? JSON.parse(savedStudents) : [];
+    }
+    return [];
+  });
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [currentTab, setCurrentTab] = useState("list");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem("students", JSON.stringify(students));
+  }, [students]);
+
+  const filteredStudents = students.filter(
+    (student) =>
+      student.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.studentId.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleAddStudent = (newStudent: Student): boolean => {
+    if (
+      students.some((student) => student.studentId === newStudent.studentId)
+    ) {
+      toast({
+        title: "Lỗi",
+        description: "Mã số sinh viên đã tồn tại!",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    setStudents([...students, newStudent]);
+    setCurrentTab("list");
+    toast({
+      title: "Thành công",
+      description: "Đã thêm sinh viên mới vào hệ thống",
+    });
+    return true;
+  };
+
+  const handleEditStudent = (studentId: string): void => {
+    const student = students.find((s) => s.studentId === studentId);
+    if (student) {
+      setEditingStudent(student);
+      setCurrentTab("edit");
+    }
+  };
+
+  const handleUpdateStudent = (updatedStudent: Student): void => {
+    setStudents(
+      students.map((student) =>
+        student.studentId === updatedStudent.studentId
+          ? updatedStudent
+          : student
+      )
+    );
+    setEditingStudent(null);
+    setCurrentTab("list");
+    toast({
+      title: "Thành công",
+      description: "Đã cập nhật thông tin sinh viên",
+    });
+  };
+
+  const confirmDeleteStudent = (studentId: string): void => {
+    setStudentToDelete(studentId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteStudent = (): void => {
+    if (studentToDelete) {
+      setStudents(
+        students.filter((student) => student.studentId !== studentToDelete)
+      );
+      toast({
+        title: "Đã xóa",
+        description: "Sinh viên đã được xóa khỏi hệ thống",
+        variant: "destructive",
+      });
+      setStudentToDelete(null);
+    }
+    setDeleteConfirmOpen(false);
+  };
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">
+          Hệ thống Quản lý Sinh viên
+        </h1>
+        <p className="text-muted-foreground">
+          Quản lý và theo dõi sinh viên trong một giao diện đơn giản.
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Tổng sinh viên"
+          value={students.length}
+          description="Tổng số sinh viên trong hệ thống"
+          icon={<Users2 className="h-4 w-4 text-muted-foreground" />}
+        />
+        <StatCard
+          title="Đang học"
+          value={students.filter((s) => s.status === "Đang học").length}
+          description="Sinh viên đang học tập"
+          icon={<Rows className="h-4 w-4 text-muted-foreground" />}
+        />
+        <StatCard
+          title="Tốt nghiệp"
+          value={students.filter((s) => s.status === "Đã tốt nghiệp").length}
+          description="Sinh viên đã tốt nghiệp"
+          icon={<BarChart4 className="h-4 w-4 text-muted-foreground" />}
+        />
+        <StatCard
+          title="Tỷ lệ tốt nghiệp"
+          value={
+            students.length
+              ? Math.round(
+                  (students.filter((s) => s.status === "Đã tốt nghiệp").length /
+                    students.length) *
+                    100
+                ) + "%"
+              : "0%"
+          }
+          description="Phần trăm sinh viên tốt nghiệp"
+          icon={<BarChart4 className="h-4 w-4 text-muted-foreground" />}
+        />
+      </div>
+
+      <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsTrigger value="list">Danh sách Sinh viên</TabsTrigger>
+          <TabsTrigger value="add">Thêm Sinh viên</TabsTrigger>
+          <TabsTrigger value="edit" disabled={!editingStudent}>
+            Sửa Thông tin
+          </TabsTrigger>
+          <TabsTrigger value="dashboard">Thống kê</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="list" className="mt-0">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div className="relative w-full md:w-1/3">
+              <SearchIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Tìm kiếm theo tên hoặc MSSV..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button
+              onClick={() => setCurrentTab("add")}
+              className="whitespace-nowrap"
+            >
+              Thêm Sinh viên
+            </Button>
+          </div>
+
+          <div className="rounded-md border">
+            <StudentTable
+              students={filteredStudents}
+              onEdit={handleEditStudent}
+              onDelete={confirmDeleteStudent}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="add" className="mt-0">
+          <div className="mx-auto max-w-2xl">
+            <AddStudentForm onSubmit={handleAddStudent} />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="edit" className="mt-0">
+          {editingStudent && (
+            <div className="mx-auto max-w-2xl">
+              <EditStudentForm
+                student={editingStudent}
+                onSubmit={handleUpdateStudent}
+                onCancel={() => {
+                  setEditingStudent(null);
+                  setCurrentTab("list");
+                }}
+              />
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="dashboard" className="mt-0">
+          <Dashboard students={students} />
+        </TabsContent>
+      </Tabs>
+
+      <ConfirmDialog
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDeleteStudent}
+        title="Xóa sinh viên"
+        description="Bạn có chắc chắn muốn xóa sinh viên này không? Hành động này không thể hoàn tác."
+        confirmText="Xóa"
+        cancelText="Hủy"
+        variant="destructive"
+      />
+    </div>
+  );
+}
