@@ -1,19 +1,20 @@
+"use client";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
 import { Input } from "@repo/ui";
 import { Button } from "@repo/ui";
 import { SearchIcon, BarChart4, Rows, Users2 } from "lucide-react";
-import AddStudentForm from "../src/components/AddStudentForm";
-import EditStudentForm from "../src/components/EditStudentForm";
-import StudentTable from "../src/components/StudentTable";
-import ConfirmDialog from "../src/components/ConfirmDialog";
-import StatCard from "../src/components/StatCard";
-import Dashboard from "../src/components/Dashboard";
-import { Student } from "../types";
-import { useToastContext } from "../src/context/toast-context";
+import AddStudentForm from "../components/AddStudentForm";
+import EditStudentForm from "../components/EditStudentForm";
+import StudentTable from "../components/StudentTable";
+import ConfirmDialog from "../components/ConfirmDialog";
+import StatCard from "../components/StatCard";
+import Dashboard from "../components/Dashboard";
+import { Student } from "../../types";
+import { useToast } from "../context/toast-context";
 
 export default function HomePage() {
-  const { toast } = useToastContext();
+  const { toast } = useToast();
 
   const [students, setStudents] = useState<Student[]>(() => {
     if (typeof window !== "undefined") {
