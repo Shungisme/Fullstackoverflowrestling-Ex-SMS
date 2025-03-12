@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "../styles/globals.css";
+//import "../styles/globals.css";
+import "@repo/ui/styles.css"
+import "../styles/globals.css"
 import { ToastProvider } from "../context/toast-context";
 import { Toaster } from "../components/Toast";
 
