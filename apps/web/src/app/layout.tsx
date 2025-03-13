@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body className={inter.className}>
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ToastProvider>
           <header className="bg-slate-800 text-white py-4">
             <div className="container mx-auto px-4 max-w-6xl">
@@ -27,7 +27,7 @@ export default function RootLayout({
             </div>
           </header>
 
-          <main className="min-h-screen bg-background">
+          <main className="flex-1 bg-background scroll-auto">
             <div className="container mx-auto py-6 px-4 max-w-6xl">
               {children}
             </div>

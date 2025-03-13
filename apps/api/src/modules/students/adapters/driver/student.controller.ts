@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  UsePipes,
 } from '@nestjs/common';
 import { StudentService } from '../../domain/port/input/student.service';
 import {
@@ -15,7 +16,7 @@ import {
   StudentRequestDTO,
   StudentResponseDTO,
 } from '../../domain/dto/student-dto';
-import { ZodSerializerDto } from 'nestjs-zod';
+import { ZodSerializerDto, ZodValidationPipe } from 'nestjs-zod';
 
 @Controller('student')
 export class StudentController {
@@ -23,6 +24,7 @@ export class StudentController {
 
   @Post()
   @ZodSerializerDto(StudentResponseDTO)
+  @UsePipes(ZodValidationPipe)
   async create(
     @Body() studentDto: StudentRequestDTO,
   ): Promise<StudentResponseDTO> {

@@ -19,22 +19,22 @@ import { Student, FormErrors } from "../../types";
 import { PlusCircle, Loader2 } from "lucide-react";
 
 interface AddStudentFormProps {
-  onSubmit: (student: Student) => boolean;
+  onSubmit: (student: Student) =>Promise<boolean>;
 }
 
 export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
   const [formData, setFormData] = useState<Student>({
     studentId: "",
-    fullName: "",
+    name: "",
     dateOfBirth: "",
-    gender: "Nam",
+    gender: "MALE",
     faculty: "",
-    batch: "",
+    course: 0,
     program: "",
     address: "",
     email: "",
     phone: "",
-    status: "Đang học",
+    status: "Currently Studying",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -42,7 +42,8 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (name === "course") setFormData({...formData, [name]: Number(value)})
+    else setFormData({ ...formData, [name]: value });
     // Clear error when field is changed
     if (errors[name]) {
       setErrors({ ...errors, [name]: undefined });
@@ -61,16 +62,16 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
 
     if (!formData.studentId.trim())
       newErrors.studentId = "MSSV không được để trống";
-    if (!formData.fullName.trim())
-      newErrors.fullName = "Họ tên không được để trống";
+    if (!formData.name.trim())
+      newErrors.name = "Họ tên không được để trống";
     if (!formData.dateOfBirth)
       newErrors.dateOfBirth = "Ngày sinh không được để trống";
     if (!formData.gender) newErrors.gender = "Giới tính không được để trống";
     if (!formData.faculty) newErrors.faculty = "Khoa không được để trống";
-    if (!formData.batch) newErrors.batch = "Khóa không được để trống";
+    if (!formData.course) newErrors.course = "Khóa không được để trống";
     if (!formData.program.trim())
       newErrors.program = "Chương trình không được để trống";
-    if (!formData.address.trim())
+    if (!formData.address?.trim())
       newErrors.address = "Địa chỉ không được để trống";
 
     if (formData.email && !validateEmail(formData.email)) {
@@ -91,21 +92,20 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
       setIsSubmitting(true);
       try {
         // Simulate an API call
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        const success = onSubmit(formData);
+        const success = await onSubmit(formData);
         if (success) {
           setFormData({
             studentId: "",
-            fullName: "",
+            name: "",
             dateOfBirth: "",
-            gender: "Nam",
+            gender: "MALE",
             faculty: "",
-            batch: "",
+            course: 0,
             program: "",
             address: "",
             email: "",
             phone: "",
-            status: "Đang học",
+            status: "Currently Studying",
           });
         }
       } finally {
@@ -143,19 +143,19 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fullName">
+              <Label htmlFor="name">
                 Họ tên <span className="text-destructive">*</span>
               </Label>
               <Input
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
+                id="name"
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 placeholder="Nhập họ tên"
-                className={errors.fullName ? "border-destructive" : ""}
+                className={errors.name ? "border-destructive" : ""}
               />
-              {errors.fullName && (
-                <p className="text-xs text-destructive">{errors.fullName}</p>
+              {errors.name && (
+                <p className="text-xs text-destructive">{errors.name}</p>
               )}
             </div>
 
@@ -216,14 +216,14 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
                   <SelectValue placeholder="Chọn khoa" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Khoa Luật">Khoa Luật</SelectItem>
-                  <SelectItem value="Khoa Tiếng Anh thương mại">
+                  <SelectItem value="Faculty of Law">Khoa Luật</SelectItem>
+                  <SelectItem value="Faculty of Business English">
                     Khoa Tiếng Anh thương mại
                   </SelectItem>
-                  <SelectItem value="Khoa Tiếng Nhật">
+                  <SelectItem value="Faculty of Japanese Language">
                     Khoa Tiếng Nhật
                   </SelectItem>
-                  <SelectItem value="Khoa Tiếng Pháp">
+                  <SelectItem value="Faculty of French Language">
                     Khoa Tiếng Pháp
                   </SelectItem>
                 </SelectContent>
@@ -234,19 +234,19 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="batch">
+              <Label htmlFor="course">
                 Khóa <span className="text-destructive">*</span>
               </Label>
               <Input
-                id="batch"
-                name="batch"
-                value={formData.batch}
+                id="course"
+                name="course"
+                value={formData.course}
                 onChange={handleChange}
-                placeholder="Ví dụ: K45"
-                className={errors.batch ? "border-destructive" : ""}
+                placeholder="Ví dụ: 22"
+                className={errors.course ? "border-destructive" : ""}
               />
-              {errors.batch && (
-                <p className="text-xs text-destructive">{errors.batch}</p>
+              {errors.course && (
+                <p className="text-xs text-destructive">{errors.course}</p>
               )}
             </div>
 
@@ -278,10 +278,10 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
                   <SelectValue placeholder="Chọn tình trạng" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Đang học">Đang học</SelectItem>
-                  <SelectItem value="Đã tốt nghiệp">Đã tốt nghiệp</SelectItem>
-                  <SelectItem value="Đã thôi học">Đã thôi học</SelectItem>
-                  <SelectItem value="Tạm dừng học">Tạm dừng học</SelectItem>
+                  <SelectItem value="Currently Studying">Đang học</SelectItem>
+                  <SelectItem value="Graduated">Đã tốt nghiệp</SelectItem>
+                  <SelectItem value="Discontinued">Đã thôi học</SelectItem>
+                  <SelectItem value="Temporarily Suspended">Tạm dừng học</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -336,7 +336,7 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
           </div>
 
           <div className="flex items-center justify-end">
-            <Button type="submit" className="gap-2" disabled={isSubmitting}>
+            <Button type="submit" variant="outline" className="flex items-center gap-2" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />

@@ -28,7 +28,7 @@ const StudentSchema = z.object({
     course: z.number().int().min(1, 'Course must be a positive integer'),
     program: z.string().min(1, 'Program cannot be empty'),
     address: z.string().optional().nullable(),
-    email: z.string().email('Invalid email format'),
+    email: z.string().email('Invalid email format').optional().nullable(),
     phone: z.string().min(10).max(15).optional().nullable(),
     status: z.enum(
         [

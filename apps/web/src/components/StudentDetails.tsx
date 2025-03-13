@@ -4,10 +4,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  Button,
-  Card,
-  CardContent,
-} from "@repo/ui";
+} from "./Dialog";
+import { Button, Card, CardContent } from "@repo/ui";
 import {
   Edit,
   Mail,
@@ -20,6 +18,7 @@ import {
   Award,
 } from "lucide-react";
 import { Student } from "../../types";
+import { format } from "date-fns";
 
 interface StudentDetailsProps {
   student: Student;
@@ -36,21 +35,15 @@ export default function StudentDetails({
 }: StudentDetailsProps) {
   if (!student) return null;
 
-  const formatDate = (dateString: string): string => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN");
-  };
-
   const getStatusClass = (status: string): string => {
     switch (status) {
-      case "Đang học":
+      case "Currently Studying":
         return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100";
-      case "Đã tốt nghiệp":
+      case "Graduated":
         return "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100";
-      case "Đã thôi học":
+      case "Discontinued":
         return "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100";
-      case "Tạm dừng học":
+      case "Temporarily Suspended":
         return "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100";
       default:
         return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100";
@@ -59,13 +52,13 @@ export default function StudentDetails({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "Đang học":
+      case "Currently Studying":
         return <BookOpen className="h-4 w-4" />;
-      case "Đã tốt nghiệp":
+      case "Graduated":
         return <Award className="h-4 w-4" />;
-      case "Đã thôi học":
+      case "Discontinued":
         return <User className="h-4 w-4" />;
-      case "Tạm dừng học":
+      case "Temporarily Suspended":
         return <User className="h-4 w-4" />;
       default:
         return <User className="h-4 w-4" />;
@@ -99,14 +92,14 @@ export default function StudentDetails({
               <User className="h-12 w-12 text-primary" />
             </div>
             <div className="text-center">
-              <h2 className="text-xl font-bold">{student.fullName}</h2>
+              <h2 className="text-xl font-bold">{student.name}</h2>
               <p className="text-sm text-muted-foreground">
                 MSSV: {student.studentId}
               </p>
               <div className="mt-2 flex items-center justify-center gap-2">
                 <span
                   className={`px-3 py-1 rounded-full text-xs flex items-center gap-1 ${getStatusClass(
-                    student.status
+                    student.status,
                   )}`}
                 >
                   {getStatusIcon(student.status)} {student.status}
@@ -123,7 +116,7 @@ export default function StudentDetails({
                   <div>
                     <p className="text-sm font-medium">Ngày sinh</p>
                     <p className="text-sm text-muted-foreground">
-                      {formatDate(student.dateOfBirth)}
+                      {format(new Date(student.dateOfBirth), "dd/mm/yyyy")}
                     </p>
                   </div>
                 </div>
@@ -153,7 +146,7 @@ export default function StudentDetails({
                   <div>
                     <p className="text-sm font-medium">Khóa</p>
                     <p className="text-sm text-muted-foreground">
-                      {student.batch}
+                      {`K${student.course}`}
                     </p>
                   </div>
                 </div>
