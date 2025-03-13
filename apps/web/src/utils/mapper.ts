@@ -6,3 +6,10 @@ export const EngVietFalcutyMap = {
     [STUDENT_CONSTANT.FACULTY.BUSSINESS_ENGLISH] : "Khoa Tiếng Anh thương mại",
     [STUDENT_CONSTANT.FACULTY.JAPANESE_LANGUAGE] : "Khoa Tiếng Nhật",
 }
+
+export const EngVietStatusMap = {
+    [STUDENT_CONSTANT.STATUS.STUDING]: "Đang học",
+    [STUDENT_CONSTANT.STATUS.GRADUATED]: "Đã tốt nghiệp",
+    [STUDENT_CONSTANT.STATUS.DISCONTINUED]: "Đã thôi học",
+    [STUDENT_CONSTANT.STATUS.TEMPORARY_SUSPENSE]: "Tạm dừng học",
+}

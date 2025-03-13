@@ -21,6 +21,7 @@ import {
 import StudentDetails from "./StudentDetails";
 import { Student } from "../../types";
 import { format } from "date-fns";
+import { EngVietFalcutyMap, EngVietStatusMap } from "../utils/mapper";
 
 interface StudentTableProps {
   students: Student[];
@@ -176,13 +177,13 @@ export default function StudentTable({
                   <TableCell>
                     {format(new Date(student.dateOfBirth), "dd/mm/yyyy")}
                   </TableCell>
-                  <TableCell>{student.faculty}</TableCell>
+                  <TableCell>{EngVietFalcutyMap[student.faculty]}</TableCell>
                   <TableCell>{student.course}</TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${getStatusClass(student.status)}`}
                     >
-                      {student.status}
+                      {EngVietStatusMap[student.status]}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
