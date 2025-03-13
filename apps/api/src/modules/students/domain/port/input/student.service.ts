@@ -40,10 +40,10 @@ export class StudentService implements IStudentService {
 
   async create(student: StudentRequestDTO): Promise<StudentResponseDTO> {
     try {
-      const existingStudent = await this.studentRepository.findById(
+      const existedStudent = await this.studentRepository.findById(
         student.studentId as string,
       );
-      if (existingStudent) {
+      if (existedStudent) {
         throw new ConflictException(
           `Student with ID ${student.studentId} already exists`,
         );
@@ -92,8 +92,11 @@ export class StudentService implements IStudentService {
     }
   }
 
-  async findById(studentId: string): Promise<StudentResponseDTO | null> {
+  async findById(studentId: string): Promise<StudentResponseDTO> {
     const student = await this.studentRepository.findById(studentId);
+    if (!student) {
+      throw new NotFoundException(`Student with ID ${studentId} not found`);
+    }
     return student;
   }
 }
