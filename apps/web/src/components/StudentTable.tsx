@@ -7,8 +7,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Button,
 } from "@repo/ui";
+import { Button } from "./Button";
 import {
   ChevronDown,
   ChevronUp,
@@ -17,6 +17,7 @@ import {
   Eye,
   AlertCircle,
   ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import StudentDetails from "./StudentDetails";
 import { Student } from "../../types";
@@ -99,7 +100,7 @@ export default function StudentTable({
       <ChevronDown className="ml-1 h-4 w-4" />
     );
   };
-
+    if (!Array.isArray(students)) return null;
   return (
     <>
       <div className="rounded-md border">
@@ -175,7 +176,7 @@ export default function StudentTable({
                   </TableCell>
                   <TableCell>{student.name}</TableCell>
                   <TableCell>
-                    {format(new Date(student.dateOfBirth), "dd/mm/yyyy")}
+                    {format(new Date(student.dateOfBirth), "dd/MM/yyyy")}
                   </TableCell>
                   <TableCell>{EngVietFalcutyMap[student.faculty]}</TableCell>
                   <TableCell>{student.course}</TableCell>
@@ -254,7 +255,7 @@ export default function StudentTable({
               onClick={() => setPage(Math.min(totalPages, page + 1))}
               disabled={page === totalPages}
             >
-              Sau
+              <ChevronRight />
             </Button>
           </div>
         </div>

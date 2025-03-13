@@ -5,7 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./Dialog";
-import { Button, Card, CardContent } from "@repo/ui";
+import { Button } from "./Button";
+import { Card, CardContent } from "./Card";
 import {
   Edit,
   Mail,

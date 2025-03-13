@@ -1,19 +1,11 @@
 import { useState, useEffect } from "react";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  Button,
   Input,
   Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@repo/ui";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./Card";
+import { Button } from "./Button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./Select";
 import { validateEmail, validatePhone } from "validations";
 import { Student, FormErrors } from "../../types";
 import { ArrowLeft, Save } from "lucide-react";

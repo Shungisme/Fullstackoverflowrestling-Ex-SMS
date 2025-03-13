@@ -2,7 +2,7 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "@repo/ui";
+import { Button } from "./Button";
 
 export function ModeToggle() {
   const { theme, setTheme } = useTheme();

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/Card";
 import { LucideIcon } from "lucide-react";
 
 interface StatCardProps {

@@ -28,7 +28,7 @@ model student {
   course      Int
   program     String
   address     String?
-  email       String    @unique
+  email       String?
   phone       String?
   status      String
   createdAt   DateTime  @default(now())

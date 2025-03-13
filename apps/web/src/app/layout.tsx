@@ -3,8 +3,7 @@ import { Inter } from "next/font/google";
 import "../styles/globals.css"
 import "@repo/ui/styles.css"
 import { ToastProvider } from "../context/toast-context";
-import { Toaster } from "../components/Toast";
-
+import { Toaster } from "../components/Sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -38,7 +37,7 @@ export default function RootLayout({
               <p>© {new Date().getFullYear()} - Hệ thống Quản lý Sinh viên</p>
             </div>
           </footer>
-          <Toaster />
+          <Toaster richColors />
         </ToastProvider>
       </body>
     </html>
