@@ -12,12 +12,13 @@ import { StudentService } from '../../domain/port/input/student.service';
 import {
   StudentRequestDTO,
   StudentResponseDTO,
+  StudentsResponseDTO,
 } from '../../domain/dto/student-dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { DeleteStudentResponseDTO } from '../../domain/dto/delete-dto';
 import { SearchRequestDTO } from '../../domain/dto/search-dto';
 
-@Controller('student')
+@Controller({ path: 'students', version: '1' })
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
@@ -55,6 +56,7 @@ export class StudentController {
   }
 
   @Get()
+  @ZodSerializerDto(StudentsResponseDTO)
   async search(
     @Query() query: SearchRequestDTO,
   ): Promise<StudentResponseDTO[]> {

@@ -2,9 +2,13 @@ import { createZodDto } from 'nestjs-zod';
 import { STUDENT_CONSTANT } from 'src/shared/constants/student.constant';
 import { z } from 'zod';
 import { Gender } from '@prisma/client';
+import { ObjectId } from 'mongodb';
 
 const StudentSchema = z.object({
-  // id: z.number().min(1, 'id must be a positive integer'),
+  id: z
+    .string()
+    .refine((id) => ObjectId.isValid(id), { message: 'Invalid ObjectId' })
+    .optional(),
   studentId: z.string().min(1, 'studentId cannot be empty'),
   name: z.string().min(1, 'Name cannot be empty'),
   dateOfBirth: z
@@ -45,6 +49,7 @@ const StudentSchema = z.object({
 
 export class StudentRequestDTO extends createZodDto(StudentSchema) {}
 export class StudentResponseDTO extends createZodDto(StudentSchema) {}
+export class StudentsResponseDTO extends createZodDto(z.array(StudentSchema)) {}
 
 export class UpdateStudentRequestDTO extends createZodDto(
   StudentSchema.omit({ studentId: true, email: true }),
