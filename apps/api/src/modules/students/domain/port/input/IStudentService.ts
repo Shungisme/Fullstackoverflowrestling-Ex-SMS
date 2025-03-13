@@ -10,6 +10,6 @@ export interface IStudentService {
   create(student: StudentRequestDTO): Promise<StudentResponseDTO>;
   delete(studentId: string): Promise<DeleteStudentResponseDTO>;
   update(student: UpdateStudentRequestDTO): Promise<StudentResponseDTO>;
-  findById(studentId: string): Promise<StudentResponseDTO>;
+  findById(studentId: string): Promise<StudentResponseDTO | null>;
   search(query: SearchRequestDTO): Promise<StudentResponseDTO[]>;
 }
