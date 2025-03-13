@@ -21,13 +21,9 @@ export default function EditStudentForm({
   onSubmit,
   onCancel,
 }: EditStudentFormProps) {
-  const [formData, setFormData] = useState<Student>({ ...student });
+  const [formData, setFormData] = useState<Student>({ ...student, dateOfBirth: new Date(student.dateOfBirth).toISOString().split("T")[0] });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    setFormData({ ...student });
-  }, [student]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

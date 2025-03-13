@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import StatsList from "../pages/Home/Stats/StatsList";
 import { BASE_URL } from "../constants/constants";
 import { stripEmptyValues } from "../utils/cleaner";
+import { toQueryString } from "../utils/helper";
 
 export default function HomePage() {
     const [students, setStudents] = useState<Student[]>([]);
@@ -54,7 +55,7 @@ export default function HomePage() {
             toast.success("Đã thêm sinh viên mới vào hệ thống");
             return true;
         } catch (e) {
-            console.log(toast);
+            toast.error("Mã số sinh viên đã tồn tại!");
             return false;
         }
     };
@@ -71,13 +72,14 @@ export default function HomePage() {
         updatedStudent: Student,
     ): Promise<void> => {
         try {
-            const res = await fetch(BASE_URL, {
-                method: "POST",
+            const res = await fetch(`${BASE_URL}/${updatedStudent.studentId}`, {
+                method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedStudent),
+                body: JSON.stringify(stripEmptyValues(updatedStudent)),
             });
             if (!res.ok) {
                 toast.error("Không thể cập nhật được sinh viên!");
+                return;
             }
             setStudents(
                 students.map((student) =>
@@ -99,15 +101,47 @@ export default function HomePage() {
         setDeleteConfirmOpen(true);
     };
 
-    const handleDeleteStudent = (): void => {
+    const handleDeleteStudent = async (): Promise<void> => {
         if (studentToDelete) {
-            setStudents(
-                students.filter((student) => student.studentId !== studentToDelete),
-            );
-            toast.info("Sinh viên đã được xóa khỏi hệ thống")
-            setStudentToDelete(null);
+            try {
+                const res = await fetch(`${BASE_URL}/${studentToDelete}`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                });
+                if (!res.ok) {
+                    toast.error("Không thể xóa được sinh viên!");
+                    return;
+                }
+                setStudents(
+                    students.filter((student) => student.studentId !== studentToDelete),
+                );
+                toast.info("Sinh viên đã được xóa khỏi hệ thống");
+                setStudentToDelete(null);
+            } catch (e) {
+                toast.error("Không thể xóa được sinh viên!");
+            }
+            setDeleteConfirmOpen(false);
         }
-        setDeleteConfirmOpen(false);
+    };
+
+    const handleSearch = async (): Promise<void> => {
+        if (searchTerm !== "") {
+            try {
+                const queryString = toQueryString({
+                    key: searchTerm,
+                });
+                const res = await fetch(`${BASE_URL}?${queryString}`, {
+                    headers: { "Content-Type": "application/json" },
+                });
+                if (!res.ok) {
+                    toast.error("Có lỗi server diễn ra!");
+                }
+                const data: Student[] = await res.json();
+                setStudents(data);
+            } catch (e) {
+                toast.error("Có lỗi server diễn ra!");
+            }
+        }
     };
 
     return (
@@ -134,18 +168,18 @@ export default function HomePage() {
 
                 <TabsContent value="list" className="mt-0">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                        <div className="relative w-full md:w-1/3">
-                            <SearchIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <div className="flex items-center w-full md:w-1/3 gap-4">
+                            <Button variant="outline" onClick={handleSearch}>
+                                <SearchIcon className="pointer-events-none h-4 w-4 text-muted-foreground" />
+                            </Button>
                             <Input
                                 placeholder="Tìm kiếm theo tên hoặc MSSV..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10"
+                                className=""
                             />
                         </div>
-                        <Button onClick={() => setCurrentTab("add")} variant="outline">
-                            Thêm Sinh viên
-                        </Button>
+                        <Button onClick={() => setCurrentTab("add")}>Thêm Sinh viên</Button>
                     </div>
 
                     <div className="rounded-md border">
