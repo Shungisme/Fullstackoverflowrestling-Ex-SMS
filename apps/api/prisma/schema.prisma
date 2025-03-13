@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
@@ -14,8 +14,8 @@ datasource db {
 }
 
 enum Gender {
-  MALE
-  FEMALE
+    MALE
+    FEMALE
 }
 
 model student {
@@ -28,7 +28,7 @@ model student {
   course      Int
   program     String
   address     String?
-  email       String?   @unique
+  email       String?
   phone       String?
   status      String
   createdAt   DateTime  @default(now())

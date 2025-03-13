@@ -2,229 +2,231 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
 import { Input } from "@repo/ui";
-import { Button } from "@repo/ui";
-import { SearchIcon, BarChart4, Rows, Users2 } from "lucide-react";
+import { Button } from "../components/Button";
+import { SearchIcon } from "lucide-react";
 import AddStudentForm from "../components/AddStudentForm";
 import EditStudentForm from "../components/EditStudentForm";
 import StudentTable from "../components/StudentTable";
 import ConfirmDialog from "../components/ConfirmDialog";
-import StatCard from "../components/StatCard";
 import Dashboard from "../components/Dashboard";
 import { Student } from "../../types";
-import { useToast } from "../context/toast-context";
+import { toast } from "sonner";
+import StatsList from "../pages/Home/Stats/StatsList";
+import { BASE_URL } from "../constants/constants";
+import { stripEmptyValues } from "../utils/cleaner";
+import { toQueryString } from "../utils/helper";
 
 export default function HomePage() {
-  const { toast } = useToast();
+    const [students, setStudents] = useState<Student[]>([]);
 
-  const [students, setStudents] = useState<Student[]>(() => {
-    if (typeof window !== "undefined") {
-      const savedStudents = localStorage.getItem("students");
-      return savedStudents ? JSON.parse(savedStudents) : [];
-    }
-    return [];
-  });
+    const [searchTerm, setSearchTerm] = useState("");
+    const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+    const [currentTab, setCurrentTab] = useState("list");
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-  const [currentTab, setCurrentTab] = useState("list");
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch(BASE_URL);
+                const data: Student[] = await res.json();
+                setStudents(data);
+            } catch (e) {
+                toast.error("Có lỗi server diễn ra!");
+            }
+        };
+        fetchData();
+        setStudents([]);
+    }, []);
 
-  useEffect(() => {
-    localStorage.setItem("students", JSON.stringify(students));
-  }, [students]);
+    const handleAddStudent = async (newStudent: Student): Promise<boolean> => {
+        try {
+            const res = await fetch(BASE_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(stripEmptyValues(newStudent)),
+            });
+            if (!res.ok) {
+                toast.error("Mã số sinh viên đã tồn tại!");
+                return false;
+            }
+            setStudents([...students, newStudent]);
+            setCurrentTab("list");
+            toast.success("Đã thêm sinh viên mới vào hệ thống");
+            return true;
+        } catch (e) {
+            toast.error("Mã số sinh viên đã tồn tại!");
+            return false;
+        }
+    };
 
-  const filteredStudents = students.filter(
-    (student) =>
-      student.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    const handleEditStudent = (studentId: string): void => {
+        const student = students.find((s) => s.studentId === studentId);
+        if (student) {
+            setEditingStudent(student);
+            setCurrentTab("edit");
+        }
+    };
 
-  const handleAddStudent = (newStudent: Student): boolean => {
-    if (
-      students.some((student) => student.studentId === newStudent.studentId)
-    ) {
-      toast({
-        title: "Lỗi",
-        description: "Mã số sinh viên đã tồn tại!",
-        variant: "destructive",
-      });
-      return false;
-    }
+    const handleUpdateStudent = async (
+        updatedStudent: Student,
+    ): Promise<void> => {
+        try {
+            const res = await fetch(`${BASE_URL}/${updatedStudent.studentId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(stripEmptyValues(updatedStudent)),
+            });
+            if (!res.ok) {
+                toast.error("Không thể cập nhật được sinh viên!");
+                return;
+            }
+            setStudents(
+                students.map((student) =>
+                    student.studentId === updatedStudent.studentId
+                        ? updatedStudent
+                        : student,
+                ),
+            );
+            setEditingStudent(null);
+            setCurrentTab("list");
+            toast.success("Đã cập nhật thông tin sinh viên");
+        } catch (e) {
+            toast.error("Không thể cập nhật được sinh viên!");
+        }
+    };
 
-    setStudents([...students, newStudent]);
-    setCurrentTab("list");
-    toast({
-      title: "Thành công",
-      description: "Đã thêm sinh viên mới vào hệ thống",
-    });
-    return true;
-  };
+    const confirmDeleteStudent = (studentId: string): void => {
+        setStudentToDelete(studentId);
+        setDeleteConfirmOpen(true);
+    };
 
-  const handleEditStudent = (studentId: string): void => {
-    const student = students.find((s) => s.studentId === studentId);
-    if (student) {
-      setEditingStudent(student);
-      setCurrentTab("edit");
-    }
-  };
+    const handleDeleteStudent = async (): Promise<void> => {
+        if (studentToDelete) {
+            try {
+                const res = await fetch(`${BASE_URL}/${studentToDelete}`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                });
+                if (!res.ok) {
+                    toast.error("Không thể xóa được sinh viên!");
+                    return;
+                }
+                setStudents(
+                    students.filter((student) => student.studentId !== studentToDelete),
+                );
+                toast.info("Sinh viên đã được xóa khỏi hệ thống");
+                setStudentToDelete(null);
+            } catch (e) {
+                toast.error("Không thể xóa được sinh viên!");
+            }
+            setDeleteConfirmOpen(false);
+        }
+    };
 
-  const handleUpdateStudent = (updatedStudent: Student): void => {
-    setStudents(
-      students.map((student) =>
-        student.studentId === updatedStudent.studentId
-          ? updatedStudent
-          : student
-      )
-    );
-    setEditingStudent(null);
-    setCurrentTab("list");
-    toast({
-      title: "Thành công",
-      description: "Đã cập nhật thông tin sinh viên",
-    });
-  };
+    const handleSearch = async (): Promise<void> => {
+        if (searchTerm !== "") {
+            try {
+                const queryString = toQueryString({
+                    key: searchTerm,
+                });
+                const res = await fetch(`${BASE_URL}?${queryString}`, {
+                    headers: { "Content-Type": "application/json" },
+                });
+                if (!res.ok) {
+                    toast.error("Có lỗi server diễn ra!");
+                }
+                const data: Student[] = await res.json();
+                setStudents(data);
+            } catch (e) {
+                toast.error("Có lỗi server diễn ra!");
+            }
+        }
+    };
 
-  const confirmDeleteStudent = (studentId: string): void => {
-    setStudentToDelete(studentId);
-    setDeleteConfirmOpen(true);
-  };
-
-  const handleDeleteStudent = (): void => {
-    if (studentToDelete) {
-      setStudents(
-        students.filter((student) => student.studentId !== studentToDelete)
-      );
-      toast({
-        title: "Đã xóa",
-        description: "Sinh viên đã được xóa khỏi hệ thống",
-        variant: "destructive",
-      });
-      setStudentToDelete(null);
-    }
-    setDeleteConfirmOpen(false);
-  };
-
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight mb-2">
-          Hệ thống Quản lý Sinh viên
-        </h1>
-        <p className="text-muted-foreground">
-          Quản lý và theo dõi sinh viên trong một giao diện đơn giản.
-        </p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Tổng sinh viên"
-          value={students.length}
-          description="Tổng số sinh viên trong hệ thống"
-          icon={<Users2 className="h-4 w-4 text-muted-foreground" />}
-        />
-        <StatCard
-          title="Đang học"
-          value={students.filter((s) => s.status === "Đang học").length}
-          description="Sinh viên đang học tập"
-          icon={<Rows className="h-4 w-4 text-muted-foreground" />}
-        />
-        <StatCard
-          title="Tốt nghiệp"
-          value={students.filter((s) => s.status === "Đã tốt nghiệp").length}
-          description="Sinh viên đã tốt nghiệp"
-          icon={<BarChart4 className="h-4 w-4 text-muted-foreground" />}
-        />
-        <StatCard
-          title="Tỷ lệ tốt nghiệp"
-          value={
-            students.length
-              ? Math.round(
-                  (students.filter((s) => s.status === "Đã tốt nghiệp").length /
-                    students.length) *
-                    100
-                ) + "%"
-              : "0%"
-          }
-          description="Phần trăm sinh viên tốt nghiệp"
-          icon={<BarChart4 className="h-4 w-4 text-muted-foreground" />}
-        />
-      </div>
-
-      <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
-          <TabsTrigger value="list">Danh sách Sinh viên</TabsTrigger>
-          <TabsTrigger value="add">Thêm Sinh viên</TabsTrigger>
-          <TabsTrigger value="edit" disabled={!editingStudent}>
-            Sửa Thông tin
-          </TabsTrigger>
-          <TabsTrigger value="dashboard">Thống kê</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="list" className="mt-0">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <div className="relative w-full md:w-1/3">
-              <SearchIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Tìm kiếm theo tên hoặc MSSV..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+    return (
+        <div className="space-y-8">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight mb-2">
+                    Hệ thống Quản lý Sinh viên
+                </h1>
+                <p className="text-muted-foreground">
+                    Quản lý và theo dõi sinh viên trong một giao diện đơn giản.
+                </p>
             </div>
-            <Button
-              onClick={() => setCurrentTab("add")}
-              className="whitespace-nowrap"
-            >
-              Thêm Sinh viên
-            </Button>
-          </div>
 
-          <div className="rounded-md border">
-            <StudentTable
-              students={filteredStudents}
-              onEdit={handleEditStudent}
-              onDelete={confirmDeleteStudent}
+            <StatsList students={students} />
+            <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-4 mb-6">
+                    <TabsTrigger value="list">Danh sách Sinh viên</TabsTrigger>
+                    <TabsTrigger value="add">Thêm Sinh viên</TabsTrigger>
+                    <TabsTrigger value="edit" disabled={!editingStudent}>
+                        Sửa Thông tin
+                    </TabsTrigger>
+                    <TabsTrigger value="dashboard">Thống kê</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="list" className="mt-0">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <div className="flex items-center w-full md:w-1/3 gap-4">
+                            <Button variant="outline" onClick={handleSearch}>
+                                <SearchIcon className="pointer-events-none h-4 w-4 text-muted-foreground" />
+                            </Button>
+                            <Input
+                                placeholder="Tìm kiếm theo tên hoặc MSSV..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className=""
+                            />
+                        </div>
+                        <Button onClick={() => setCurrentTab("add")}>Thêm Sinh viên</Button>
+                    </div>
+
+                    <div className="rounded-md border">
+                        <StudentTable
+                            students={students}
+                            onEdit={handleEditStudent}
+                            onDelete={confirmDeleteStudent}
+                        />
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="add" className="mt-0">
+                    <div className="mx-auto max-w-2xl">
+                        <AddStudentForm onSubmit={handleAddStudent} />
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="edit" className="mt-0">
+                    {editingStudent && (
+                        <div className="mx-auto max-w-2xl">
+                            <EditStudentForm
+                                student={editingStudent}
+                                onSubmit={handleUpdateStudent}
+                                onCancel={() => {
+                                    setEditingStudent(null);
+                                    setCurrentTab("list");
+                                }}
+                            />
+                        </div>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="dashboard" className="mt-0">
+                    <Dashboard students={students} />
+                </TabsContent>
+            </Tabs>
+
+            <ConfirmDialog
+                isOpen={deleteConfirmOpen}
+                onClose={() => setDeleteConfirmOpen(false)}
+                onConfirm={handleDeleteStudent}
+                title="Xóa sinh viên"
+                description="Bạn có chắc chắn muốn xóa sinh viên này không? Hành động này không thể hoàn tác."
+                confirmText="Xóa"
+                cancelText="Hủy"
+                variant="destructive"
             />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="add" className="mt-0">
-          <div className="mx-auto max-w-2xl">
-            <AddStudentForm onSubmit={handleAddStudent} />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="edit" className="mt-0">
-          {editingStudent && (
-            <div className="mx-auto max-w-2xl">
-              <EditStudentForm
-                student={editingStudent}
-                onSubmit={handleUpdateStudent}
-                onCancel={() => {
-                  setEditingStudent(null);
-                  setCurrentTab("list");
-                }}
-              />
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="dashboard" className="mt-0">
-          <Dashboard students={students} />
-        </TabsContent>
-      </Tabs>
-
-      <ConfirmDialog
-        isOpen={deleteConfirmOpen}
-        onClose={() => setDeleteConfirmOpen(false)}
-        onConfirm={handleDeleteStudent}
-        title="Xóa sinh viên"
-        description="Bạn có chắc chắn muốn xóa sinh viên này không? Hành động này không thể hoàn tác."
-        confirmText="Xóa"
-        cancelText="Hủy"
-        variant="destructive"
-      />
-    </div>
-  );
+        </div>
+    );
 }

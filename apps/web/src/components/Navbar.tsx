@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { GraduationCap } from "lucide-react";
 import { ModeToggle } from "./ModeToggle";
-import { Button } from "@repo/ui";
+import { Button } from "./Button";
 
 export default function Navbar() {
   return (

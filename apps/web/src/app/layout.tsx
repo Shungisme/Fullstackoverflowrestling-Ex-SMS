@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-//import "../styles/globals.css";
-import "@repo/ui/styles.css"
 import "../styles/globals.css"
+import "@repo/ui/styles.css"
 import { ToastProvider } from "../context/toast-context";
-import { Toaster } from "../components/Toast";
-
+import { Toaster } from "../components/Sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -20,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body className={inter.className}>
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ToastProvider>
           <header className="bg-slate-800 text-white py-4">
             <div className="container mx-auto px-4 max-w-6xl">
@@ -28,7 +26,7 @@ export default function RootLayout({
             </div>
           </header>
 
-          <main className="min-h-screen bg-slate-50">
+          <main className="flex-1 bg-background scroll-auto">
             <div className="container mx-auto py-6 px-4 max-w-6xl">
               {children}
             </div>
@@ -39,7 +37,7 @@ export default function RootLayout({
               <p>© {new Date().getFullYear()} - Hệ thống Quản lý Sinh viên</p>
             </div>
           </footer>
-          <Toaster />
+          <Toaster richColors />
         </ToastProvider>
       </body>
     </html>
