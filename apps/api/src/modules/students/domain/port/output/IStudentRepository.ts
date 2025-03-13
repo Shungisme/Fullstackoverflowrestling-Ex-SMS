@@ -1,5 +1,5 @@
+import { SearchRequestDTO } from '../../dto/search-dto';
 import {
-  DeleteStudentResponseDTO,
   StudentRequestDTO,
   StudentResponseDTO,
   UpdateStudentRequestDTO,
@@ -7,10 +7,10 @@ import {
 
 export interface IStudentRepository {
   create(student: StudentRequestDTO): Promise<StudentResponseDTO>;
-  delete(studentId: string): Promise<DeleteStudentResponseDTO>;
+  delete(studentId: string): Promise<StudentResponseDTO>;
   update(student: UpdateStudentRequestDTO): Promise<StudentResponseDTO>;
   findById(studentId: string): Promise<StudentResponseDTO | null>;
-  search(query: any): Promise<StudentResponseDTO[]>;
+  search(query: SearchRequestDTO): Promise<StudentResponseDTO[]>;
 }
 
 export const STUDENT_REPOSITORY = Symbol('IStudentRepository');
