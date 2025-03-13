@@ -43,7 +43,7 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === "course") setFormData({...formData, [name]: Number(value)})
-    else setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [name]: value });
     // Clear error when field is changed
     if (errors[name]) {
       setErrors({ ...errors, [name]: undefined });

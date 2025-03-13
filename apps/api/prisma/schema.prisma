@@ -19,7 +19,7 @@ enum Gender {
 }
 
 model student {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   studentId   String    @unique
   name        String
   dateOfBirth DateTime
@@ -34,4 +34,3 @@ model student {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
 }
-

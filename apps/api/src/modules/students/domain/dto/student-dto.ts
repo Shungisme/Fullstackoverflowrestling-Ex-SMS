@@ -2,9 +2,13 @@ import { createZodDto } from 'nestjs-zod';
 import { STUDENT_CONSTANT } from 'src/shared/constants/student.constant';
 import { z } from 'zod';
 import { Gender } from '@prisma/client';
+import { ObjectId } from 'mongodb';
 
 const StudentSchema = z.object({
-    //id: z.number().min(1, 'id must be a positive integer'),
+    id: z
+        .string()
+        .refine((id) => ObjectId.isValid(id), { message: 'Invalid ObjectId' })
+        .optional(),
     studentId: z.string().min(1, 'studentId cannot be empty'),
     name: z.string().min(1, 'Name cannot be empty'),
     dateOfBirth: z
@@ -28,7 +32,7 @@ const StudentSchema = z.object({
     course: z.number().int().min(1, 'Course must be a positive integer'),
     program: z.string().min(1, 'Program cannot be empty'),
     address: z.string().optional().nullable(),
-    email: z.string().email('Invalid email format').optional().nullable(),
+    email: z.string().email('Invalid email format'),
     phone: z.string().min(10).max(15).optional().nullable(),
     status: z.enum(
         [
@@ -43,16 +47,9 @@ const StudentSchema = z.object({
     ),
 });
 
-const DeleteStudentSchema = z.object({
-    isDeleted: z.boolean().default(false),
-    message: z.string().optional().nullable(),
-});
-
 export class StudentRequestDTO extends createZodDto(StudentSchema) { }
 export class StudentResponseDTO extends createZodDto(StudentSchema) { }
-export class DeleteStudentResponseDTO extends createZodDto(
-    DeleteStudentSchema,
-) { }
+export class StudentsResponseDTO extends createZodDto(z.array(StudentSchema)) { }
 export class UpdateStudentRequestDTO extends createZodDto(
     StudentSchema.omit({ studentId: true, email: true }),
 ) { }

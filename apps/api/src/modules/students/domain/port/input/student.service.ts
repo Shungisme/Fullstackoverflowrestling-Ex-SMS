@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -9,11 +10,14 @@ import {
   IStudentRepository,
   STUDENT_REPOSITORY,
 } from '../output/IStudentRepository';
+import { StudentRequestDTO, StudentResponseDTO } from '../../dto/student-dto';
+import { SearchRequestDTO } from '../../dto/search-dto';
+import { DeleteStudentResponseDTO } from '../../dto/delete-dto';
 import {
-  DeleteStudentResponseDTO,
-  StudentRequestDTO,
-  StudentResponseDTO,
-} from '../../dto/student-dto';
+  isNotFoundPrismaError,
+  isNotNullPrismaError,
+  isUniqueConstraintPrismaError,
+} from 'src/shared/helpers/error';
 
 @Injectable()
 export class StudentService implements IStudentService {
@@ -22,50 +26,70 @@ export class StudentService implements IStudentService {
     private readonly studentRepository: IStudentRepository,
   ) {}
 
-  async search(query: any): Promise<StudentResponseDTO[]> {
-    const students = await this.studentRepository.search(query);
-    if (!students || students.length === 0) {
-      throw new NotFoundException('No students found matching the criteria');
+  async search(query: SearchRequestDTO): Promise<StudentResponseDTO[]> {
+    try {
+      const students = await this.studentRepository.search(query);
+      return students;
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw new NotFoundException('No students found matching the criteria');
+      }
+      throw error;
     }
-    return students;
   }
 
   async create(student: StudentRequestDTO): Promise<StudentResponseDTO> {
-    const existingStudent = await this.studentRepository.findById(
-      student.studentId as string,
-    );
-    if (existingStudent) {
-      throw new ConflictException(
-        `Student with ID ${student.studentId} already exists`,
+    try {
+      const existedStudent = await this.studentRepository.findById(
+        student.studentId as string,
       );
+      if (existedStudent) {
+        throw new ConflictException(
+          `Student with ID ${student.studentId} already exists`,
+        );
+      }
+      return this.studentRepository.create(student);
+    } catch (error) {
+      if (isUniqueConstraintPrismaError(error)) {
+        throw new ConflictException(
+          `Student with ID ${student.studentId} already exists`,
+        );
+      }
+      if (isNotNullPrismaError(error)) {
+        throw new BadRequestException(`Missing required field`);
+      }
+
+      throw error;
     }
-    return this.studentRepository.create(student);
   }
 
   async delete(studentId: string): Promise<DeleteStudentResponseDTO> {
-    const student = await this.studentRepository.findById(studentId);
-    if (!student) {
-      throw new NotFoundException(`Student with ID ${studentId} not found`);
+    try {
+      await this.studentRepository.delete(studentId);
+
+      return {
+        isDeleted: true,
+        message: 'Delete successfully',
+      };
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw new NotFoundException(`Student with ID ${studentId} not found`);
+      }
+      throw error;
     }
-    const result = await this.studentRepository.delete(studentId);
-    if (!result) {
-      throw new NotFoundException(
-        `Failed to delete student with ID ${studentId}`,
-      );
-    }
-    return result;
   }
 
   async update(student: StudentRequestDTO): Promise<StudentResponseDTO> {
-    const existingStudent = await this.studentRepository.findById(
-      student.studentId as string,
-    );
-    if (!existingStudent) {
-      throw new NotFoundException(
-        `Student with ID ${student.studentId} not found`,
-      );
+    try {
+      return await this.studentRepository.update(student);
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw new NotFoundException(
+          `Student with ID ${student.studentId} not found`,
+        );
+      }
+      throw error;
     }
-    return this.studentRepository.update(student);
   }
 
   async findById(studentId: string): Promise<StudentResponseDTO> {
