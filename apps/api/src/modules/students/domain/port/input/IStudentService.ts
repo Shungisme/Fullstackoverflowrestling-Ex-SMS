@@ -1,5 +1,6 @@
+import { DeleteStudentResponseDTO } from '../../dto/delete-dto';
+import { SearchRequestDTO } from '../../dto/search-dto';
 import {
-  DeleteStudentResponseDTO,
   StudentRequestDTO,
   StudentResponseDTO,
   UpdateStudentRequestDTO,
@@ -10,5 +11,5 @@ export interface IStudentService {
   delete(studentId: string): Promise<DeleteStudentResponseDTO>;
   update(student: UpdateStudentRequestDTO): Promise<StudentResponseDTO>;
   findById(studentId: string): Promise<StudentResponseDTO>;
-  search(query: any): Promise<StudentResponseDTO[]>;
+  search(query: SearchRequestDTO): Promise<StudentResponseDTO[]>;
 }

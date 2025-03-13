@@ -43,16 +43,9 @@ const StudentSchema = z.object({
   ),
 });
 
-const DeleteStudentSchema = z.object({
-  isDeleted: z.boolean().default(false),
-  message: z.string().optional().nullable(),
-});
-
 export class StudentRequestDTO extends createZodDto(StudentSchema) {}
 export class StudentResponseDTO extends createZodDto(StudentSchema) {}
-export class DeleteStudentResponseDTO extends createZodDto(
-  DeleteStudentSchema,
-) {}
+
 export class UpdateStudentRequestDTO extends createZodDto(
   StudentSchema.omit({ studentId: true, email: true }),
 ) {}

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import {
   StudentRequestDTO,
   StudentResponseDTO,
-  DeleteStudentResponseDTO,
 } from '../../domain/dto/student-dto';
 import { IStudentRepository } from '../../domain/port/output/IStudentRepository';
 import { PrismaService } from 'src/shared/services/database/prisma.service';
@@ -18,17 +17,12 @@ export class StudentRepository implements IStudentRepository {
 
     return response;
   }
-  async delete(studentId: string): Promise<DeleteStudentResponseDTO> {
-    await this.prismaService.student.delete({
+  async delete(studentId: string): Promise<StudentResponseDTO> {
+    return await this.prismaService.student.delete({
       where: {
         studentId: studentId,
       },
     });
-
-    return {
-      isDeleted: true,
-      message: 'Delete successfully',
-    };
   }
 
   async update(student: StudentRequestDTO): Promise<StudentResponseDTO> {

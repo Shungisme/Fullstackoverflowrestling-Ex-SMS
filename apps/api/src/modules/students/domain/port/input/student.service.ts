@@ -9,11 +9,9 @@ import {
   IStudentRepository,
   STUDENT_REPOSITORY,
 } from '../output/IStudentRepository';
-import {
-  DeleteStudentResponseDTO,
-  StudentRequestDTO,
-  StudentResponseDTO,
-} from '../../dto/student-dto';
+import { StudentRequestDTO, StudentResponseDTO } from '../../dto/student-dto';
+import { SearchRequestDTO } from '../../dto/search-dto';
+import { DeleteStudentResponseDTO } from '../../dto/delete-dto';
 
 @Injectable()
 export class StudentService implements IStudentService {
@@ -22,7 +20,7 @@ export class StudentService implements IStudentService {
     private readonly studentRepository: IStudentRepository,
   ) {}
 
-  async search(query: any): Promise<StudentResponseDTO[]> {
+  async search(query: SearchRequestDTO): Promise<StudentResponseDTO[]> {
     const students = await this.studentRepository.search(query);
     if (!students || students.length === 0) {
       throw new NotFoundException('No students found matching the criteria');
@@ -53,7 +51,10 @@ export class StudentService implements IStudentService {
         `Failed to delete student with ID ${studentId}`,
       );
     }
-    return result;
+    return {
+      isDeleted: true,
+      message: 'Delete successfully',
+    };
   }
 
   async update(student: StudentRequestDTO): Promise<StudentResponseDTO> {

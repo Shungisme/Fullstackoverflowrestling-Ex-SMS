@@ -4,18 +4,18 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { StudentService } from '../../domain/port/input/student.service';
 import {
-  DeleteStudentResponseDTO,
   StudentRequestDTO,
   StudentResponseDTO,
 } from '../../domain/dto/student-dto';
 import { ZodSerializerDto } from 'nestjs-zod';
+import { DeleteStudentResponseDTO } from '../../domain/dto/delete-dto';
+import { SearchRequestDTO } from '../../domain/dto/search-dto';
 
 @Controller('student')
 export class StudentController {
@@ -54,8 +54,10 @@ export class StudentController {
     return await this.studentService.delete(studentId);
   }
 
-  @Get('/')
-  async search(@Query() query): Promise<StudentResponseDTO[]> {
-    return await this.studentService.search(query);
+  @Get()
+  async search(
+    @Query() query: SearchRequestDTO,
+  ): Promise<StudentResponseDTO[]> {
+    return this.studentService.search(query);
   }
 }
