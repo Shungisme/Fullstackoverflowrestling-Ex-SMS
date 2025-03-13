@@ -32,7 +32,7 @@ export class StudentService implements IStudentService {
 
   async create(student: StudentRequestDTO): Promise<StudentResponseDTO> {
     const existingStudent = await this.studentRepository.findById(
-      student.studentId,
+      student.studentId as string,
     );
     if (existingStudent) {
       throw new ConflictException(
@@ -58,10 +58,12 @@ export class StudentService implements IStudentService {
 
   async update(student: StudentRequestDTO): Promise<StudentResponseDTO> {
     const existingStudent = await this.studentRepository.findById(
-      student.studentId,
+      student.studentId as string,
     );
     if (!existingStudent) {
-      throw new NotFoundException(`Student with ID ${student.id} not found`);
+      throw new NotFoundException(
+        `Student with ID ${student.studentId} not found`,
+      );
     }
     return this.studentRepository.update(student);
   }

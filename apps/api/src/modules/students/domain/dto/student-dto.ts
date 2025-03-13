@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { Gender } from '@prisma/client';
 
 const StudentSchema = z.object({
-  id: z.number().min(1, 'id must be a positive integer'),
+  // id: z.number().min(1, 'id must be a positive integer'),
   studentId: z.string().min(1, 'studentId cannot be empty'),
   name: z.string().min(1, 'Name cannot be empty'),
   dateOfBirth: z
