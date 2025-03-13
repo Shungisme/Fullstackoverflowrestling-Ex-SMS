@@ -182,8 +182,8 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
               </Label>
               <Select
                 name="gender"
-                value={formData.gender}
-                onValueChange={(value) => handleSelectChange("gender", value)}
+                //value={formData.gender}
+                //onValueChange={(value) => handleSelectChange("gender", value)}
               >
                 <SelectTrigger
                   className={errors.gender ? "border-destructive" : ""}

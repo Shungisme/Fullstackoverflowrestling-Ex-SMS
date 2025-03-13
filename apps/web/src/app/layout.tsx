@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-//import "../styles/globals.css";
-import "@repo/ui/styles.css"
 import "../styles/globals.css"
+import "@repo/ui/styles.css"
 import { ToastProvider } from "../context/toast-context";
 import { Toaster } from "../components/Toast";
 
@@ -28,7 +27,7 @@ export default function RootLayout({
             </div>
           </header>
 
-          <main className="min-h-screen bg-slate-50">
+          <main className="min-h-screen bg-background">
             <div className="container mx-auto py-6 px-4 max-w-6xl">
               {children}
             </div>
