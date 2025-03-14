@@ -1,24 +1,29 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
-import { ReactNode } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../components/atoms/Card";
+import { LucideIcon } from "lucide-react";
 
 interface StatCardProps {
   title: string;
   value: string | number;
   description?: string;
-  icon?: ReactNode;
+  Icon?: LucideIcon;
 }
 
 export default function StatCard({
   title,
   value,
   description,
-  icon,
+  Icon,
 }: StatCardProps) {
   return (
-    <Card className="p-4 rounded-lg shadow">
+    <Card className="rounded-lg shadow">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon}
+        {Icon && <Icon className="w-4" />}
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>

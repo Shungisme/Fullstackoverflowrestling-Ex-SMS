@@ -5,8 +5,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Button,
-} from "@repo/ui";
+} from "../atoms/Dialog";
+import { Button } from "../atoms/Button";
 import { AlertTriangle } from "lucide-react";
 
 interface ConfirmDialogProps {
@@ -43,18 +43,20 @@ export default function ConfirmDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            {cancelText}
-          </Button>
-          <Button
-            variant={variant}
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
-          >
-            {confirmText}
-          </Button>
+          <div className="flex flex-col gap-1">
+            <Button
+              variant={variant}
+              onClick={() => {
+                onConfirm();
+                onClose();
+              }}
+            >
+              {confirmText}
+            </Button>
+            <Button variant="outline" onClick={onClose}>
+              {cancelText}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

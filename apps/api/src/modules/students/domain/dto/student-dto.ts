@@ -47,10 +47,9 @@ const StudentSchema = z.object({
   ),
 });
 
-export class StudentRequestDTO extends createZodDto(StudentSchema) {}
-export class StudentResponseDTO extends createZodDto(StudentSchema) {}
-export class StudentsResponseDTO extends createZodDto(z.array(StudentSchema)) {}
-
+export class StudentRequestDTO extends createZodDto(StudentSchema) { }
+export class StudentResponseDTO extends createZodDto(StudentSchema) { }
+export class StudentsResponseDTO extends createZodDto(z.array(StudentSchema)) { }
 export class UpdateStudentRequestDTO extends createZodDto(
   StudentSchema.omit({ studentId: true }),
 ) {}

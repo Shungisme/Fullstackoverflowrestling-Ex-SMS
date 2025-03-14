@@ -1,45 +1,52 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { Input, Label } from "@repo/ui";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-  Button,
-  Input,
-  Label,
+} from "../atoms/Card";
+import { Button } from "../atoms/Button";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/ui";
+} from "../atoms/Select";
 import { validateEmail, validatePhone } from "validations";
 import { Student, FormErrors } from "../../types";
-import { ArrowLeft, Save } from "lucide-react";
+import { PlusCircle, Loader2 } from "lucide-react";
+import { parseISO } from "date-fns";
 
-interface EditStudentFormProps {
-  student: Student;
-  onSubmit: (student: Student) => void;
-  onCancel: () => void;
+interface AddStudentFormProps {
+  onSubmit: (student: Student) => Promise<boolean>;
 }
 
-export default function EditStudentForm({
-  student,
-  onSubmit,
-  onCancel,
-}: EditStudentFormProps) {
-  const [formData, setFormData] = useState<Student>({ ...student });
+export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
+  const [formData, setFormData] = useState<Student>({
+    studentId: "",
+    name: "",
+    dateOfBirth: "",
+    gender: "MALE",
+    faculty: "",
+    course: 0,
+    program: "",
+    address: "",
+    email: "",
+    phone: "",
+    status: "Currently Studying",
+  });
+
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    setFormData({ ...student });
-  }, [student]);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (name === "course") setFormData({ ...formData, [name]: Number(value) });
+    else setFormData({ ...formData, [name]: value });
+    // Clear error when field is changed
     if (errors[name]) {
       setErrors({ ...errors, [name]: undefined });
     }
@@ -55,17 +62,17 @@ export default function EditStudentForm({
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // StudentID is not editable in this form, so we don't validate it
-    if (!formData.fullName.trim())
-      newErrors.fullName = "Họ tên không được để trống";
+    if (!formData.studentId.trim())
+      newErrors.studentId = "MSSV không được để trống";
+    if (!formData.name.trim()) newErrors.name = "Họ tên không được để trống";
     if (!formData.dateOfBirth)
       newErrors.dateOfBirth = "Ngày sinh không được để trống";
     if (!formData.gender) newErrors.gender = "Giới tính không được để trống";
     if (!formData.faculty) newErrors.faculty = "Khoa không được để trống";
-    if (!formData.batch) newErrors.batch = "Khóa không được để trống";
+    if (!formData.course) newErrors.course = "Khóa không được để trống";
     if (!formData.program.trim())
       newErrors.program = "Chương trình không được để trống";
-    if (!formData.address.trim())
+    if (!formData.address?.trim())
       newErrors.address = "Địa chỉ không được để trống";
 
     if (formData.email && !validateEmail(formData.email)) {
@@ -85,9 +92,26 @@ export default function EditStudentForm({
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        // Simulate an API call
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        onSubmit(formData);
+        const dateFormatedForm = {
+          ...formData,
+          dateOfBirth: parseISO(formData.dateOfBirth).toISOString(),
+        };
+        const success = await onSubmit(dateFormatedForm);
+        if (success) {
+          setFormData({
+            studentId: "",
+            name: "",
+            dateOfBirth: "",
+            gender: "MALE",
+            faculty: "",
+            course: 0,
+            program: "",
+            address: "",
+            email: "",
+            phone: "",
+            status: "Currently Studying",
+          });
+        }
       } finally {
         setIsSubmitting(false);
       }
@@ -97,56 +121,45 @@ export default function EditStudentForm({
   return (
     <Card className="border-none shadow-none sm:border sm:shadow-sm">
       <CardHeader>
-        <div className="flex items-center">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="mr-2 h-8 w-8 p-0 lg:hidden"
-            onClick={onCancel}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back</span>
-          </Button>
-          <div>
-            <CardTitle>Sửa thông tin sinh viên</CardTitle>
-            <CardDescription>
-              Cập nhật thông tin của sinh viên {formData.fullName}
-            </CardDescription>
-          </div>
-        </div>
+        <CardTitle>Thêm Sinh viên mới</CardTitle>
+        <CardDescription>
+          Nhập thông tin sinh viên mới vào hệ thống
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="studentId">Mã số sinh viên</Label>
+              <Label htmlFor="studentId">
+                MSSV <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="studentId"
                 name="studentId"
                 value={formData.studentId}
-                disabled
-                className="bg-muted/50"
+                onChange={handleChange}
+                placeholder="Nhập MSSV"
+                className={errors.studentId ? "border-destructive" : ""}
               />
-              <p className="text-xs text-muted-foreground">
-                Mã số sinh viên không thể thay đổi
-              </p>
+              {errors.studentId && (
+                <p className="text-xs text-destructive">{errors.studentId}</p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fullName">
+              <Label htmlFor="name">
                 Họ tên <span className="text-destructive">*</span>
               </Label>
               <Input
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
+                id="name"
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 placeholder="Nhập họ tên"
-                className={errors.fullName ? "border-destructive" : ""}
+                className={errors.name ? "border-destructive" : ""}
               />
-              {errors.fullName && (
-                <p className="text-xs text-destructive">{errors.fullName}</p>
+              {errors.name && (
+                <p className="text-xs text-destructive">{errors.name}</p>
               )}
             </div>
 
@@ -171,11 +184,7 @@ export default function EditStudentForm({
               <Label htmlFor="gender">
                 Giới tính <span className="text-destructive">*</span>
               </Label>
-              <Select
-                name="gender"
-                value={formData.gender}
-                onValueChange={(value) => handleSelectChange("gender", value)}
-              >
+              <Select name="gender">
                 <SelectTrigger
                   className={errors.gender ? "border-destructive" : ""}
                 >
@@ -207,14 +216,14 @@ export default function EditStudentForm({
                   <SelectValue placeholder="Chọn khoa" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Khoa Luật">Khoa Luật</SelectItem>
-                  <SelectItem value="Khoa Tiếng Anh thương mại">
+                  <SelectItem value="Faculty of Law">Khoa Luật</SelectItem>
+                  <SelectItem value="Faculty of Business English">
                     Khoa Tiếng Anh thương mại
                   </SelectItem>
-                  <SelectItem value="Khoa Tiếng Nhật">
+                  <SelectItem value="Faculty of Japanese Language">
                     Khoa Tiếng Nhật
                   </SelectItem>
-                  <SelectItem value="Khoa Tiếng Pháp">
+                  <SelectItem value="Faculty of French Language">
                     Khoa Tiếng Pháp
                   </SelectItem>
                 </SelectContent>
@@ -225,19 +234,19 @@ export default function EditStudentForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="batch">
+              <Label htmlFor="course">
                 Khóa <span className="text-destructive">*</span>
               </Label>
               <Input
-                id="batch"
-                name="batch"
-                value={formData.batch}
+                id="course"
+                name="course"
+                value={formData.course}
                 onChange={handleChange}
-                placeholder="Ví dụ: K45"
-                className={errors.batch ? "border-destructive" : ""}
+                placeholder="Ví dụ: 22"
+                className={errors.course ? "border-destructive" : ""}
               />
-              {errors.batch && (
-                <p className="text-xs text-destructive">{errors.batch}</p>
+              {errors.course && (
+                <p className="text-xs text-destructive">{errors.course}</p>
               )}
             </div>
 
@@ -269,10 +278,12 @@ export default function EditStudentForm({
                   <SelectValue placeholder="Chọn tình trạng" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Đang học">Đang học</SelectItem>
-                  <SelectItem value="Đã tốt nghiệp">Đã tốt nghiệp</SelectItem>
-                  <SelectItem value="Đã thôi học">Đã thôi học</SelectItem>
-                  <SelectItem value="Tạm dừng học">Tạm dừng học</SelectItem>
+                  <SelectItem value="Currently Studying">Đang học</SelectItem>
+                  <SelectItem value="Graduated">Đã tốt nghiệp</SelectItem>
+                  <SelectItem value="Discontinued">Đã thôi học</SelectItem>
+                  <SelectItem value="Temporarily Suspended">
+                    Tạm dừng học
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -326,25 +337,22 @@ export default function EditStudentForm({
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end">
             <Button
-              type="button"
+              type="submit"
               variant="outline"
-              onClick={onCancel}
+              className="flex items-center gap-2"
               disabled={isSubmitting}
             >
-              Hủy
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
-                  Đang xử lý...
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Đang thêm...
                 </>
               ) : (
                 <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Lưu thay đổi
+                  <PlusCircle className="h-4 w-4" />
+                  Thêm Sinh viên
                 </>
               )}
             </Button>

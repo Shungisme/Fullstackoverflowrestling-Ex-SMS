@@ -32,7 +32,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     ...props
   }: Omit<ToastProps, "id" | "open">) {
     const id = generateId();
-
     setToasts((toasts) => {
       if (toasts.length >= TOAST_LIMIT) {
         toasts.shift();
@@ -55,8 +54,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   function dismissToast(id: string) {
     setToasts((toasts) =>
       toasts.map((toast) =>
-        toast.id === id ? { ...toast, open: false } : toast
-      )
+        toast.id === id ? { ...toast, open: false } : toast,
+      ),
     );
 
     setTimeout(() => {
@@ -66,7 +65,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   function updateToast(id: string, props: Omit<ToastProps, "id" | "open">) {
     setToasts((toasts) =>
-      toasts.map((toast) => (toast.id === id ? { ...toast, ...props } : toast))
+      toasts.map((toast) => (toast.id === id ? { ...toast, ...props } : toast)),
     );
   }
 

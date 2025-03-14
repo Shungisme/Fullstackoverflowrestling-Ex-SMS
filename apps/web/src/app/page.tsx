@@ -2,63 +2,65 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
 import { Input } from "@repo/ui";
-import { Button } from "@repo/ui";
-import { SearchIcon, BarChart4, Rows, Users2 } from "lucide-react";
-import AddStudentForm from "../components/AddStudentForm";
-import EditStudentForm from "../components/EditStudentForm";
-import StudentTable from "../components/StudentTable";
-import ConfirmDialog from "../components/ConfirmDialog";
-import StatCard from "../components/StatCard";
-import Dashboard from "../components/Dashboard";
+import { Button } from "../components/atoms/Button";
+import { SearchIcon } from "lucide-react";
+import AddStudentForm from "../components/organisms/AddStudentForm";
+import EditStudentForm from "../components/organisms/EditStudentForm";
+import StudentTable from "../components/molecules/StudentTable";
+import ConfirmDialog from "../components/molecules/ConfirmDialog";
+import Dashboard from "../components/pages/Dashboard";
 import { Student } from "../../types";
-import { useToast } from "../context/toast-context";
+import { toast } from "sonner";
+import StatsList from "../pages/Home/Stats/StatsList";
+import { BASE_URL } from "../constants/constants";
+import { stripEmptyValues } from "../utils/cleaner";
+import { toQueryString } from "../utils/helper";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function HomePage() {
-  const { toast } = useToast();
-
-  const [students, setStudents] = useState<Student[]>(() => {
-    if (typeof window !== "undefined") {
-      const savedStudents = localStorage.getItem("students");
-      return savedStudents ? JSON.parse(savedStudents) : [];
-    }
-    return [];
-  });
+  const [students, setStudents] = useState<Student[]>([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [currentTab, setCurrentTab] = useState("list");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   useEffect(() => {
-    localStorage.setItem("students", JSON.stringify(students));
-  }, [students]);
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch(BASE_URL);
+        const data: Student[] = await res.json();
+        setStudents(data);
+      } catch (e) {
+        toast.error("Có lỗi server diễn ra!");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  const filteredStudents = students.filter(
-    (student) =>
-      student.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleAddStudent = (newStudent: Student): boolean => {
-    if (
-      students.some((student) => student.studentId === newStudent.studentId)
-    ) {
-      toast({
-        title: "Lỗi",
-        description: "Mã số sinh viên đã tồn tại!",
-        variant: "destructive",
+  const handleAddStudent = async (newStudent: Student): Promise<boolean> => {
+    try {
+      const res = await fetch(BASE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(stripEmptyValues(newStudent)),
       });
+      if (!res.ok) {
+        toast.error("Mã số sinh viên đã tồn tại!");
+        return false;
+      }
+      setStudents([...students, newStudent]);
+      setCurrentTab("list");
+      toast.success("Đã thêm sinh viên mới vào hệ thống");
+      return true;
+    } catch (e) {
+      toast.error("Mã số sinh viên đã tồn tại!");
       return false;
     }
-
-    setStudents([...students, newStudent]);
-    setCurrentTab("list");
-    toast({
-      title: "Thành công",
-      description: "Đã thêm sinh viên mới vào hệ thống",
-    });
-    return true;
   };
 
   const handleEditStudent = (studentId: string): void => {
@@ -69,20 +71,32 @@ export default function HomePage() {
     }
   };
 
-  const handleUpdateStudent = (updatedStudent: Student): void => {
-    setStudents(
-      students.map((student) =>
-        student.studentId === updatedStudent.studentId
-          ? updatedStudent
-          : student
-      )
-    );
-    setEditingStudent(null);
-    setCurrentTab("list");
-    toast({
-      title: "Thành công",
-      description: "Đã cập nhật thông tin sinh viên",
-    });
+  const handleUpdateStudent = async (
+    updatedStudent: Student,
+  ): Promise<void> => {
+    try {
+      const res = await fetch(`${BASE_URL}/${updatedStudent.studentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(stripEmptyValues(updatedStudent)),
+      });
+      if (!res.ok) {
+        toast.error("Không thể cập nhật được sinh viên!");
+        return;
+      }
+      setStudents(
+        students.map((student) =>
+          student.studentId === updatedStudent.studentId
+            ? updatedStudent
+            : student,
+        ),
+      );
+      setEditingStudent(null);
+      setCurrentTab("list");
+      toast.success("Đã cập nhật thông tin sinh viên");
+    } catch (e) {
+      toast.error("Không thể cập nhật được sinh viên!");
+    }
   };
 
   const confirmDeleteStudent = (studentId: string): void => {
@@ -90,19 +104,48 @@ export default function HomePage() {
     setDeleteConfirmOpen(true);
   };
 
-  const handleDeleteStudent = (): void => {
+  const handleDeleteStudent = async (): Promise<void> => {
     if (studentToDelete) {
-      setStudents(
-        students.filter((student) => student.studentId !== studentToDelete)
-      );
-      toast({
-        title: "Đã xóa",
-        description: "Sinh viên đã được xóa khỏi hệ thống",
-        variant: "destructive",
-      });
-      setStudentToDelete(null);
+      try {
+        const res = await fetch(`${BASE_URL}/${studentToDelete}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) {
+          toast.error("Không thể xóa được sinh viên!");
+          return;
+        }
+        setStudents(
+          students.filter((student) => student.studentId !== studentToDelete),
+        );
+        toast.info("Sinh viên đã được xóa khỏi hệ thống");
+        setStudentToDelete(null);
+      } catch (e) {
+        toast.error("Không thể xóa được sinh viên!");
+      }
+      setDeleteConfirmOpen(false);
     }
-    setDeleteConfirmOpen(false);
+  };
+
+  const handleSearch = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      const queryString = toQueryString({
+        key: searchTerm,
+      });
+      const res = await fetch(`${BASE_URL}?${queryString}`, {
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) {
+        toast.error("Có lỗi server diễn ra!");
+      }
+      const data: Student[] = await res.json();
+      setStudents(data);
+    } catch (e) {
+      toast.error("Có lỗi server diễn ra!");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -116,41 +159,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Tổng sinh viên"
-          value={students.length}
-          description="Tổng số sinh viên trong hệ thống"
-          icon={<Users2 className="h-4 w-4 text-muted-foreground" />}
-        />
-        <StatCard
-          title="Đang học"
-          value={students.filter((s) => s.status === "Đang học").length}
-          description="Sinh viên đang học tập"
-          icon={<Rows className="h-4 w-4 text-muted-foreground" />}
-        />
-        <StatCard
-          title="Tốt nghiệp"
-          value={students.filter((s) => s.status === "Đã tốt nghiệp").length}
-          description="Sinh viên đã tốt nghiệp"
-          icon={<BarChart4 className="h-4 w-4 text-muted-foreground" />}
-        />
-        <StatCard
-          title="Tỷ lệ tốt nghiệp"
-          value={
-            students.length
-              ? Math.round(
-                  (students.filter((s) => s.status === "Đã tốt nghiệp").length /
-                    students.length) *
-                    100
-                ) + "%"
-              : "0%"
-          }
-          description="Phần trăm sinh viên tốt nghiệp"
-          icon={<BarChart4 className="h-4 w-4 text-muted-foreground" />}
-        />
-      </div>
-
+      <StatsList students={students} />
       <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="list">Danh sách Sinh viên</TabsTrigger>
@@ -163,26 +172,29 @@ export default function HomePage() {
 
         <TabsContent value="list" className="mt-0">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <div className="relative w-full md:w-1/3">
-              <SearchIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center w-full md:w-1/3 gap-4">
+              <Button variant="outline" onClick={handleSearch}>
+                {isLoading ? (
+                  <LoadingSpinner />
+                ) : (
+                  <SearchIcon className="pointer-events-none h-4 w-4 text-muted-foreground" />
+                )}
+              </Button>
               <Input
                 placeholder="Tìm kiếm theo tên hoặc MSSV..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
               />
             </div>
-            <Button
-              onClick={() => setCurrentTab("add")}
-              className="whitespace-nowrap"
-            >
-              Thêm Sinh viên
-            </Button>
+            <Button onClick={() => setCurrentTab("add")}>Thêm Sinh viên</Button>
           </div>
 
           <div className="rounded-md border">
             <StudentTable
-              students={filteredStudents}
+              students={students}
               onEdit={handleEditStudent}
               onDelete={confirmDeleteStudent}
             />

@@ -1,49 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Input, Label } from "@repo/ui";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-  Button,
-  Input,
-  Label,
+} from "../atoms/Card";
+import { Button } from "../atoms/Button";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/ui";
+} from "../atoms/Select";
 import { validateEmail, validatePhone } from "validations";
 import { Student, FormErrors } from "../../types";
-import { PlusCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 
-interface AddStudentFormProps {
-  onSubmit: (student: Student) => boolean;
+interface EditStudentFormProps {
+  student: Student;
+  onSubmit: (student: Student) => void;
+  onCancel: () => void;
 }
 
-export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
+export default function EditStudentForm({
+  student,
+  onSubmit,
+  onCancel,
+}: EditStudentFormProps) {
   const [formData, setFormData] = useState<Student>({
-    studentId: "",
-    fullName: "",
-    dateOfBirth: "",
-    gender: "Nam",
-    faculty: "",
-    batch: "",
-    program: "",
-    address: "",
-    email: "",
-    phone: "",
-    status: "Đang học",
+    ...student,
+    dateOfBirth: new Date(student.dateOfBirth).toISOString().split("T")[0],
   });
-
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    // Clear error when field is changed
+    if (name === "course") setFormData({ ...formData, [name]: Number(value) });
+    else setFormData({ ...formData, [name]: value });
     if (errors[name]) {
       setErrors({ ...errors, [name]: undefined });
     }
@@ -59,18 +56,16 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!formData.studentId.trim())
-      newErrors.studentId = "MSSV không được để trống";
-    if (!formData.fullName.trim())
-      newErrors.fullName = "Họ tên không được để trống";
+    // StudentID is not editable in this form, so we don't validate it
+    if (!formData.name.trim()) newErrors.name = "Họ tên không được để trống";
     if (!formData.dateOfBirth)
       newErrors.dateOfBirth = "Ngày sinh không được để trống";
     if (!formData.gender) newErrors.gender = "Giới tính không được để trống";
     if (!formData.faculty) newErrors.faculty = "Khoa không được để trống";
-    if (!formData.batch) newErrors.batch = "Khóa không được để trống";
+    if (!formData.course) newErrors.course = "Khóa không được để trống";
     if (!formData.program.trim())
       newErrors.program = "Chương trình không được để trống";
-    if (!formData.address.trim())
+    if (!formData.address?.trim())
       newErrors.address = "Địa chỉ không được để trống";
 
     if (formData.email && !validateEmail(formData.email)) {
@@ -92,22 +87,7 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
       try {
         // Simulate an API call
         await new Promise((resolve) => setTimeout(resolve, 500));
-        const success = onSubmit(formData);
-        if (success) {
-          setFormData({
-            studentId: "",
-            fullName: "",
-            dateOfBirth: "",
-            gender: "Nam",
-            faculty: "",
-            batch: "",
-            program: "",
-            address: "",
-            email: "",
-            phone: "",
-            status: "Đang học",
-          });
-        }
+        onSubmit(formData);
       } finally {
         setIsSubmitting(false);
       }
@@ -117,45 +97,56 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
   return (
     <Card className="border-none shadow-none sm:border sm:shadow-sm">
       <CardHeader>
-        <CardTitle>Thêm Sinh viên mới</CardTitle>
-        <CardDescription>
-          Nhập thông tin sinh viên mới vào hệ thống
-        </CardDescription>
+        <div className="flex items-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="mr-2 h-8 w-8 p-0 lg:hidden"
+            onClick={onCancel}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Button>
+          <div>
+            <CardTitle>Sửa thông tin sinh viên</CardTitle>
+            <CardDescription>
+              Cập nhật thông tin của sinh viên {formData.name}
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="studentId">
-                MSSV <span className="text-destructive">*</span>
-              </Label>
+              <Label htmlFor="studentId">Mã số sinh viên</Label>
               <Input
                 id="studentId"
                 name="studentId"
                 value={formData.studentId}
-                onChange={handleChange}
-                placeholder="Nhập MSSV"
-                className={errors.studentId ? "border-destructive" : ""}
+                disabled
+                className="bg-muted/50"
               />
-              {errors.studentId && (
-                <p className="text-xs text-destructive">{errors.studentId}</p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                Mã số sinh viên không thể thay đổi
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="fullName">
+              <Label htmlFor="name">
                 Họ tên <span className="text-destructive">*</span>
               </Label>
               <Input
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
+                id="name"
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 placeholder="Nhập họ tên"
-                className={errors.fullName ? "border-destructive" : ""}
+                className={errors.name ? "border-destructive" : ""}
               />
-              {errors.fullName && (
-                <p className="text-xs text-destructive">{errors.fullName}</p>
+              {errors.name && (
+                <p className="text-xs text-destructive">{errors.name}</p>
               )}
             </div>
 
@@ -191,9 +182,8 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
                   <SelectValue placeholder="Chọn giới tính" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Nam">Nam</SelectItem>
-                  <SelectItem value="Nữ">Nữ</SelectItem>
-                  <SelectItem value="Khác">Khác</SelectItem>
+                  <SelectItem value="MALE">Nam</SelectItem>
+                  <SelectItem value="FEMALE">Nữ</SelectItem>
                 </SelectContent>
               </Select>
               {errors.gender && (
@@ -216,14 +206,14 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
                   <SelectValue placeholder="Chọn khoa" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Khoa Luật">Khoa Luật</SelectItem>
-                  <SelectItem value="Khoa Tiếng Anh thương mại">
+                  <SelectItem value="Faculty of Law">Khoa Luật</SelectItem>
+                  <SelectItem value="Faculty of Business English">
                     Khoa Tiếng Anh thương mại
                   </SelectItem>
-                  <SelectItem value="Khoa Tiếng Nhật">
+                  <SelectItem value="Faculty of Japanese Language">
                     Khoa Tiếng Nhật
                   </SelectItem>
-                  <SelectItem value="Khoa Tiếng Pháp">
+                  <SelectItem value="Faculty of French Language">
                     Khoa Tiếng Pháp
                   </SelectItem>
                 </SelectContent>
@@ -234,19 +224,19 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="batch">
+              <Label htmlFor="course">
                 Khóa <span className="text-destructive">*</span>
               </Label>
               <Input
-                id="batch"
-                name="batch"
-                value={formData.batch}
+                id="course"
+                name="course"
+                value={formData.course}
                 onChange={handleChange}
                 placeholder="Ví dụ: K45"
-                className={errors.batch ? "border-destructive" : ""}
+                className={errors.course ? "border-destructive" : ""}
               />
-              {errors.batch && (
-                <p className="text-xs text-destructive">{errors.batch}</p>
+              {errors.course && (
+                <p className="text-xs text-destructive">{errors.course}</p>
               )}
             </div>
 
@@ -278,10 +268,12 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
                   <SelectValue placeholder="Chọn tình trạng" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Đang học">Đang học</SelectItem>
-                  <SelectItem value="Đã tốt nghiệp">Đã tốt nghiệp</SelectItem>
-                  <SelectItem value="Đã thôi học">Đã thôi học</SelectItem>
-                  <SelectItem value="Tạm dừng học">Tạm dừng học</SelectItem>
+                  <SelectItem value="Currently Studying">Đang học</SelectItem>
+                  <SelectItem value="Graduated">Đã tốt nghiệp</SelectItem>
+                  <SelectItem value="Discontinued">Đã thôi học</SelectItem>
+                  <SelectItem value="Temporarily Suspended">
+                    Tạm dừng học
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -335,17 +327,30 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-end">
-            <Button type="submit" className="gap-2" disabled={isSubmitting}>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isSubmitting}
+            >
+              Hủy
+            </Button>
+            <Button
+              type="submit"
+              className="flex items-centers"
+              variant="outline"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Đang thêm...
+                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                  Đang xử lý...
                 </>
               ) : (
                 <>
-                  <PlusCircle className="h-4 w-4" />
-                  Thêm Sinh viên
+                  <Save className="mr-2 h-4 w-4" />
+                  Lưu thay đổi
                 </>
               )}
             </Button>
