@@ -1,15 +1,19 @@
 export interface Student {
   studentId: string;
-  fullName: string;
+  name: string;
   dateOfBirth: string;
-  gender: "Nam" | "Nữ" | "Khác";
+  gender: "MALE" | "FEMALE";
   faculty: string;
-  batch: string;
+  course: number;
   program: string;
-  address: string;
-  email: string;
+  address?: string;
+  email?: string;
   phone: string;
-  status: "Đang học" | "Đã tốt nghiệp" | "Đã thôi học" | "Tạm dừng học";
+  status:
+    | "Currently Studying"
+    | "Graduated"
+    | "Discontinued"
+    | "Temporarily Suspended";
 }
 
 export interface FormErrors {

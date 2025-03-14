@@ -136,11 +136,11 @@ student_management/
        ```
      - Clone repository:
        ```
-       git clone https://github.com/your-username/student-management.git
+       git clone https://github.com/Shungisme/Fullstackoverflowrestling-Ex-SMS
        ```
      - Di chuyển vào thư mục dự án:
        ```
-       cd student-management
+       cd Fullstackoverflowrestling-Ex-SMS
        ```
    - **Hoặc tải xuống dưới dạng ZIP**:
      - Tải file ZIP từ đường link: [Link tải ứng dụng]
@@ -157,7 +157,25 @@ student_management/
 
 ### Biên dịch và chạy chương trình
 
-#### Bước 1: Biên dịch dự án
+#### Bước 1: Thiết lập môi trường cho dự án
+
+1. Bổ sung các file .env
+2. Generate Prisma Client
+   - Mở Command Prompt hoặc Terminal
+   - Điều hướng đến thư mục bạn đã lưu ứng dụng:
+     ```
+     cd đường-dẫn-đến-thư-mục
+     ```
+   - Điều hướng đến thư mục chứa mã nguồn backend:
+     ```
+      cd apps/api
+     ```
+   - Khởi tạo Prisma Client
+     ```
+      pnpm prisma generate
+     ```
+
+#### Bước 2: Biên dịch dự án
 
 1. Mở Command Prompt hoặc Terminal trong thư mục gốc của dự án
 2. Chạy lệnh:
@@ -166,7 +184,7 @@ student_management/
    ```
 3. Đợi cho quá trình biên dịch hoàn tất. Bạn sẽ thấy thông báo thành công.
 
-#### Bước 2: Chạy ứng dụng
+#### Bước 3: Chạy ứng dụng
 
 1. Sau khi biên dịch thành công, chạy lệnh:
    ```

@@ -9,7 +9,7 @@ import EditStudentForm from "../components/organisms/EditStudentForm";
 import StudentTable from "../components/molecules/StudentTable";
 import ConfirmDialog from "../components/molecules/ConfirmDialog";
 import Dashboard from "../components/pages/Dashboard";
-import { Student } from "../../types";
+import { Student } from "../types";
 import { toast } from "sonner";
 import StatsList from "../pages/Home/Stats/StatsList";
 import { BASE_URL } from "../constants/constants";
@@ -72,7 +72,7 @@ export default function HomePage() {
   };
 
   const handleUpdateStudent = async (
-    updatedStudent: Student,
+    updatedStudent: Student
   ): Promise<void> => {
     try {
       const res = await fetch(`${BASE_URL}/${updatedStudent.studentId}`, {
@@ -88,8 +88,8 @@ export default function HomePage() {
         students.map((student) =>
           student.studentId === updatedStudent.studentId
             ? updatedStudent
-            : student,
-        ),
+            : student
+        )
       );
       setEditingStudent(null);
       setCurrentTab("list");
@@ -116,7 +116,7 @@ export default function HomePage() {
           return;
         }
         setStudents(
-          students.filter((student) => student.studentId !== studentToDelete),
+          students.filter((student) => student.studentId !== studentToDelete)
         );
         toast.info("Sinh viên đã được xóa khỏi hệ thống");
         setStudentToDelete(null);
