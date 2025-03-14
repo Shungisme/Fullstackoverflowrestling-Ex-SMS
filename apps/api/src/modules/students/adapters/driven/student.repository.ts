@@ -46,7 +46,7 @@ export class StudentRepository implements IStudentRepository {
   }
 
   async search(query: any): Promise<StudentResponseDTO[]> {
-    const { key = '', limit = 5, page = 1 } = query;
+    const { key = '', limit = 1000, page = 1 } = query;
     return this.prismaService.student.findMany({
       where: {
         OR: [
