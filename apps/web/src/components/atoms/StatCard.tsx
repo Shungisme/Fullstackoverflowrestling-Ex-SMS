@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "./atoms/Card";
+import { Card, CardContent, CardHeader, CardTitle } from "./Card";
 import { LucideIcon } from "lucide-react";
 
 interface StatCardProps {
