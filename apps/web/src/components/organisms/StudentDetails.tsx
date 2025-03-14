@@ -20,8 +20,7 @@ import {
 } from "lucide-react";
 import { Student } from "../../types";
 import { format } from "date-fns";
-import { EngVietFalcutyMap, EngVietGenderMap } from "../utils/mapper";
-
+import { EngVietFalcutyMap, EngVietGenderMap } from "@/src/utils/mapper";
 interface StudentDetailsProps {
   student: Student;
   isOpen: boolean;
@@ -101,7 +100,7 @@ export default function StudentDetails({
               <div className="mt-2 flex items-center justify-center gap-2">
                 <span
                   className={`px-3 py-1 rounded-full text-xs flex items-center gap-1 ${getStatusClass(
-                    student.status
+                    student.status,
                   )}`}
                 >
                   {getStatusIcon(student.status)} {student.status}

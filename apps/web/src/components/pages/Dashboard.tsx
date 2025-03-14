@@ -8,8 +8,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Student } from "../../types";
-import { EngVietFalcutyMap, EngVietStatusMap } from "../utils/mapper";
-
+import { EngVietFalcutyMap, EngVietStatusMap } from "@/src/utils/mapper";
 interface DashboardProps {
   students: Student[];
 }
