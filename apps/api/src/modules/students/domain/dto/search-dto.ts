@@ -5,7 +5,7 @@ const SearchRequestSchema = z.object({
   key: z.string().default(''),
   limit: z
     .string()
-    .default('5')
+    .default('1000')
     .transform((val) => parseInt(val, 10)),
   page: z
     .string()
