@@ -4,9 +4,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "./Dialog";
-import { Button } from "./Button";
-import { Card, CardContent } from "./Card";
+} from "../atoms/Dialog";
+import { Button } from "../atoms/Button";
+import { Card, CardContent } from "../atoms/Card";
 import {
   Edit,
   Mail,
@@ -100,7 +100,7 @@ export default function StudentDetails({
               <div className="mt-2 flex items-center justify-center gap-2">
                 <span
                   className={`px-3 py-1 rounded-full text-xs flex items-center gap-1 ${getStatusClass(
-                    student.status,
+                    student.status
                   )}`}
                 >
                   {getStatusIcon(student.status)} {student.status}

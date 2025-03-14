@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
+import { Input, Label } from "@repo/ui";
 import {
-  Input,
-  Label,
-} from "@repo/ui";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./Card";
-import { Button } from "./Button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./Select";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "../atoms/Card";
+import { Button } from "../atoms/Button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../atoms/Select";
 import { validateEmail, validatePhone } from "validations";
 import { Student, FormErrors } from "../../types";
 import { ArrowLeft, Save } from "lucide-react";
@@ -21,13 +30,16 @@ export default function EditStudentForm({
   onSubmit,
   onCancel,
 }: EditStudentFormProps) {
-  const [formData, setFormData] = useState<Student>({ ...student, dateOfBirth: new Date(student.dateOfBirth).toISOString().split("T")[0] });
+  const [formData, setFormData] = useState<Student>({
+    ...student,
+    dateOfBirth: new Date(student.dateOfBirth).toISOString().split("T")[0],
+  });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === "course") setFormData({...formData, [name]: Number(value)})
+    if (name === "course") setFormData({ ...formData, [name]: Number(value) });
     else setFormData({ ...formData, [name]: value });
     if (errors[name]) {
       setErrors({ ...errors, [name]: undefined });
@@ -259,7 +271,9 @@ export default function EditStudentForm({
                   <SelectItem value="Currently Studying">Đang học</SelectItem>
                   <SelectItem value="Graduated">Đã tốt nghiệp</SelectItem>
                   <SelectItem value="Discontinued">Đã thôi học</SelectItem>
-                  <SelectItem value="Temporarily Suspended">Tạm dừng học</SelectItem>
+                  <SelectItem value="Temporarily Suspended">
+                    Tạm dừng học
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -322,7 +336,12 @@ export default function EditStudentForm({
             >
               Hủy
             </Button>
-            <Button type="submit" className="flex items-centers" variant="outline" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="flex items-centers"
+              variant="outline"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? (
                 <>
                   <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
-import { ThemeProvider } from "../theme/ThemeProvider";
-import Navbar from "./Navbar";
+import { ThemeProvider } from "../../theme/ThemeProvider";
+import Navbar from "../atoms/Navbar";
 
 type LayoutProps = {
   children: ReactNode;

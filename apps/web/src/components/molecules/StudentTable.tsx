@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
-import { Button } from "./Button";
+import { Button } from "../atoms/Button";
 import {
   ChevronDown,
   ChevronUp,
@@ -19,10 +19,10 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import StudentDetails from "./StudentDetails";
+import StudentDetails from "../organisms/StudentDetails";
 import { Student } from "../../types";
 import { format } from "date-fns";
-import { EngVietFalcutyMap, EngVietStatusMap } from "../utils/mapper";
+import { EngVietFalcutyMap, EngVietStatusMap } from "../../utils/mapper";
 
 interface StudentTableProps {
   students: Student[];
@@ -89,7 +89,7 @@ export default function StudentTable({
   const totalPages = Math.ceil(sortedStudents.length / rowsPerPage);
   const paginatedStudents = sortedStudents.slice(
     (page - 1) * rowsPerPage,
-    page * rowsPerPage,
+    page * rowsPerPage
   );
 
   const SortIcon = ({ field }: { field: SortField }) => {
@@ -100,7 +100,7 @@ export default function StudentTable({
       <ChevronDown className="ml-1 h-4 w-4" />
     );
   };
-    if (!Array.isArray(students)) return null;
+  if (!Array.isArray(students)) return null;
   return (
     <>
       <div className="rounded-md border">
@@ -247,7 +247,7 @@ export default function StudentTable({
                 >
                   {pageNum}
                 </Button>
-              ),
+              )
             )}
             <Button
               variant="outline"
