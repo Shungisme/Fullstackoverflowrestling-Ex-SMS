@@ -13,3 +13,9 @@ export const EngVietStatusMap = {
     [STUDENT_CONSTANT.STATUS.DISCONTINUED]: "Đã thôi học",
     [STUDENT_CONSTANT.STATUS.TEMPORARY_SUSPENSE]: "Tạm dừng học",
 }
+
+export const EngVietGenderMap = {
+    [STUDENT_CONSTANT.GENDER.MALE]: "Nam",
+    [STUDENT_CONSTANT.GENDER.FEMALE]: "Nữ",
+}
+

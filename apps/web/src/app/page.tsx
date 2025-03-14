@@ -15,6 +15,7 @@ import StatsList from "../pages/Home/Stats/StatsList";
 import { BASE_URL } from "../constants/constants";
 import { stripEmptyValues } from "../utils/cleaner";
 import { toQueryString } from "../utils/helper";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function HomePage() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -24,19 +25,21 @@ export default function HomePage() {
   const [currentTab, setCurrentTab] = useState("list");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const res = await fetch(BASE_URL);
         const data: Student[] = await res.json();
         setStudents(data);
       } catch (e) {
         toast.error("Có lỗi server diễn ra!");
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
-    setStudents([]);
   }, []);
 
   const handleAddStudent = async (newStudent: Student): Promise<boolean> => {
@@ -69,7 +72,7 @@ export default function HomePage() {
   };
 
   const handleUpdateStudent = async (
-    updatedStudent: Student
+    updatedStudent: Student,
   ): Promise<void> => {
     try {
       const res = await fetch(`${BASE_URL}/${updatedStudent.studentId}`, {
@@ -85,8 +88,8 @@ export default function HomePage() {
         students.map((student) =>
           student.studentId === updatedStudent.studentId
             ? updatedStudent
-            : student
-        )
+            : student,
+        ),
       );
       setEditingStudent(null);
       setCurrentTab("list");
@@ -113,7 +116,7 @@ export default function HomePage() {
           return;
         }
         setStudents(
-          students.filter((student) => student.studentId !== studentToDelete)
+          students.filter((student) => student.studentId !== studentToDelete),
         );
         toast.info("Sinh viên đã được xóa khỏi hệ thống");
         setStudentToDelete(null);
@@ -125,22 +128,23 @@ export default function HomePage() {
   };
 
   const handleSearch = async (): Promise<void> => {
-    if (searchTerm !== "") {
-      try {
-        const queryString = toQueryString({
-          key: searchTerm,
-        });
-        const res = await fetch(`${BASE_URL}?${queryString}`, {
-          headers: { "Content-Type": "application/json" },
-        });
-        if (!res.ok) {
-          toast.error("Có lỗi server diễn ra!");
-        }
-        const data: Student[] = await res.json();
-        setStudents(data);
-      } catch (e) {
+    try {
+      setIsLoading(true);
+      const queryString = toQueryString({
+        key: searchTerm,
+      });
+      const res = await fetch(`${BASE_URL}?${queryString}`, {
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) {
         toast.error("Có lỗi server diễn ra!");
       }
+      const data: Student[] = await res.json();
+      setStudents(data);
+    } catch (e) {
+      toast.error("Có lỗi server diễn ra!");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -150,6 +154,9 @@ export default function HomePage() {
         <h1 className="text-3xl font-bold tracking-tight mb-2">
           Hệ thống Quản lý Sinh viên
         </h1>
+        <p className="text-muted-foreground">
+          Quản lý và theo dõi sinh viên trong một giao diện đơn giản.
+        </p>
       </div>
 
       <StatsList students={students} />
@@ -167,13 +174,19 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div className="flex items-center w-full md:w-1/3 gap-4">
               <Button variant="outline" onClick={handleSearch}>
-                <SearchIcon className="pointer-events-none h-4 w-4 text-muted-foreground" />
+                {isLoading ? (
+                  <LoadingSpinner />
+                ) : (
+                  <SearchIcon className="pointer-events-none h-4 w-4 text-muted-foreground" />
+                )}
               </Button>
               <Input
                 placeholder="Tìm kiếm theo tên hoặc MSSV..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className=""
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
               />
             </div>
             <Button onClick={() => setCurrentTab("add")}>Thêm Sinh viên</Button>

@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Student } from "../../types";
-
+import { EngVietFalcutyMap, EngVietStatusMap } from "@/src/utils/mapper";
 interface DashboardProps {
   students: Student[];
 }
@@ -17,12 +17,13 @@ export default function Dashboard({ students }: DashboardProps) {
   // Count students by status
   const statusCounts = students.reduce(
     (acc: Record<string, number>, student) => {
-      acc[student.status] = (acc[student.status] || 0) + 1;
+      acc[EngVietStatusMap[student.status]] =
+        (acc[EngVietStatusMap[student.status]] || 0) + 1;
       return acc;
     },
-    {}
+    {},
   );
-
+  
   // Convert to array for charting
   const chartData = Object.entries(statusCounts).map(([name, value]) => ({
     name,
@@ -32,10 +33,11 @@ export default function Dashboard({ students }: DashboardProps) {
   // Count students by faculty
   const facultyCounts = students.reduce(
     (acc: Record<string, number>, student) => {
-      acc[student.faculty] = (acc[student.faculty] || 0) + 1;
+      acc[EngVietFalcutyMap[student.faculty]] =
+        (acc[EngVietFalcutyMap[student.faculty]] || 0) + 1;
       return acc;
     },
-    {}
+    {},
   );
 
   const facultyData = Object.entries(facultyCounts).map(([name, value]) => ({
