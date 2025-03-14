@@ -2,7 +2,7 @@
 
 ## Giới thiệu
 
-Hệ thống Quản lý Học Sinh là phần mềm giúp quản lý thông tin học sinh, điểm số, lớp học, và các hoạt động học tập một cách hiệu quả. Dự án được phát triển với TypeScript và quản lý theo kiến trúc monorepo sử dụng Turborepo.
+Hệ thống Quản lý Sinh viên là phần mềm giúp quản lý thông tin sinh viên một cách hiệu quả. Dự án được phát triển với TypeScript và quản lý theo kiến trúc monorepo sử dụng Turborepo.
 
 ## Cấu trúc source code
 
@@ -31,7 +31,7 @@ student_management/
 │   └── api/             # API server
 │       ├── src/         # Mã nguồn của API server
 │       │    ├── modules/ # Các module của API
-│       │    │    ├── students/ # Module quản lý học sinh
+│       │    │    ├── students/ # Module quản lý sinh viên
 │       │    │    │    ├── adapters/ # Các adapter của module
 │       │    │    │    │    ├── driven/ # Các adapter driven
 │       │    │    │    │    ├── driver/ # Các adapter driver
@@ -124,7 +124,7 @@ student_management/
    pnpm --version
    ```
 
-### Cài đặt ứng dụng Quản lý Học Sinh
+### Cài đặt ứng dụng Quản lý Sinh Viên
 
 1. **Tải ứng dụng**
 
@@ -188,7 +188,7 @@ student_management/
 
 1. Sau khi biên dịch thành công, chạy lệnh:
    ```
-   pnpm start
+   pnpm dev
    ```
 2. Truy cập ứng dụng:
    - Mở trình duyệt web
@@ -215,50 +215,34 @@ pnpm dev
 
 ### Hướng dẫn sử dụng cơ bản
 
-#### Quản lý học sinh
+#### Quản lý sinh viên
 
-1. **Xem danh sách học sinh**
+1. **Xem danh sách sinh viên**
 
-   - Nhấp vào mục "Học sinh" trên thanh điều hướng
-   - Danh sách học sinh sẽ hiển thị trong bảng
+   - Danh sách sinh viên sẽ hiển thị trong bảng
 
-2. **Thêm học sinh mới**
+2. **Thêm sinh viên mới**
 
-   - Nhấp vào nút "Thêm học sinh mới" phía trên bảng
-   - Điền đầy đủ thông tin học sinh vào biểu mẫu (các trường có dấu \* là bắt buộc)
+   - Nhấp vào nút "Thêm sinh viên" phía trên bảng
+   - Điền đầy đủ thông tin sinh viên vào biểu mẫu (các trường có dấu \* là bắt buộc)
    - Nhấp nút "Lưu" để hoàn tất
 
-3. **Chỉnh sửa thông tin học sinh**
+3. **Chỉnh sửa thông tin sinh viên**
 
-   - Tìm học sinh cần chỉnh sửa trong danh sách
+   - Tìm sinh viên cần chỉnh sửa trong danh sách
    - Nhấp vào biểu tượng bút chì ở cột "Thao tác"
    - Thay đổi thông tin cần thiết trong biểu mẫu
    - Nhấp nút "Cập nhật" để hoàn tất
 
-4. **Xóa học sinh**
-   - Tìm học sinh cần xóa trong danh sách
+4. **Xóa sinh viên**
+
+   - Tìm sinh viên cần xóa trong danh sách
    - Nhấp vào biểu tượng thùng rác ở cột "Thao tác"
    - Xác nhận xóa khi hộp thoại hiện lên
 
-#### Quản lý lớp học
-
-1. **Xem danh sách lớp**
-
-   - Nhấp vào mục "Lớp học" trên thanh điều hướng
-   - Danh sách lớp học sẽ hiển thị trong bảng
-
-2. **Tạo lớp mới**
-
-   - Nhấp vào nút "Tạo lớp mới"
-   - Điền thông tin lớp học vào biểu mẫu
-   - Nhấp nút "Lưu" để hoàn tất
-
-3. **Thêm học sinh vào lớp**
-   - Nhấp vào tên lớp học trong danh sách để xem chi tiết
-   - Nhấp vào tab "Học sinh" trong trang chi tiết lớp học
-   - Nhấp vào nút "Thêm học sinh"
-   - Tìm và chọn học sinh từ danh sách được hiển thị
-   - Nhấp "Thêm" để hoàn tất
+5. **Tìm kiếm sinh viên**
+   - Tìm kiếm sinh viên bằng thanh tìm kiếm trên màn hình
+   - Nhập mã số sinh viên hoặc tên sinh viên để tìm kiếm
 
 ### Xử lý sự cố
 
