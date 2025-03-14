@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Student } from "../../types";
 import { format } from "date-fns";
+import { EngVietFalcutyMap, EngVietGenderMap } from "../utils/mapper";
 
 interface StudentDetailsProps {
   student: Student;
@@ -117,7 +118,7 @@ export default function StudentDetails({
                   <div>
                     <p className="text-sm font-medium">Ngày sinh</p>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(student.dateOfBirth), "dd/mm/yyyy")}
+                      {format(new Date(student.dateOfBirth), "dd/MM/yyyy")}
                     </p>
                   </div>
                 </div>
@@ -127,7 +128,7 @@ export default function StudentDetails({
                   <div>
                     <p className="text-sm font-medium">Giới tính</p>
                     <p className="text-sm text-muted-foreground">
-                      {student.gender}
+                      {EngVietGenderMap[student.gender]}
                     </p>
                   </div>
                 </div>
@@ -137,7 +138,7 @@ export default function StudentDetails({
                   <div>
                     <p className="text-sm font-medium">Khoa</p>
                     <p className="text-sm text-muted-foreground">
-                      {student.faculty}
+                      {EngVietFalcutyMap[student.faculty]}
                     </p>
                   </div>
                 </div>
