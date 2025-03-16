@@ -10,7 +10,11 @@ import {
   IStudentRepository,
   STUDENT_REPOSITORY,
 } from '../output/IStudentRepository';
-import { StudentRequestDTO, StudentResponseDTO } from '../../dto/student-dto';
+import {
+  StudentRequestDTO,
+  StudentResponseDTO,
+  StudentsResponseDTO,
+} from '../../dto/student-dto';
 import { SearchRequestDTO } from '../../dto/search-dto';
 import { DeleteStudentResponseDTO } from '../../dto/delete-dto';
 import {
@@ -26,10 +30,14 @@ export class StudentService implements IStudentService {
     private readonly studentRepository: IStudentRepository,
   ) {}
 
-  async search(query: SearchRequestDTO): Promise<StudentResponseDTO[]> {
+  async search(query: SearchRequestDTO): Promise<StudentsResponseDTO> {
     try {
       const students = await this.studentRepository.search(query);
-      return students;
+      const total = await this.studentRepository.count();
+      return {
+        students: students,
+        total: total,
+      };
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
         throw new NotFoundException('No students found matching the criteria');

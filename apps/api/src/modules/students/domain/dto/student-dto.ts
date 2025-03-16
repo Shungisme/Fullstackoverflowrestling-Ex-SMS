@@ -3,6 +3,7 @@ import { STUDENT_CONSTANT } from 'src/shared/constants/student.constant';
 import { z } from 'zod';
 import { Gender } from '@prisma/client';
 import { ObjectId } from 'mongodb';
+import { createResponseWrapperSchema } from 'src/shared/helpers/api-response';
 
 const StudentSchema = z.object({
   id: z
@@ -47,9 +48,32 @@ const StudentSchema = z.object({
   ),
 });
 
-export class StudentRequestDTO extends createZodDto(StudentSchema) { }
-export class StudentResponseDTO extends createZodDto(StudentSchema) { }
-export class StudentsResponseDTO extends createZodDto(z.array(StudentSchema)) { }
+const StudentsResponseSchema = z.object({
+  students: z.array(StudentSchema),
+  total: z.number(),
+});
+
+export class StudentRequestDTO extends createZodDto(
+  StudentSchema.omit({ id: true }),
+) {}
+export class StudentResponseDTO extends createZodDto(StudentSchema) {}
+export class StudentsResponseDTO extends createZodDto(StudentsResponseSchema) {}
 export class UpdateStudentRequestDTO extends createZodDto(
   StudentSchema.omit({ studentId: true }),
+) {}
+
+export type StudentReponseType = z.infer<typeof StudentSchema>;
+export type StudentRequestType = z.infer<typeof StudentSchema>;
+
+const StudentApiResponse = createResponseWrapperSchema(StudentSchema);
+const StudentsResponseWrapperSchema = createResponseWrapperSchema(
+  StudentsResponseSchema,
+);
+
+export class StudentResponseWrapperDTO extends createZodDto(
+  StudentApiResponse,
+) {}
+
+export class StudentsResponseWrapperDTO extends createZodDto(
+  StudentsResponseWrapperSchema,
 ) {}

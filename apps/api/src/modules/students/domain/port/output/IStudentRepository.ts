@@ -11,6 +11,7 @@ export interface IStudentRepository {
   update(student: UpdateStudentRequestDTO): Promise<StudentResponseDTO>;
   findById(studentId: string): Promise<StudentResponseDTO | null>;
   search(query: SearchRequestDTO): Promise<StudentResponseDTO[]>;
+  count(): Promise<number>;
 }
 
 export const STUDENT_REPOSITORY = Symbol('IStudentRepository');
