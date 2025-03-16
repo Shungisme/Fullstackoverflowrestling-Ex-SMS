@@ -3,14 +3,8 @@ import { z } from 'zod';
 
 const SearchRequestSchema = z.object({
   key: z.string().default(''),
-  limit: z
-    .string()
-    .default('1000')
-    .transform((val) => parseInt(val, 10)),
-  page: z
-    .string()
-    .default('1')
-    .transform((val) => parseInt(val, 10)),
+  limit: z.number().default(5),
+  page: z.number().default(1),
 });
 
 export class SearchRequestDTO extends createZodDto(SearchRequestSchema) {}

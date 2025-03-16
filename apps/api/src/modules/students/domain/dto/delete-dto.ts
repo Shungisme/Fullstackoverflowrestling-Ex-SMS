@@ -1,4 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
+import { createResponseWrapperSchema } from 'src/shared/helpers/api-response';
 import { z } from 'zod';
 
 const DeleteStudentSchema = z
@@ -10,4 +11,11 @@ const DeleteStudentSchema = z
 
 export class DeleteStudentResponseDTO extends createZodDto(
   DeleteStudentSchema,
+) {}
+
+const createDeleteStudentSchema =
+  createResponseWrapperSchema(DeleteStudentSchema);
+
+export class DeleteStudentWrapperResponseDTO extends createZodDto(
+  createDeleteStudentSchema,
 ) {}

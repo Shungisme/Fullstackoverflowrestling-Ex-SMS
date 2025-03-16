@@ -1,65 +1,114 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    Patch,
-    Post,
-    Query,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
 import { StudentService } from '../../domain/port/input/student.service';
 import {
-    StudentRequestDTO,
-    StudentResponseDTO,
-    StudentsResponseDTO,
+  StudentRequestDTO,
+  StudentResponseDTO,
+  StudentResponseWrapperDTO,
+  StudentsResponseDTO,
+  StudentsResponseWrapperDTO,
 } from '../../domain/dto/student-dto';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { DeleteStudentResponseDTO } from '../../domain/dto/delete-dto';
+import {
+  DeleteStudentResponseDTO,
+  DeleteStudentWrapperResponseDTO,
+} from '../../domain/dto/delete-dto';
 import { SearchRequestDTO } from '../../domain/dto/search-dto';
+import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Students')
 @Controller({ path: 'students', version: '1' })
 export class StudentController {
-    constructor(private readonly studentService: StudentService) { }
+  constructor(private readonly studentService: StudentService) {}
 
-    @Post()
-    @ZodSerializerDto(StudentResponseDTO)
-    async create(
-        @Body() studentDto: StudentRequestDTO,
-    ): Promise<StudentResponseDTO> {
-        return await this.studentService.create(studentDto);
-    }
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ZodSerializerDto(StudentResponseDTO)
+  @ApiBody({
+    type: StudentResponseDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Create a student',
+    type: StudentResponseWrapperDTO,
+  })
+  async create(
+    @Body() studentDto: StudentRequestDTO,
+  ): Promise<StudentResponseDTO> {
+    return await this.studentService.create(studentDto);
+  }
 
-    @Get(':studentId')
-    @ZodSerializerDto(StudentResponseDTO)
-    async findById(
-        @Param('studentId') studentId: string,
-    ): Promise<StudentResponseDTO> {
-        return await this.studentService.findById(studentId);
-    }
+  @Get(':studentId')
+  @HttpCode(HttpStatus?.OK)
+  @ZodSerializerDto(StudentResponseDTO)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'find a student by id',
+    type: StudentResponseWrapperDTO,
+  })
+  async findById(
+    @Param('studentId') studentId: string,
+  ): Promise<StudentResponseDTO> {
+    return await this.studentService.findById(studentId);
+  }
 
-    @Patch(':studentId')
-    @ZodSerializerDto(StudentResponseDTO)
-    async update(
-        @Param('studentId') studentId: string,
-        @Body() studentDto: StudentRequestDTO,
-    ): Promise<StudentResponseDTO> {
-        return await this.studentService.update({ ...studentDto, studentId });
-    }
+  @Patch(':studentId')
+  @HttpCode(HttpStatus?.OK)
+  @ZodSerializerDto(StudentResponseDTO)
+  @ApiBody({ type: StudentRequestDTO })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'update a student',
+    type: StudentResponseWrapperDTO,
+  })
+  async update(
+    @Param('studentId') studentId: string,
+    @Body() studentDto: StudentRequestDTO,
+  ): Promise<StudentResponseDTO> {
+    return await this.studentService.update({ ...studentDto, studentId });
+  }
 
-    @Delete(':studentId')
-    @ZodSerializerDto(DeleteStudentResponseDTO)
-    async delete(
-        @Param('studentId') studentId: string,
-    ): Promise<DeleteStudentResponseDTO> {
-        return await this.studentService.delete(studentId);
-    }
+  @Delete(':studentId')
+  @HttpCode(HttpStatus.OK)
+  @ZodSerializerDto(DeleteStudentResponseDTO)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'delete a student',
+    type: DeleteStudentWrapperResponseDTO,
+  })
+  async delete(
+    @Param('studentId') studentId: string,
+  ): Promise<DeleteStudentResponseDTO> {
+    return await this.studentService.delete(studentId);
+  }
 
-    @Get()
-    @ZodSerializerDto(StudentsResponseDTO)
-    async search(
-        @Query() query: SearchRequestDTO,
-    ): Promise<StudentResponseDTO[]> {
-        return this.studentService.search(query);
-    }
+  @Get()
+  @ZodSerializerDto(StudentsResponseDTO)
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Create a student',
+    type: StudentsResponseWrapperDTO,
+  })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({
+    name: 'key',
+    required: false,
+    type: Number,
+    description: 'contain name and studentId',
+  })
+  async search(@Query() query: SearchRequestDTO): Promise<StudentsResponseDTO> {
+    return this.studentService.search(query);
+  }
 }

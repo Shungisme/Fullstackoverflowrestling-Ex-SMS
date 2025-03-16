@@ -9,6 +9,9 @@ import { PrismaService } from 'src/shared/services/database/prisma.service';
 @Injectable()
 export class StudentRepository implements IStudentRepository {
   constructor(private readonly prismaService: PrismaService) {}
+  async count(): Promise<number> {
+    return this.prismaService.student.count();
+  }
 
   async create(student: StudentRequestDTO): Promise<StudentResponseDTO> {
     const response = await this.prismaService.student.create({
