@@ -41,12 +41,19 @@ export default function StudentTable({
   data,
   onEdit,
   onDelete,
+  onPageChange
 }: StudentTableProps) {
   const [viewingStudent, setViewingStudent] = useState<Student | null>(null);
   const [sortField, setSortField] = useState<SortField>("studentId");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [page, setPage] = useState(1);
   const rowsPerPage = ListConfig.rowsPerPage;
+  
+    const handlePageChange = (page: number) => {
+        if (onPageChange(page)) {
+            setPage(page);
+        }
+    }
 
   const { isOpen, openConfirmDialog, closeConfirmDialog, confirmDelete } =
     useConfirmDialog();
@@ -93,7 +100,7 @@ export default function StudentTable({
   });
 
   // Pagination
-  const totalPages = Math.ceil(data.total / rowsPerPage) + 1;
+  const totalPages = Math.ceil(data.total / rowsPerPage);
   const paginatedStudents = sortedStudents;
 
   const SortIcon = ({ field }: { field: SortField }) => {
@@ -245,7 +252,7 @@ export default function StudentTable({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage(Math.max(1, page - 1))}
+              onClick={() => handlePageChange(Math.max(1, page - 1))}
               disabled={page === 1}
             >
               <ChevronLeft />
@@ -256,7 +263,7 @@ export default function StudentTable({
                   key={pageNum}
                   variant={page === pageNum ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setPage(pageNum)}
+                  onClick={() => handlePageChange(pageNum)}
                   className="h-8 w-8 p-0"
                 >
                   {pageNum}
@@ -266,7 +273,7 @@ export default function StudentTable({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage(Math.min(totalPages, page + 1))}
+              onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
               disabled={page === totalPages}
             >
               <ChevronRight />

@@ -6,9 +6,10 @@ import { toQueryString } from "@/src/utils/helper";
 
 export async function getStudents(
   page = ListConfig.defaultPage,
+  limit = ListConfig.rowsPerPage,
 ): Promise<StudentDataRespose> {
   const queryString = toQueryString({
-    limit: ListConfig.rowsPerPage,
+    limit,
     page,
   });
   const url = `${BASE_URL}?${queryString}`;

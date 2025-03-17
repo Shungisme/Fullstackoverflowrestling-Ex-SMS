@@ -16,6 +16,7 @@ type StudentContextType = {
   updateStudent: (student: Student) => Promise<void>;
   deleteStudent: (studentId: string) => Promise<void>;
   searchStudents: (searchTerm: string) => Promise<void>;
+  handlePageChange: (page: number) => boolean;
 };
 
 const StudentContext = createContext<StudentContextType | undefined>(undefined);

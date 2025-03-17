@@ -17,7 +17,8 @@ const StudentManagementTabs = () => {
     addStudent,
     updateStudent,
     deleteStudent,
-    searchStudents
+    searchStudents,
+    handlePageChange
   } = useStudentContext();
 
   const handleEditStudent = (studentId: string): void => {
@@ -47,6 +48,7 @@ const StudentManagementTabs = () => {
           onEdit={handleEditStudent}
           onDelete={deleteStudent}
           onAddClick={() => setCurrentTab("add")}
+          onPageChange={handlePageChange}
         />
       </TabsContent>
 
