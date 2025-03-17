@@ -5,6 +5,7 @@ import {
 } from '../../domain/dto/student-dto';
 import { IStudentRepository } from '../../domain/port/output/IStudentRepository';
 import { PrismaService } from 'src/shared/services/database/prisma.service';
+import { SearchRequestDTO } from '../../domain/dto/search-dto';
 
 @Injectable()
 export class StudentRepository implements IStudentRepository {
@@ -48,8 +49,8 @@ export class StudentRepository implements IStudentRepository {
     return response;
   }
 
-  async search(query: any): Promise<StudentResponseDTO[]> {
-    const { key = '', limit = 1000, page = 1 } = query;
+  async search(query: SearchRequestDTO): Promise<StudentResponseDTO[]> {
+    const { key, limit, page } = query;
     return this.prismaService.student.findMany({
       where: {
         OR: [
