@@ -20,21 +20,25 @@ import {
   ChevronRight,
 } from "lucide-react";
 import StudentDetails from "../organisms/StudentDetails";
-import { Student } from "../../types";
+import { Student, StudentList } from "../../types";
 import { format } from "date-fns";
 import { EngVietFalcutyMap, EngVietStatusMap } from "../../utils/mapper";
+import ConfirmDialog from "./ConfirmDialog";
+import { useConfirmDialog } from "@/src/hooks/useConfirmDialog";
+import { ListConfig } from "@/src/constants/constants";
 
 interface StudentTableProps {
-  students: Student[];
+  data: StudentList;
   onEdit: (studentId: string) => void;
-  onDelete: (studentId: string) => void;
+  onDelete: (studentId: string) => Promise<void>;
+  onPageChange: (page: number) => boolean;
 }
 
 type SortField = "studentId" | "name" | "dateOfBirth" | "faculty" | "course";
 type SortDirection = "asc" | "desc";
 
 export default function StudentTable({
-  students,
+  data,
   onEdit,
   onDelete,
 }: StudentTableProps) {
@@ -42,7 +46,10 @@ export default function StudentTable({
   const [sortField, setSortField] = useState<SortField>("studentId");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [page, setPage] = useState(1);
-  const rowsPerPage = 10;
+  const rowsPerPage = ListConfig.rowsPerPage;
+
+  const { isOpen, openConfirmDialog, closeConfirmDialog, confirmDelete } =
+    useConfirmDialog();
 
   const getStatusClass = (status: string): string => {
     switch (status) {
@@ -60,7 +67,7 @@ export default function StudentTable({
   };
 
   const handleViewStudent = (studentId: string): void => {
-    const student = students.find((s) => s.studentId === studentId);
+    const student = data.students.find((s) => s.studentId === studentId);
     if (student) {
       setViewingStudent(student);
     }
@@ -76,7 +83,7 @@ export default function StudentTable({
   };
 
   // Sort students
-  const sortedStudents = [...students].sort((a, b) => {
+  const sortedStudents = [...data.students].sort((a, b) => {
     const aValue = a[sortField];
     const bValue = b[sortField];
 
@@ -86,11 +93,8 @@ export default function StudentTable({
   });
 
   // Pagination
-  const totalPages = Math.ceil(sortedStudents.length / rowsPerPage);
-  const paginatedStudents = sortedStudents.slice(
-    (page - 1) * rowsPerPage,
-    page * rowsPerPage
-  );
+  const totalPages = Math.ceil(data.total / rowsPerPage) + 1;
+  const paginatedStudents = sortedStudents;
 
   const SortIcon = ({ field }: { field: SortField }) => {
     if (sortField !== field) return null;
@@ -100,7 +104,17 @@ export default function StudentTable({
       <ChevronDown className="ml-1 h-4 w-4" />
     );
   };
-  if (!Array.isArray(students)) return null;
+
+  const handleDelete = (studentId: string) => {
+    openConfirmDialog(studentId);
+  };
+
+  const handleConfirmDelete = async () => {
+    await confirmDelete(onDelete);
+  };
+
+  if (!Array.isArray(data.students)) return null;
+
   return (
     <>
       <div className="rounded-md border">
@@ -158,7 +172,7 @@ export default function StudentTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students.length === 0 ? (
+            {data.students.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8">
                   <div className="flex flex-col items-center justify-center text-muted-foreground">
@@ -207,7 +221,7 @@ export default function StudentTable({
                         variant="outline"
                         size="icon"
                         className="text-destructive hover:bg-destructive/10"
-                        onClick={() => onDelete(student.studentId)}
+                        onClick={() => handleDelete(student.studentId)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -221,11 +235,11 @@ export default function StudentTable({
       </div>
 
       {/* Pagination */}
-      {students.length > 0 && (
+      {data.students.length > 0 && (
         <div className="flex items-center justify-between space-x-2 p-4">
           <div className="text-sm text-muted-foreground">
-            Hiển thị {Math.min(rowsPerPage, students.length)} trên{" "}
-            {students.length} sinh viên
+            Hiển thị {data.students.length} trên{" "}
+            {data.total} sinh viên
           </div>
           <div className="flex items-center space-x-1">
             <Button
@@ -247,7 +261,7 @@ export default function StudentTable({
                 >
                   {pageNum}
                 </Button>
-              )
+              ),
             )}
             <Button
               variant="outline"
@@ -269,6 +283,17 @@ export default function StudentTable({
           onEdit={onEdit}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={isOpen}
+        onClose={closeConfirmDialog}
+        onConfirm={handleConfirmDelete}
+        title="Xóa sinh viên"
+        description="Bạn có chắc chắn muốn xóa sinh viên này không? Hành động này không thể hoàn tác."
+        confirmText="Xóa"
+        cancelText="Hủy"
+        variant="destructive"
+      />
     </>
   );
 }

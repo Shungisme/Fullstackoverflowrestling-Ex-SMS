@@ -19,3 +19,17 @@ export interface Student {
 export interface FormErrors {
   [key: string]: string | undefined;
 }
+
+export interface IAPIResponse<T> {
+  statusCode: string; // shoud be typed StatusCode with defined status codes, but we go with string right now
+  message: string;
+  data: T;
+}
+
+export type StudentList = {
+    students: Student[];
+    total: number;
+}
+
+export interface StudentDataRespose
+  extends IAPIResponse<StudentList> {}
