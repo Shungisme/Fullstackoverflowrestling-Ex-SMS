@@ -1,5 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
+
 import { z } from 'zod';
 
 export const facultiesSchema = z.object({
@@ -26,3 +27,4 @@ export class FacultiesResponseWrapperDTO {
   message: string;
   statusCode: number;
 }
+

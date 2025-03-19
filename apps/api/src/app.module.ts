@@ -11,6 +11,7 @@ import { AddressesModule } from './modules/addresses/addresses.module';
 
 @Module({
   imports: [SharedModule, StudentsModule, FacultiesModule, AddressesModule],
+
   controllers: [AppController],
   providers: [
     AppService,

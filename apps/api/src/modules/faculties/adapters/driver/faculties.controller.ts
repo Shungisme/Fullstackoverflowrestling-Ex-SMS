@@ -29,6 +29,7 @@ import {
 import { ZodSerializerDto } from 'nestjs-zod';
 
 @ApiTags('Faculties')
+
 @Controller({ path: 'faculties', version: '1' })
 export class FacultiesController {
   constructor(private readonly facultiesService: FacultiesService) {}
@@ -42,6 +43,7 @@ export class FacultiesController {
     description: 'Create a faculty',
     type: FacultyResponseWrapperDTO,
   })
+
   create(@Body() createFacultyDto: CreateFacultyDTO) {
     return this.facultiesService.create(createFacultyDto);
   }
@@ -85,6 +87,7 @@ export class FacultiesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Faculty not found',
   })
+
   findById(@Param('id') id: string) {
     return this.facultiesService.findById(id);
   }
@@ -103,6 +106,7 @@ export class FacultiesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Faculty not found',
   })
+
   update(@Param('id') id: string, @Body() updateFacultyDto: UpdateFacultyDTO) {
     return this.facultiesService.update(id, updateFacultyDto);
   }
@@ -120,6 +124,7 @@ export class FacultiesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Faculty not found',
   })
+
   delete(@Param('id') id: string) {
     return this.facultiesService.delete(id);
   }
