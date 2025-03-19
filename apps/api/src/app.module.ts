@@ -6,9 +6,10 @@ import { SharedModule } from './shared/services/shared.module';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { ResponseInterceptor } from './shared/core/interceptors/response-interceptor';
+import { FacultiesModule } from './modules//faculties/faculties.module';
 
 @Module({
-  imports: [StudentsModule, SharedModule],
+  imports: [SharedModule, StudentsModule, FacultiesModule],
   controllers: [AppController],
   providers: [
     AppService,
