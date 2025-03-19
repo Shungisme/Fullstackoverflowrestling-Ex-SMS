@@ -25,9 +25,24 @@ const StudentSchema = z.object({
   facultyId: z
     .string()
     .refine((id) => ObjectId.isValid(id), { message: 'Invalid facultyId' }),
-  addressId: z
+  permanentAddressId: z.string().refine((id) => ObjectId.isValid(id), {
+    message: 'Invalid permanentAddressId',
+  }),
+  temporaryAddressId: z
     .string()
-    .refine((id) => ObjectId.isValid(id), { message: 'Invalid addressId' }),
+    .refine((id) => ObjectId.isValid(id), {
+      message: 'Invalid temporaryAddressId',
+    })
+    .optional()
+    .nullable(),
+  mailingAddressId: z
+    .string()
+    .refine((id) => ObjectId.isValid(id), {
+      message: 'Invalid mailingAddressId',
+    })
+    .optional()
+    .nullable(),
+
   programId: z
     .string()
     .refine((id) => ObjectId.isValid(id), { message: 'Invalid programId' }),

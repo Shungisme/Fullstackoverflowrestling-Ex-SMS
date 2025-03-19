@@ -8,97 +8,105 @@ datasource db {
 }
 
 model students {
-  id               String            @id @default(auto()) @map("_id") @db.ObjectId
-  studentId        String            @unique
-  name             String
-  dateOfBirth      DateTime
-  gender           Gender
-  course           Int
-  email            String
-  phone            String
-  nationality      String
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  studentId   String   @unique
+  name        String
+  dateOfBirth DateTime
+  gender      Gender
+  course      Int
+  email       String
+  phone       String
+  nationality String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
-  facultyId        String
-  faculty          faculties         @relation(fields: [facultyId], references: [id])
+  facultyId String
+  faculty   faculties @relation(fields: [facultyId], references: [id])
 
-  addressId        String            @unique
-  address          addresses         @relation(fields: [addressId], references: [id])
+  permanentAddressId String    @unique
+  permanentAddress   addresses @relation("PermanentAddress", fields: [permanentAddressId], references: [id])
 
-  programId        String
-  program          programs          @relation(fields: [programId], references: [id])
+  temporaryAddressId String?    @unique
+  temporaryAddress   addresses? @relation("TemporaryAddress", fields: [temporaryAddressId], references: [id])
 
-  statusId         String
-  status           statuses          @relation(fields: [statusId], references: [id])
+  mailingAddressId String?    @unique
+  mailingAddress   addresses? @relation("MailingAddress", fields: [mailingAddressId], references: [id])
 
-  identityPaperId  String            @unique
-  identityPaper    identity_papers   @relation(fields: [identityPaperId], references: [id])
+  programId String
+  program   programs @relation(fields: [programId], references: [id])
+
+  statusId String
+  status   statuses @relation(fields: [statusId], references: [id])
+
+  identityPaperId String          @unique
+  identityPaper   identity_papers @relation(fields: [identityPaperId], references: [id])
 }
 
 model faculties {
-  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String
-  status      String     @default("active")
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Back relation
-  students    students[]
+  students students[]
 }
 
 model addresses {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   number    String
   street    String
   district  String
   city      String
   country   String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Back relation
-  student         students?
+  permanentAddressOf students? @relation("PermanentAddress")
+  temporaryAddressOf students? @relation("TemporaryAddress")
+  mailingAddressOf   students? @relation("MailingAddress")
 }
 
 model programs {
-  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String
-  status      String     @default("active")
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Back relation
-  student         students[]
+  student students[]
 }
 
 model statuses {
-  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String
-  status      String     @default("active")
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Back relation
-  student         students[]
+  student students[]
 }
 
 model identity_papers {
-  id              String     @id @default(auto()) @map("_id") @db.ObjectId
-  type            String
-  number          String
-  issueDate       DateTime
-  expirationDate  DateTime
-  placeOfIssue    String
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  type           String
+  number         String
+  issueDate      DateTime
+  expirationDate DateTime
+  placeOfIssue   String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Back relation
-  student         students?
+  student students?
 }
 
 enum Gender {
