@@ -10,9 +10,9 @@ export const STUDENT_CONSTANT = {
     FRENCH_LANGUAGE: 'Faculty of French Language',
   },
   STATUS: {
-    STUDING: 'Currently Studying',
+    STUDYING: 'Currently Studying',
     GRADUATED: 'Graduated',
     DISCONTINUED: 'Discontinued',
-    TEMPORARY_SUSPENSE: 'Temporarily Suspended',
+    TEMPORARY_SUSPENSION: 'Temporarily Suspended',
   },
 };
