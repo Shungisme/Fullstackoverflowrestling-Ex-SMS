@@ -10,6 +10,7 @@ import { FacultiesModule } from './modules//faculties/faculties.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
 import { ProgramsModule } from './modules/programs/programs.module';
 import { StatusesModule } from './modules/statuses/statuses.module';
+import { IdentityPapersModule } from './modules/identity-papers/identity-papers.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { StatusesModule } from './modules/statuses/statuses.module';
     AddressesModule,
     ProgramsModule,
     StatusesModule,
+    IdentityPapersModule,
   ],
   controllers: [AppController],
   providers: [
