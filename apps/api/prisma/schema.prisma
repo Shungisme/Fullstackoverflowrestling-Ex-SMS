@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -13,24 +7,110 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Gender {
-    MALE
-    FEMALE
-}
-
-model student {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  studentId   String    @unique
+model students {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  studentId   String   @unique
   name        String
   dateOfBirth DateTime
   gender      Gender
-  faculty     String
   course      Int
-  program     String
-  address     String?
-  email       String?
-  phone       String?
-  status      String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
+  email       String
+  phone       String
+  nationality String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  facultyId String
+  faculty   faculties @relation(fields: [facultyId], references: [id])
+
+  permanentAddressId String    @unique
+  permanentAddress   addresses @relation("PermanentAddress", fields: [permanentAddressId], references: [id])
+
+  temporaryAddressId String?    @unique
+  temporaryAddress   addresses? @relation("TemporaryAddress", fields: [temporaryAddressId], references: [id])
+
+  mailingAddressId String?    @unique
+  mailingAddress   addresses? @relation("MailingAddress", fields: [mailingAddressId], references: [id])
+
+  programId String
+  program   programs @relation(fields: [programId], references: [id])
+
+  statusId String
+  status   statuses @relation(fields: [statusId], references: [id])
+
+  identityPaperId String          @unique
+  identityPaper   identity_papers @relation(fields: [identityPaperId], references: [id])
+}
+
+model faculties {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Back relation
+  students students[]
+}
+
+model addresses {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  number    String
+  street    String
+  district  String
+  city      String
+  country   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Back relation
+  permanentAddressOf students? @relation("PermanentAddress")
+  temporaryAddressOf students? @relation("TemporaryAddress")
+  mailingAddressOf   students? @relation("MailingAddress")
+}
+
+model programs {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Back relation
+  student students[]
+}
+
+model statuses {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Back relation
+  student students[]
+}
+
+model identity_papers {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  type           String
+  number         String
+  issueDate      DateTime
+  expirationDate DateTime
+  placeOfIssue   String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Back relation
+  student students?
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }

@@ -1,10 +1,9 @@
 import { createZodDto } from 'nestjs-zod';
 import { STUDENT_CONSTANT } from 'src/shared/constants/student.constant';
 import { z } from 'zod';
-import { Gender } from '@prisma/client';
+import { Gender } from '@prisma/client'; // <- important
 import { ObjectId } from 'mongodb';
 import { createResponseWrapperSchema } from 'src/shared/helpers/api-response';
-
 const StudentSchema = z.object({
   id: z
     .string()
@@ -19,33 +18,39 @@ const StudentSchema = z.object({
     })
     .transform((date) => new Date(date)),
   gender: z.nativeEnum(Gender),
-  faculty: z.enum(
-    [
-      STUDENT_CONSTANT.FACULTY.LAW,
-      STUDENT_CONSTANT.FACULTY.BUSSINESS_ENGLISH,
-      STUDENT_CONSTANT.FACULTY.JAPANESE_LANGUAGE,
-      STUDENT_CONSTANT.FACULTY.FRENCH_LANGUAGE,
-    ],
-    {
-      message: 'Invalid faculty',
-    },
-  ),
   course: z.number().int().min(1, 'Course must be a positive integer'),
-  program: z.string().min(1, 'Program cannot be empty'),
-  address: z.string().optional().nullable(),
-  email: z.string().email('Invalid email format').optional().nullable(),
-  phone: z.string().min(10).max(15).optional().nullable(),
-  status: z.enum(
-    [
-      STUDENT_CONSTANT.STATUS.STUDING,
-      STUDENT_CONSTANT.STATUS.GRADUATED,
-      STUDENT_CONSTANT.STATUS.DISCONTINUED,
-      STUDENT_CONSTANT.STATUS.TEMPORARY_SUSPENSE,
-    ],
-    {
-      message: 'Invalid student status',
-    },
-  ),
+  email: z.string().email('Invalid email format'),
+  phone: z.string().min(10).max(15),
+  nationality: z.string().min(1, 'Nationality cannot be empty'),
+  facultyId: z
+    .string()
+    .refine((id) => ObjectId.isValid(id), { message: 'Invalid facultyId' }),
+  permanentAddressId: z.string().refine((id) => ObjectId.isValid(id), {
+    message: 'Invalid permanentAddressId',
+  }),
+  temporaryAddressId: z
+    .string()
+    .refine((id) => ObjectId.isValid(id), {
+      message: 'Invalid temporaryAddressId',
+    })
+    .optional()
+    .nullable(),
+  mailingAddressId: z
+    .string()
+    .refine((id) => ObjectId.isValid(id), {
+      message: 'Invalid mailingAddressId',
+    })
+    .optional()
+    .nullable(),
+  programId: z
+    .string()
+    .refine((id) => ObjectId.isValid(id), { message: 'Invalid programId' }),
+  statusId: z
+    .string()
+    .refine((id) => ObjectId.isValid(id), { message: 'Invalid statusId' }),
+  identityPaperId: z.string().refine((id) => ObjectId.isValid(id), {
+    message: 'Invalid identityPaperId',
+  }),
 });
 
 const StudentsResponseSchema = z.object({
@@ -76,4 +81,12 @@ export class StudentResponseWrapperDTO extends createZodDto(
 
 export class StudentsResponseWrapperDTO extends createZodDto(
   StudentsResponseWrapperSchema,
+) {}
+
+export class StudentDTO extends createZodDto(StudentSchema) {}
+export class CreateStudentDTO extends createZodDto(
+  StudentSchema.omit({ id: true }),
+) {}
+export class UpdateStudentDTO extends createZodDto(
+  StudentSchema.omit({ id: true }).partial(),
 ) {}
