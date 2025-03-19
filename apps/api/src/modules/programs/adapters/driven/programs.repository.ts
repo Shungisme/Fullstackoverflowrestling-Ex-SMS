@@ -1,0 +1,75 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/shared/services/database/prisma.service';
+import { IProgramsRepository } from '../../domain/port/output/IProgramsRepository';
+import { ProgramsDto } from '../../domain/dto/programs.dto';
+import { CreateProgramDTO } from '../../domain/dto/create-program.dto';
+
+@Injectable()
+export class ProgramsRepository implements IProgramsRepository {
+  constructor(private readonly prismaService: PrismaService) {}
+
+  async count(): Promise<number> {
+    return await this.prismaService.programs.count();
+  }
+
+  async create(program: CreateProgramDTO): Promise<ProgramsDto> {
+    const createdProgram = await this.prismaService.programs.create({
+      data: program,
+    });
+    return {
+      ...createdProgram,
+      status: createdProgram.status as 'active' | 'inactive',
+    };
+  }
+
+  async delete(programId: string): Promise<ProgramsDto> {
+    const deletedProgram = await this.prismaService.programs.delete({
+      where: { id: programId },
+    });
+    return {
+      ...deletedProgram,
+      status: deletedProgram.status as 'active' | 'inactive',
+    };
+  }
+
+  async findAll(page: number, limit: number): Promise<ProgramsDto[]> {
+    const programs = await this.prismaService.programs.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return programs.map((program) => ({
+      ...program,
+      status: program.status as 'active' | 'inactive',
+    }));
+  }
+
+  async findById(programId: string): Promise<ProgramsDto> {
+    const program = await this.prismaService.programs.findUnique({
+      where: { id: programId },
+    });
+
+    if (!program) {
+      throw new Error(`Program with ID ${programId} not found`);
+    }
+
+    return {
+      ...program,
+      status: program.status as 'active' | 'inactive',
+    };
+  }
+
+  async update(
+    programId: string,
+    data: CreateProgramDTO,
+  ): Promise<ProgramsDto> {
+    const updatedProgram = await this.prismaService.programs.update({
+      where: { id: programId },
+      data,
+    });
+
+    return {
+      ...updatedProgram,
+      status: updatedProgram.status as 'active' | 'inactive',
+    };
+  }
+}

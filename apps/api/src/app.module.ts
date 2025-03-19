@@ -8,10 +8,16 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { ResponseInterceptor } from './shared/core/interceptors/response-interceptor';
 import { FacultiesModule } from './modules//faculties/faculties.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
+import { ProgramsModule } from './modules/programs/programs.module';
 
 @Module({
-  imports: [SharedModule, StudentsModule, FacultiesModule, AddressesModule],
-
+  imports: [
+    SharedModule,
+    StudentsModule,
+    FacultiesModule,
+    AddressesModule,
+    ProgramsModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
