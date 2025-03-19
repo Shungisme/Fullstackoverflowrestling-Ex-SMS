@@ -9,6 +9,7 @@ import { ResponseInterceptor } from './shared/core/interceptors/response-interce
 import { FacultiesModule } from './modules//faculties/faculties.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
 import { ProgramsModule } from './modules/programs/programs.module';
+import { StatusesModule } from './modules/statuses/statuses.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ProgramsModule } from './modules/programs/programs.module';
     FacultiesModule,
     AddressesModule,
     ProgramsModule,
+    StatusesModule,
   ],
   controllers: [AppController],
   providers: [
