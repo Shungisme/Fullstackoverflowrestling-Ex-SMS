@@ -9,29 +9,27 @@ export class IdentityPapersRepository implements IIdentityPapersRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async count(): Promise<number> {
-    return await this.prismaService.identity_papers.count();
+    return await this.prismaService.identityPaper.count();
   }
 
   async create(
     identityPaper: CreateIdentityPaperDTO,
   ): Promise<IdentityPapersDto> {
-    const createdIdentityPaper =
-      await this.prismaService.identity_papers.create({
-        data: identityPaper,
-      });
+    const createdIdentityPaper = await this.prismaService.identityPaper.create({
+      data: identityPaper,
+    });
     return createdIdentityPaper;
   }
 
   async delete(identityPaperId: string): Promise<IdentityPapersDto> {
-    const deletedIdentityPaper =
-      await this.prismaService.identity_papers.delete({
-        where: { id: identityPaperId },
-      });
+    const deletedIdentityPaper = await this.prismaService.identityPaper.delete({
+      where: { id: identityPaperId },
+    });
     return deletedIdentityPaper;
   }
 
   async findAll(page: number, limit: number): Promise<IdentityPapersDto[]> {
-    const identityPapers = await this.prismaService.identity_papers.findMany({
+    const identityPapers = await this.prismaService.identityPaper.findMany({
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -39,7 +37,7 @@ export class IdentityPapersRepository implements IIdentityPapersRepository {
   }
 
   async findById(identityPaperId: string): Promise<IdentityPapersDto> {
-    const identityPaper = await this.prismaService.identity_papers.findUnique({
+    const identityPaper = await this.prismaService.identityPaper.findUnique({
       where: { id: identityPaperId },
     });
 
@@ -54,11 +52,10 @@ export class IdentityPapersRepository implements IIdentityPapersRepository {
     identityPaperId: string,
     data: CreateIdentityPaperDTO,
   ): Promise<IdentityPapersDto> {
-    const updatedIdentityPaper =
-      await this.prismaService.identity_papers.update({
-        where: { id: identityPaperId },
-        data,
-      });
+    const updatedIdentityPaper = await this.prismaService.identityPaper.update({
+      where: { id: identityPaperId },
+      data,
+    });
 
     return updatedIdentityPaper;
   }

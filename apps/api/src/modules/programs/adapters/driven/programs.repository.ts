@@ -9,11 +9,11 @@ export class ProgramsRepository implements IProgramsRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async count(): Promise<number> {
-    return await this.prismaService.programs.count();
+    return await this.prismaService.program.count();
   }
 
   async create(program: CreateProgramDTO): Promise<ProgramsDto> {
-    const createdProgram = await this.prismaService.programs.create({
+    const createdProgram = await this.prismaService.program.create({
       data: program,
     });
     return {
@@ -23,7 +23,7 @@ export class ProgramsRepository implements IProgramsRepository {
   }
 
   async delete(programId: string): Promise<ProgramsDto> {
-    const deletedProgram = await this.prismaService.programs.delete({
+    const deletedProgram = await this.prismaService.program.delete({
       where: { id: programId },
     });
     return {
@@ -33,7 +33,7 @@ export class ProgramsRepository implements IProgramsRepository {
   }
 
   async findAll(page: number, limit: number): Promise<ProgramsDto[]> {
-    const programs = await this.prismaService.programs.findMany({
+    const programs = await this.prismaService.program.findMany({
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -44,7 +44,7 @@ export class ProgramsRepository implements IProgramsRepository {
   }
 
   async findById(programId: string): Promise<ProgramsDto> {
-    const program = await this.prismaService.programs.findUnique({
+    const program = await this.prismaService.program.findUnique({
       where: { id: programId },
     });
 
@@ -62,7 +62,7 @@ export class ProgramsRepository implements IProgramsRepository {
     programId: string,
     data: CreateProgramDTO,
   ): Promise<ProgramsDto> {
-    const updatedProgram = await this.prismaService.programs.update({
+    const updatedProgram = await this.prismaService.program.update({
       where: { id: programId },
       data,
     });

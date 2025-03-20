@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model students {
+model Student {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   studentId   String   @unique
   name        String
@@ -22,28 +22,31 @@ model students {
 
   // Relations
   facultyId String
-  faculty   faculties @relation(fields: [facultyId], references: [id])
+  faculty   Faculty @relation(fields: [facultyId], references: [id])
 
   permanentAddressId String    @unique
-  permanentAddress   addresses @relation("PermanentAddress", fields: [permanentAddressId], references: [id])
+  permanentAddress   Address @relation("PermanentAddress", fields: [permanentAddressId], references: [id])
 
   temporaryAddressId String?    @unique
-  temporaryAddress   addresses? @relation("TemporaryAddress", fields: [temporaryAddressId], references: [id])
+  temporaryAddress   Address? @relation("TemporaryAddress", fields: [temporaryAddressId], references: [id])
 
   mailingAddressId String?    @unique
-  mailingAddress   addresses? @relation("MailingAddress", fields: [mailingAddressId], references: [id])
+  mailingAddress   Address? @relation("MailingAddress", fields: [mailingAddressId], references: [id])
 
   programId String
-  program   programs @relation(fields: [programId], references: [id])
+  program   Program @relation(fields: [programId], references: [id])
 
   statusId String
-  status   statuses @relation(fields: [statusId], references: [id])
+  status   Status @relation(fields: [statusId], references: [id])
 
   identityPaperId String          @unique
-  identityPaper   identity_papers @relation(fields: [identityPaperId], references: [id])
+  identityPaper   IdentityPaper @relation(fields: [identityPaperId], references: [id])
+
+  // Map model to model of table
+  @@map("students")
 }
 
-model faculties {
+model Faculty {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String
@@ -52,10 +55,13 @@ model faculties {
   updatedAt   DateTime @updatedAt
 
   // Back relation
-  students students[]
+  students Student[]
+
+  // Map model to model of table
+  @@map("faculties")
 }
 
-model addresses {
+model Address {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   number    String
   street    String
@@ -66,12 +72,15 @@ model addresses {
   updatedAt DateTime @updatedAt
 
   // Back relation
-  permanentAddressOf students? @relation("PermanentAddress")
-  temporaryAddressOf students? @relation("TemporaryAddress")
-  mailingAddressOf   students? @relation("MailingAddress")
+  permanentAddressOf Student? @relation("PermanentAddress")
+  temporaryAddressOf Student? @relation("TemporaryAddress")
+  mailingAddressOf   Student? @relation("MailingAddress")
+
+  // Map model to model of table
+  @@map("addresses")
 }
 
-model programs {
+model Program {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String
@@ -80,10 +89,13 @@ model programs {
   updatedAt   DateTime @updatedAt
 
   // Back relation
-  student students[]
+  student Student[]
+
+  // Map model to model of table
+  @@map("programs")
 }
 
-model statuses {
+model Status {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String
@@ -92,10 +104,13 @@ model statuses {
   updatedAt   DateTime @updatedAt
 
   // Back relation
-  student students[]
+  student Student[]
+
+  // Map model to model of table
+  @@map("statuses")
 }
 
-model identity_papers {
+model IdentityPaper {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   type           String
   number         String
@@ -106,7 +121,10 @@ model identity_papers {
   updatedAt      DateTime @updatedAt
 
   // Back relation
-  student students?
+  student Student?
+
+  // Map model to model of table
+  @@map("identity_papers")
 }
 
 enum Gender {

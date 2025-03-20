@@ -14,18 +14,18 @@ import { SearchRequestDTO } from '../../domain/dto/search-dto';
 export class StudentRepository implements IStudentRepository {
   constructor(private readonly prismaService: PrismaService) {}
   async count(): Promise<number> {
-    return this.prismaService.students.count();
+    return this.prismaService.student.count();
   }
 
   async create(student: CreateStudentDTO): Promise<StudentResponseDTO> {
-    const response = await this.prismaService.students.create({
+    const response = await this.prismaService.student.create({
       data: student,
     });
 
     return response;
   }
   async delete(studentId: string): Promise<StudentResponseDTO> {
-    return await this.prismaService.students.delete({
+    return await this.prismaService.student.delete({
       where: {
         studentId: studentId,
       },
@@ -34,7 +34,7 @@ export class StudentRepository implements IStudentRepository {
 
   async update(student: UpdateStudentDTO): Promise<StudentResponseDTO> {
     const { studentId, ...data } = student;
-    return await this.prismaService.students.update({
+    return await this.prismaService.student.update({
       where: {
         studentId: studentId,
       },
@@ -42,7 +42,7 @@ export class StudentRepository implements IStudentRepository {
     });
   }
   async findById(studentId: string): Promise<StudentResponseDTO | null> {
-    const response = await this.prismaService.students.findUnique({
+    const response = await this.prismaService.student.findUnique({
       where: {
         studentId: studentId,
       },
@@ -53,12 +53,20 @@ export class StudentRepository implements IStudentRepository {
 
   async search(query: SearchRequestDTO): Promise<StudentResponseDTO[]> {
     const { key, limit, page } = query;
-    return this.prismaService.students.findMany({
+    return this.prismaService.student.findMany({
       where: {
         OR: [
           { name: { contains: key, mode: 'insensitive' } },
           { studentId: key },
         ],
+      },
+      include: {
+        program: true,
+        status: true,
+        permanentAddress: true,
+        temporaryAddress: true,
+        mailingAddress: true,
+        identityPaper: true,
       },
       skip: Number((page - 1) * limit),
       take: Number(limit),
