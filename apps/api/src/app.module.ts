@@ -1,4 +1,6 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { LoggerModule } from './shared/logger/logger.module';
+import { HttpLoggerMiddleware } from './shared/middlewares/http-logger.middleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { StudentsModule } from './modules/students/students.module';
@@ -14,6 +16,7 @@ import { IdentityPapersModule } from './modules/identity-papers/identity-papers.
 
 @Module({
   imports: [
+    LoggerModule,
     SharedModule,
     StudentsModule,
     FacultiesModule,
@@ -35,4 +38,8 @@ import { IdentityPapersModule } from './modules/identity-papers/identity-papers.
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+  }
+}
