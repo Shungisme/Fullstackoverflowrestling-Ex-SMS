@@ -21,25 +21,25 @@ model Student {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  facultyId String
+  facultyId String  @db.ObjectId
   faculty   Faculty @relation(fields: [facultyId], references: [id])
 
-  permanentAddressId String    @unique
-  permanentAddress   Address @relation("PermanentAddress", fields: [permanentAddressId], references: [id])
+  permanentAddressId String?    @unique  @db.ObjectId
+  permanentAddress   Address? @relation("PermanentAddress", fields: [permanentAddressId], references: [id])
 
-  temporaryAddressId String?    @unique
+  temporaryAddressId String?    @unique  @db.ObjectId
   temporaryAddress   Address? @relation("TemporaryAddress", fields: [temporaryAddressId], references: [id])
 
-  mailingAddressId String?    @unique
-  mailingAddress   Address? @relation("MailingAddress", fields: [mailingAddressId], references: [id])
+  mailingAddressId String    @unique  @db.ObjectId
+  mailingAddress   Address @relation("MailingAddress", fields: [mailingAddressId], references: [id])
 
-  programId String
+  programId String  @db.ObjectId
   program   Program @relation(fields: [programId], references: [id])
 
-  statusId String
+  statusId String   @db.ObjectId
   status   Status @relation(fields: [statusId], references: [id])
 
-  identityPaperId String          @unique
+  identityPaperId String    @unique  @db.ObjectId
   identityPaper   IdentityPaper @relation(fields: [identityPaperId], references: [id])
 
   // Map model to model of table
@@ -117,9 +117,12 @@ model IdentityPaper {
   issueDate      DateTime
   expirationDate DateTime
   placeOfIssue   String
+  hasChip        Boolean?
+  issuingCountry String?
+  notes          String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-
+  
   // Back relation
   student Student?
 
@@ -131,4 +134,9 @@ enum Gender {
   MALE
   FEMALE
   OTHER
+}
+enum IdentityPaperType {
+  IDENTITY_CARD
+  CITIZEN_IDENTIFICATION_CARD
+  PASSPORT
 }
