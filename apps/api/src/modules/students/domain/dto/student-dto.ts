@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { Gender } from '@prisma/client'; // <- important
 import { ObjectId } from 'mongodb';
 import { createResponseWrapperSchema } from 'src/shared/helpers/api-response';
+import { identity } from 'rxjs';
 const StudentSchema = z.object({
   id: z
     .string()
@@ -22,36 +23,13 @@ const StudentSchema = z.object({
   email: z.string().email('Invalid email format'),
   phone: z.string().min(10).max(15),
   nationality: z.string().min(1, 'Nationality cannot be empty'),
-  facultyId: z
-    .string()
-    .refine((id) => ObjectId.isValid(id), { message: 'Invalid facultyId' }),
-  permanentAddressId: z.string().refine((id) => ObjectId.isValid(id), {
-    message: 'Invalid permanentAddressId',
-  }),
-  temporaryAddressId: z
-    .string()
-    .refine((id) => ObjectId.isValid(id), {
-      message: 'Invalid temporaryAddressId',
-    })
-    .optional()
-    .nullable(),
-  mailingAddressId: z
-    .string()
-    .refine((id) => ObjectId.isValid(id), {
-      message: 'Invalid mailingAddressId',
-    })
-    .optional()
-    .nullable(),
-
-  programId: z
-    .string()
-    .refine((id) => ObjectId.isValid(id), { message: 'Invalid programId' }),
-  statusId: z
-    .string()
-    .refine((id) => ObjectId.isValid(id), { message: 'Invalid statusId' }),
-  identityPaperId: z.string().refine((id) => ObjectId.isValid(id), {
-    message: 'Invalid identityPaperId',
-  }),
+  facultyId: z.string().min(1, 'Faculty cannot be empty'),
+  permanentAddressId: z.string().optional().nullable(),
+  temporaryAddressId: z.string().optional().nullable(),
+  mailingAddressId: z.string().min(1, 'Mailing address cannot be empty'),
+  identityPaperId: z.string().min(1, 'Identity paper cannot be empty'),
+  programId: z.string().min(1, 'Program cannot be empty'),
+  statusId: z.string().min(1, 'Status cannot be empty'),
 });
 
 const StudentsResponseSchema = z.object({

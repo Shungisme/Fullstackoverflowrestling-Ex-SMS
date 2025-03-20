@@ -9,6 +9,9 @@ export const identityPapersSchema = z.object({
   issueDate: z.coerce.date(),
   expirationDate: z.coerce.date(),
   placeOfIssue: z.string().min(1, 'Place of issue cannot be empty'),
+  hasChip: z.boolean().optional().nullable(),
+  issuingCountry: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });
