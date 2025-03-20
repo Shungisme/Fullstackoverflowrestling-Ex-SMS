@@ -1,5 +1,3 @@
-"use client";
-
 import { Student } from "@/src/types";
 import AddStudentForm from "@/src/components/organisms/AddStudentForm";
 

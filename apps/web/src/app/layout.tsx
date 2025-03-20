@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "../styles/globals.css"
-import "@repo/ui/styles.css"
+import "../styles/globals.css";
+import "@repo/ui/styles.css";
 import { ToastProvider } from "../context/toast-context";
 import { Toaster } from "../components/atoms/Sonner";
+import Navbar from "../components/atoms/Navbar";
+import { ThemeProvider } from "../theme/ThemeProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -20,23 +22,22 @@ export default function RootLayout({
     <html lang="vi">
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ToastProvider>
-          <header className="bg-slate-800 text-white py-4">
-            <div className="container mx-auto px-4 max-w-6xl">
-              <h1 className="text-2xl font-bold">Quản Lý Sinh Viên</h1>
-            </div>
-          </header>
+          <ThemeProvider>
+            <Navbar />
+            <main className="flex-1 bg-background scroll-auto">
+              <div className="container mx-auto py-6 px-4 max-w-6xl">
+                {children}
+              </div>
+            </main>
 
-          <main className="flex-1 bg-background scroll-auto">
-            <div className="container mx-auto py-6 px-4 max-w-6xl">
-              {children}
-            </div>
-          </main>
-
-          <footer className="bg-slate-800 text-white py-4 text-center">
-            <div className="container mx-auto px-4 max-w-6xl">
-              <p>© {new Date().getFullYear()} - Hệ thống Quản lý Sinh viên</p>
-            </div>
-          </footer>
+            <footer className="bg-slate-800 text-white py-4 text-center">
+              <div className="container mx-auto px-4 max-w-6xl">
+                <p>
+                  © {new Date().getFullYear()} - Hệ thống Quản lý Sinh viên
+                </p>
+              </div>
+            </footer>
+          </ThemeProvider>
           <Toaster richColors />
         </ToastProvider>
       </body>

@@ -15,10 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../atoms/Select";
+
 import { validateEmail, validatePhone } from "validations";
 import { Student, FormErrors } from "../../types";
 import { PlusCircle, Loader2 } from "lucide-react";
 import { parseISO } from "date-fns";
+import FacultySelect from "../atoms/FacultySelect";
+import StudentStatusSelect from "../atoms/StudentStatusSelect";
+import ProgramSelect from "../atoms/ProgramSelect";
 
 interface AddStudentFormProps {
   onSubmit: (student: Student) => Promise<boolean>;
@@ -36,7 +40,15 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
     address: "",
     email: "",
     phone: "",
-    status: "Currently Studying",
+    status: "",
+    nationality: "",
+    mailingAddress: {
+        country: "",
+        district: "",
+        street: "",
+        number: "",
+        city: ""
+    }
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -191,9 +203,8 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
                   <SelectValue placeholder="Chọn giới tính" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Nam">Nam</SelectItem>
-                  <SelectItem value="Nữ">Nữ</SelectItem>
-                  <SelectItem value="Khác">Khác</SelectItem>
+                  <SelectItem value="MALE">Nam</SelectItem>
+                  <SelectItem value="FEMALE">Nữ</SelectItem>
                 </SelectContent>
               </Select>
               {errors.gender && (
@@ -205,7 +216,7 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
               <Label htmlFor="faculty">
                 Khoa <span className="text-destructive">*</span>
               </Label>
-              <Select
+              <FacultySelect
                 name="faculty"
                 value={formData.faculty}
                 onValueChange={(value) => handleSelectChange("faculty", value)}
@@ -215,19 +226,7 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
                 >
                   <SelectValue placeholder="Chọn khoa" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Faculty of Law">Khoa Luật</SelectItem>
-                  <SelectItem value="Faculty of Business English">
-                    Khoa Tiếng Anh thương mại
-                  </SelectItem>
-                  <SelectItem value="Faculty of Japanese Language">
-                    Khoa Tiếng Nhật
-                  </SelectItem>
-                  <SelectItem value="Faculty of French Language">
-                    Khoa Tiếng Pháp
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              </FacultySelect>
               {errors.faculty && (
                 <p className="text-xs text-destructive">{errors.faculty}</p>
               )}
@@ -254,14 +253,17 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
               <Label htmlFor="program">
                 Chương trình <span className="text-destructive">*</span>
               </Label>
-              <Input
-                id="program"
+              <ProgramSelect
                 name="program"
                 value={formData.program}
-                onChange={handleChange}
-                placeholder="Nhập chương trình đào tạo"
-                className={errors.program ? "border-destructive" : ""}
-              />
+                onValueChange={(value) => handleSelectChange("program", value)}
+              >
+                <SelectTrigger
+                  className={errors.program ? "border-destructive" : ""}
+                >
+                  <SelectValue placeholder="Nhập chương trình đào tạo" />
+                </SelectTrigger>
+              </ProgramSelect>
               {errors.program && (
                 <p className="text-xs text-destructive">{errors.program}</p>
               )}
@@ -269,7 +271,7 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="status">Tình trạng</Label>
-              <Select
+              <StudentStatusSelect
                 name="status"
                 value={formData.status}
                 onValueChange={(value) => handleSelectChange("status", value)}
@@ -277,15 +279,7 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn tình trạng" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Currently Studying">Đang học</SelectItem>
-                  <SelectItem value="Graduated">Đã tốt nghiệp</SelectItem>
-                  <SelectItem value="Discontinued">Đã thôi học</SelectItem>
-                  <SelectItem value="Temporarily Suspended">
-                    Tạm dừng học
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              </StudentStatusSelect>
             </div>
 
             <div className="space-y-2">
