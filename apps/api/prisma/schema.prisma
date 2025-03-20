@@ -24,22 +24,22 @@ model Student {
   facultyId String  @db.ObjectId
   faculty   Faculty @relation(fields: [facultyId], references: [id])
 
-  permanentAddressId String?    @unique  @db.ObjectId
+  permanentAddressId String?  @unique @db.ObjectId
   permanentAddress   Address? @relation("PermanentAddress", fields: [permanentAddressId], references: [id])
 
-  temporaryAddressId String?    @unique  @db.ObjectId
+  temporaryAddressId String?  @unique @db.ObjectId
   temporaryAddress   Address? @relation("TemporaryAddress", fields: [temporaryAddressId], references: [id])
 
-  mailingAddressId String    @unique  @db.ObjectId
+  mailingAddressId String  @unique @db.ObjectId
   mailingAddress   Address @relation("MailingAddress", fields: [mailingAddressId], references: [id])
 
   programId String  @db.ObjectId
   program   Program @relation(fields: [programId], references: [id])
 
-  statusId String   @db.ObjectId
+  statusId String @db.ObjectId
   status   Status @relation(fields: [statusId], references: [id])
 
-  identityPaperId String    @unique  @db.ObjectId
+  identityPaperId String        @unique @db.ObjectId
   identityPaper   IdentityPaper @relation(fields: [identityPaperId], references: [id])
 
   // Map model to model of table
@@ -122,7 +122,7 @@ model IdentityPaper {
   notes          String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  
+
   // Back relation
   student Student?
 
@@ -135,6 +135,7 @@ enum Gender {
   FEMALE
   OTHER
 }
+
 enum IdentityPaperType {
   IDENTITY_CARD
   CITIZEN_IDENTIFICATION_CARD

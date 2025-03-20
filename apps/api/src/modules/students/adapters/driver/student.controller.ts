@@ -11,13 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { StudentService } from '../../domain/port/input/student.service';
-import {
-  StudentRequestDTO,
-  StudentResponseDTO,
-  StudentResponseWrapperDTO,
-  StudentsResponseDTO,
-  StudentsResponseWrapperDTO,
-} from '../../domain/dto/student-dto';
+import { StudentRequestDTO } from '../../domain/dto/student-dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
   DeleteStudentResponseDTO,
@@ -25,6 +19,12 @@ import {
 } from '../../domain/dto/delete-dto';
 import { SearchRequestDTO } from '../../domain/dto/search-dto';
 import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  StudentResponseDTO,
+  StudentResponseWrapperDTO,
+  StudentsResponseDTO,
+  StudentsResponseWrapperDTO,
+} from '../../domain/dto/student-response-dto';
 
 @ApiTags('Students')
 @Controller({ path: 'students', version: '1' })
@@ -35,7 +35,7 @@ export class StudentController {
   @HttpCode(HttpStatus.CREATED)
   @ZodSerializerDto(StudentResponseDTO)
   @ApiBody({
-    type: StudentResponseDTO,
+    type: StudentRequestDTO,
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -107,6 +107,11 @@ export class StudentController {
     required: false,
     type: Number,
     description: 'contain name and studentId',
+  })
+  @ApiQuery({
+    name: 'faculty',
+    required: false,
+    type: String,
   })
   async search(@Query() query: SearchRequestDTO): Promise<StudentsResponseDTO> {
     return this.studentService.search(query);

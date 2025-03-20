@@ -1,10 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
-import { STUDENT_CONSTANT } from 'src/shared/constants/student.constant';
 import { z } from 'zod';
-import { Gender } from '@prisma/client'; // <- important
+import { Gender } from '@prisma/client';
 import { ObjectId } from 'mongodb';
-import { createResponseWrapperSchema } from 'src/shared/helpers/api-response';
-import { identity } from 'rxjs';
 const StudentSchema = z.object({
   id: z
     .string()
@@ -32,35 +29,14 @@ const StudentSchema = z.object({
   statusId: z.string().min(1, 'Status cannot be empty'),
 });
 
-const StudentsResponseSchema = z.object({
-  students: z.array(StudentSchema),
-  total: z.number(),
-});
-
 export class StudentRequestDTO extends createZodDto(
   StudentSchema.omit({ id: true }),
 ) {}
-export class StudentResponseDTO extends createZodDto(StudentSchema) {}
-export class StudentsResponseDTO extends createZodDto(StudentsResponseSchema) {}
 export class UpdateStudentRequestDTO extends createZodDto(
   StudentSchema.omit({ studentId: true }),
 ) {}
 
-export type StudentReponseType = z.infer<typeof StudentSchema>;
 export type StudentRequestType = z.infer<typeof StudentSchema>;
-
-const StudentApiResponse = createResponseWrapperSchema(StudentSchema);
-const StudentsResponseWrapperSchema = createResponseWrapperSchema(
-  StudentsResponseSchema,
-);
-
-export class StudentResponseWrapperDTO extends createZodDto(
-  StudentApiResponse,
-) {}
-
-export class StudentsResponseWrapperDTO extends createZodDto(
-  StudentsResponseWrapperSchema,
-) {}
 
 export class StudentDTO extends createZodDto(StudentSchema) {}
 export class CreateStudentDTO extends createZodDto(
