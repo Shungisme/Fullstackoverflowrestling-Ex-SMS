@@ -39,3 +39,13 @@ export const isInvalidValuePrismaError = (
     error.code === 'P2005'
   );
 };
+
+// Lỗi giá trị NULL không hợp lệ
+export const isIncompatibleNullValueError = (
+  error: any,
+): error is Prisma.PrismaClientKnownRequestError => {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2032'
+  );
+};

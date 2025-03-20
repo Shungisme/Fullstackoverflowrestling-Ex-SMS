@@ -1,5 +1,4 @@
 import { createZodDto } from 'nestjs-zod';
-import { STUDENT_CONSTANT } from 'src/shared/constants/student.constant';
 import { z } from 'zod';
 import { Gender } from '@prisma/client'; // <- important
 import { ObjectId } from 'mongodb';

@@ -1,16 +1,12 @@
-import { SearchRequestDTO } from '../../dto/search-dto';
-import {
-  StudentRequestDTO,
-  StudentResponseDTO,
-  UpdateStudentRequestDTO,
-} from '../../dto/student-dto';
+import { Student } from 'src/modules/students/adapters/driven/types/student-type';
+import { SearchStudent } from 'src/modules/students/adapters/driven/types/search-type';
 
 export interface IStudentRepository {
-  create(student: StudentRequestDTO): Promise<StudentResponseDTO>;
-  delete(studentId: string): Promise<StudentResponseDTO>;
-  update(student: UpdateStudentRequestDTO): Promise<StudentResponseDTO>;
-  findById(studentId: string): Promise<StudentResponseDTO | null>;
-  search(query: SearchRequestDTO): Promise<StudentResponseDTO[]>;
+  create(student: Student): Promise<Student>;
+  delete(studentId: string): Promise<Student>;
+  update(student: Student): Promise<Student>;
+  findById(studentId: string): Promise<Student | null>;
+  search(query: SearchStudent): Promise<Student[]>;
   count(): Promise<number>;
 }
 

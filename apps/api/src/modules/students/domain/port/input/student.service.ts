@@ -18,6 +18,7 @@ import {
 import { SearchRequestDTO } from '../../dto/search-dto';
 import { DeleteStudentResponseDTO } from '../../dto/delete-dto';
 import {
+  isIncompatibleNullValueError,
   isNotFoundPrismaError,
   isNotNullPrismaError,
   isUniqueConstraintPrismaError,
@@ -39,8 +40,21 @@ export class StudentService implements IStudentService {
         total: total,
       };
     } catch (error) {
+      console.log('🔥 Lỗi xảy ra:', error);
       if (isNotFoundPrismaError(error)) {
         throw new NotFoundException('No students found matching the criteria');
+      }
+
+      if (isNotNullPrismaError(error)) {
+        throw new BadRequestException(
+          `Missing required field:  ${error.message}`,
+        );
+      }
+
+      if (isIncompatibleNullValueError(error)) {
+        throw new BadRequestException(
+          `Null value found for a required field:  ${error.message}`,
+        );
       }
       throw error;
     }
@@ -48,23 +62,23 @@ export class StudentService implements IStudentService {
 
   async create(student: StudentRequestDTO): Promise<StudentResponseDTO> {
     try {
-      const existedStudent = await this.studentRepository.findById(
-        student.studentId as string,
-      );
-      if (existedStudent) {
-        throw new ConflictException(
-          `Student with ID ${student.studentId} already exists`,
-        );
-      }
       return this.studentRepository.create(student);
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
         throw new ConflictException(
-          `Student with ID ${student.studentId} already exists`,
+          `Student with ID ${student.studentId} already exists: ${error.message}`,
         );
       }
       if (isNotNullPrismaError(error)) {
-        throw new BadRequestException(`Missing required field`);
+        throw new BadRequestException(
+          `Missing required field:  ${error.message}`,
+        );
+      }
+
+      if (isIncompatibleNullValueError(error)) {
+        throw new BadRequestException(
+          `Null value found for a required field:  ${error.message}`,
+        );
       }
 
       throw error;
@@ -81,7 +95,9 @@ export class StudentService implements IStudentService {
       };
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
-        throw new NotFoundException(`Student with ID ${studentId} not found`);
+        throw new NotFoundException(
+          `Student with ID ${studentId} not found: ${error.message}`,
+        );
       }
       throw error;
     }
@@ -93,7 +109,7 @@ export class StudentService implements IStudentService {
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
         throw new NotFoundException(
-          `Student with ID ${student.studentId} not found`,
+          `Student with ID ${student.studentId} not found: ${error.message}`,
         );
       }
       throw error;
@@ -103,7 +119,7 @@ export class StudentService implements IStudentService {
   async findById(studentId: string): Promise<StudentResponseDTO> {
     const student = await this.studentRepository.findById(studentId);
     if (!student) {
-      throw new NotFoundException(`Student with ID ${studentId} not found`);
+      throw new NotFoundException(`Student with ID ${studentId} not found: `);
     }
     return student;
   }

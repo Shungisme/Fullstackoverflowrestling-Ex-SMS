@@ -1,14 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CreateStudentDTO,
-  StudentRequestDTO,
-  StudentResponseDTO,
-  UpdateStudentDTO,
-  UpdateStudentRequestDTO,
-} from '../../domain/dto/student-dto';
 import { IStudentRepository } from '../../domain/port/output/IStudentRepository';
 import { PrismaService } from 'src/shared/services/database/prisma.service';
-import { SearchRequestDTO } from '../../domain/dto/search-dto';
+import { SearchStudent } from './types/search-type';
+import { Student } from './types/student-type';
 
 @Injectable()
 export class StudentRepository implements IStudentRepository {
@@ -17,49 +11,79 @@ export class StudentRepository implements IStudentRepository {
     return this.prismaService.student.count();
   }
 
-  async create(student: CreateStudentDTO): Promise<StudentResponseDTO> {
+  async create(student: Student): Promise<Student> {
     const response = await this.prismaService.student.create({
       data: student,
+      include: {
+        faculty: true,
+        identityPaper: true,
+        mailingAddress: true,
+        permanentAddress: true,
+        program: true,
+        status: true,
+        temporaryAddress: true,
+      },
     });
 
     return response;
   }
-  async delete(studentId: string): Promise<StudentResponseDTO> {
+  async delete(studentId: string): Promise<Student> {
     return await this.prismaService.student.delete({
       where: {
         studentId: studentId,
       },
+      include: {
+        faculty: true,
+        identityPaper: true,
+        mailingAddress: true,
+        permanentAddress: true,
+        program: true,
+        status: true,
+        temporaryAddress: true,
+      },
     });
   }
 
-  async update(student: UpdateStudentDTO): Promise<StudentResponseDTO> {
+  async update(student: Student): Promise<Student> {
     const { studentId, ...data } = student;
     return await this.prismaService.student.update({
       where: {
         studentId: studentId,
       },
       data: data,
+      include: {
+        faculty: true,
+        identityPaper: true,
+        mailingAddress: true,
+        permanentAddress: true,
+        program: true,
+        status: true,
+        temporaryAddress: true,
+      },
     });
   }
-  async findById(studentId: string): Promise<StudentResponseDTO | null> {
+  async findById(studentId: string): Promise<Student | null> {
     const response = await this.prismaService.student.findUnique({
       where: {
         studentId: studentId,
+      },
+      include: {
+        faculty: true,
+        identityPaper: true,
+        mailingAddress: true,
+        permanentAddress: true,
+        program: true,
+        status: true,
+        temporaryAddress: true,
       },
     });
 
     return response;
   }
 
-  async search(query: SearchRequestDTO): Promise<StudentResponseDTO[]> {
-    const { key, limit, page } = query;
+  async search(query: SearchStudent): Promise<Student[]> {
+    const { key, limit, page, faculty } = query;
     return this.prismaService.student.findMany({
-      where: {
-        OR: [
-          { name: { contains: key, mode: 'insensitive' } },
-          { studentId: key },
-        ],
-      },
       include: {
         program: true,
         status: true,
@@ -67,6 +91,18 @@ export class StudentRepository implements IStudentRepository {
         temporaryAddress: true,
         mailingAddress: true,
         identityPaper: true,
+        faculty: true,
+      },
+      where: {
+        OR: [
+          { name: { contains: key, mode: 'insensitive' } },
+          { studentId: key },
+          {
+            faculty: {
+              title: faculty,
+            },
+          },
+        ],
       },
       skip: Number((page - 1) * limit),
       take: Number(limit),

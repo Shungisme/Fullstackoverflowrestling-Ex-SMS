@@ -24,13 +24,13 @@ model Student {
   facultyId String
   faculty   Faculty @relation(fields: [facultyId], references: [id])
 
-  permanentAddressId String    @unique
+  permanentAddressId String  @unique
   permanentAddress   Address @relation("PermanentAddress", fields: [permanentAddressId], references: [id])
 
-  temporaryAddressId String?    @unique
+  temporaryAddressId String?  @unique
   temporaryAddress   Address? @relation("TemporaryAddress", fields: [temporaryAddressId], references: [id])
 
-  mailingAddressId String?    @unique
+  mailingAddressId String?  @unique
   mailingAddress   Address? @relation("MailingAddress", fields: [mailingAddressId], references: [id])
 
   programId String
@@ -39,7 +39,7 @@ model Student {
   statusId String
   status   Status @relation(fields: [statusId], references: [id])
 
-  identityPaperId String          @unique
+  identityPaperId String        @unique
   identityPaper   IdentityPaper @relation(fields: [identityPaperId], references: [id])
 
   // Map model to model of table

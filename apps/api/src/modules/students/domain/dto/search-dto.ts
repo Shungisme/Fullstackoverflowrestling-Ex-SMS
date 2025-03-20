@@ -31,6 +31,7 @@ const SearchRequestSchema = z.object({
       }
       return parsed;
     }),
+  faculty: z.string().default(''),
 });
 
 export class SearchRequestDTO extends createZodDto(SearchRequestSchema) {}
