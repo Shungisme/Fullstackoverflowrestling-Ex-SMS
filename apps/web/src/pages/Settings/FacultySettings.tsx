@@ -7,7 +7,7 @@ import { useConfirmDialog } from "@/src/hooks/useConfirmDialog";
 import ConfirmDialog from "@/src/components/molecules/ConfirmDialog";
 import EditItemDialog from "@/src/components/molecules/EditItemDialog";
 import { toast } from "sonner";
-import { Faculty } from "@/src/types";
+import { Faculty, IAPIResponse } from "@/src/types";
 import { FacultyService } from "@/src/lib/api/school-service";
 
 export default function FacultySettings() {
@@ -19,7 +19,7 @@ export default function FacultySettings() {
       if (res.statusCode !== 200) {
         toast.error(res.message);
       } else {
-        setFaculties(res.data);
+        setFaculties(res.data.data);
       }
     } catch {
       toast.error("Can't fetch data'");
@@ -56,25 +56,37 @@ export default function FacultySettings() {
     openConfirm(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (itemToDelete) {
+      await FacultyService.delete(itemToDelete);
       setFaculties(faculties.filter((f) => f.id !== itemToDelete));
       toast.info("Đã xóa khoa");
     }
   };
 
-  const handleSave = (item: Faculty) => {
+  const handleSave = async (item: Faculty) => {
     if (currentItem) {
       // Cập nhật
-      setFaculties(faculties.map((f) => (f.id === item.id ? item : f)));
+      if (!item.id) {
+        toast.error("Gặp lỗi khi cập nhật khoa!");
+        return;
+      }
+      const edited = await FacultyService.update(item.id, item);
+      if (!edited) {
+        toast.error("Gặp lỗi khi cập nhật khoa!");
+        return;
+      }
+      setFaculties(faculties.map((f) => (f.id === edited.data.id ? edited.data : f)));
       toast.info("Thông tin khoa đã được cập nhật thành công");
     } else {
       // Thêm mới
-      const newItem = {
-        ...item,
-        id: Date.now().toString(), // Tạo ID đơn giản
-      };
-      setFaculties([...faculties, newItem]);
+      const newFaculty: IAPIResponse<Faculty> =
+        await FacultyService.create(item);
+      if (!newFaculty) {
+        toast.error("Gặp lỗi khi thêm mới khoa!");
+        return;
+      }
+      setFaculties([...faculties, newFaculty.data]);
       toast.info("Thông tin khoa mới đã được thêm thành công");
     }
     setIsEditDialogOpen(false);
@@ -147,7 +159,7 @@ export default function FacultySettings() {
         item={currentItem}
         title={currentItem ? "Chỉnh sửa thông tin khoa" : "Thêm khoa mới"}
         fields={[
-          { name: "name", label: "Tên khoa", type: "text" },
+          { name: "title", label: "Tên khoa", type: "text" },
           { name: "description", label: "Mô tả Khoa", type: "text" },
         ]}
       />

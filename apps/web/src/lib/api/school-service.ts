@@ -1,10 +1,14 @@
 import { toQueryString } from "@/src/utils/helper";
 import { Faculty, IAPIResponse, Program, StudentStatus } from "@/src/types";
 import { BASE_URL } from "@/src/constants/constants";
-type PaginationRequestParams = {
-    limit: number;
+
+interface PaginatedResponse<T> {
+    data: T[];
     page: number;
-};
+    totalPage: number;
+    limit: number;
+    total: number;
+}
 
 class CRUDService<T> {
     private endpoint: string;
@@ -13,18 +17,18 @@ class CRUDService<T> {
         this.endpoint = endpoint;
     }
 
-    async getAll(): Promise<IAPIResponse<T[]>> {
+    async getAll(): Promise<IAPIResponse<PaginatedResponse<T>>> {
         //const queryString = toQueryString(params);
         const response = await fetch(`${this.endpoint}`);
         return response.json();
     }
 
-    async getById(id: number | string): Promise<T> {
+    async getById(id: number | string): Promise<IAPIResponse<T>> {
         const response = await fetch(`${this.endpoint}/${id}`);
         return response.json();
     }
 
-    async create(data: Partial<T>): Promise<T> {
+    async create(data: Partial<T>): Promise<IAPIResponse<T>> {
         const response = await fetch(this.endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -33,24 +37,25 @@ class CRUDService<T> {
         return response.json();
     }
 
-    async update(id: number | string, data: Partial<T>): Promise<T> {
+    async update(id: number | string, data: Partial<T>): Promise<IAPIResponse<T>> {
         const response = await fetch(`${this.endpoint}/${id}`, {
-            method: "PUT",
+            method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
         });
         return response.json();
     }
 
-    async delete(id: number | string): Promise<void> {
-        await fetch(`${this.endpoint}/${id}`, {
+    async delete(id: number | string): Promise<IAPIResponse<T>> {
+        const response = await fetch(`${this.endpoint}/${id}`, {
             method: "DELETE",
         });
+        return response.json();
     }
 }
 
 export const FacultyService = new CRUDService<Faculty>(`${BASE_URL}/faculties`);
 export const StudentStatusService = new CRUDService<StudentStatus>(
-    `${BASE_URL}/student-statuses`,
+    `${BASE_URL}/statuses`,
 );
 export const ProgramService = new CRUDService<Program>(`${BASE_URL}/programs`);

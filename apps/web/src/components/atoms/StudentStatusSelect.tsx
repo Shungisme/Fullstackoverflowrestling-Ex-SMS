@@ -1,6 +1,7 @@
 import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./Select";
 import { StudentStatus } from "@/src/types";
+import { StudentStatusService } from "@/src/lib/api/school-service";
 
 type StudentStatusSelectProps = Omit<
   React.ComponentPropsWithoutRef<typeof Select>,
@@ -17,8 +18,8 @@ const StudentStatusSelect = async ({
   if (React.isValidElement(children) && children.type !== SelectTrigger) {
     throw new Error("FacultySelect only accepts SelectTrigger as children");
   }
-  //const res = await StudentStatusService.getAll();
-  const data = mockData;
+  const res = await StudentStatusService.getAll();
+  const data = res.data.data;
 
   return (
     <Select {...props}>

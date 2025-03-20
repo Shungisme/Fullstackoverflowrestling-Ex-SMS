@@ -19,7 +19,7 @@ export default function ProgramSettings() {
       if (res.statusCode !== 200) {
         toast.error(res.message);
       } else {
-        setFaculties(res.data);
+        setFaculties(res.data.data);
       }
     } catch {
       toast.error("Can't fetch data'");
@@ -56,24 +56,29 @@ export default function ProgramSettings() {
     openConfirm(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (itemToDelete) {
+      await ProgramService.delete(itemToDelete);
       setFaculties(faculties.filter((f) => f.id !== itemToDelete));
       toast.info("Đã xóa chương trình học");
     }
   };
 
-  const handleSave = (item: Program) => {
+  const handleSave = async (item: Program) => {
     if (currentItem) {
-      setFaculties(faculties.map((f) => (f.id === item.id ? item : f)));
+      if (!item.id) {
+        toast.error("Có lỗi khi sửa chương trình học!");
+        return;
+      }
+      const edited = await ProgramService.update(item.id, item);
+      setFaculties(
+        faculties.map((f) => (f.id === edited.data.id ? edited.data : f)),
+      );
       toast.info("Thông tin chương trình học đã được cập nhật thành công");
     } else {
       // Thêm mới
-      const newItem = {
-        ...item,
-        id: Date.now().toString(), // Tạo ID đơn giản
-      };
-      setFaculties([...faculties, newItem]);
+      const newItem = await ProgramService.create(item);
+      setFaculties([...faculties, newItem.data]);
       toast.info("Thông tin chương trình học mới đã được thêm thành công");
     }
     setIsEditDialogOpen(false);
@@ -152,7 +157,7 @@ export default function ProgramSettings() {
             : "Thêm chương trình học mới"
         }
         fields={[
-          { name: "name", label: "Tên chương trình học", type: "text" },
+          { name: "title", label: "Tên chương trình học", type: "text" },
           {
             name: "description",
             label: "Mô tả chương trình học",

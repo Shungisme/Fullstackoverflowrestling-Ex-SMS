@@ -19,7 +19,7 @@ export default function StudentStatusSettings() {
       if (res.statusCode !== 200) {
         toast.error(res.message);
       } else {
-        setStatuses(res.data);
+        setStatuses(res.data.data);
       }
     } catch {
       toast.error("Can't fetch data'");
@@ -65,15 +65,15 @@ export default function StudentStatusSettings() {
   };
 
   const handleSave = async (item: StudentStatus) => {
-    if (!item.id) return;
     if (currentItem) {
-      await StudentStatusService.update(item.id, item);
-      setStatuses(statuses.map((f) => (f.id === item.id ? item : f)));
+      if (!item.id) return;
+      const edited = await StudentStatusService.update(item.id, item);
+      setStatuses(statuses.map((f) => (f.id === edited.data.id ? edited.data : f)));
       toast.info("Thông tin sinh viên đã được cập nhật thành công");
     } else {
       // Thêm mới
-      await StudentStatusService.create(item);
-      setStatuses([...statuses, item]);
+      const newItem = await StudentStatusService.create(item);
+      setStatuses([...statuses, newItem.data]);
       toast.info("Thông tin sinh viên mới đã được thêm thành công");
     }
     setIsEditDialogOpen(false);
@@ -150,7 +150,7 @@ export default function StudentStatusSettings() {
           currentItem ? "Chỉnh sửa thông tin trạng thái" : "Thêm trạng thái mới"
         }
         fields={[
-          { name: "name", label: "Tên trạng thái", type: "text" },
+          { name: "title", label: "Tên trạng thái", type: "text" },
           { name: "description", label: "Mô tả trạng thái", type: "text" },
         ]}
       />

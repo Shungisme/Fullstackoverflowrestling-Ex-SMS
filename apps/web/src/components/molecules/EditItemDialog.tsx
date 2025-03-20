@@ -9,6 +9,7 @@ import {
 import { Button } from "../../components/atoms/Button";
 import { Input } from "@repo/ui";
 import { Label } from "@repo/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../atoms/Select";
 
 interface Field {
   name: string;
@@ -40,7 +41,7 @@ export default function EditItemDialog({
       setFormData({ ...item });
     } else {
       const initialData: Record<string, string> = {};
-      fields.forEach(field => {
+      fields.forEach((field) => {
         initialData[field.name] = "";
       });
       setFormData(initialData);
@@ -53,6 +54,13 @@ export default function EditItemDialog({
       [e.target.name]: e.target.value,
     });
   };
+
+  const handleValueChange = (type: string, value: string) => {
+      setFormData({
+          ...formData,
+          [type]: value,
+      })
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +76,10 @@ export default function EditItemDialog({
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             {fields.map((field) => (
-              <div key={field.name} className="grid grid-cols-4 items-center gap-4">
+              <div
+                key={field.name}
+                className="grid grid-cols-4 items-center gap-4"
+              >
                 <Label htmlFor={field.name} className="text-right">
                   {field.label}
                 </Label>
@@ -82,6 +93,23 @@ export default function EditItemDialog({
                 />
               </div>
             ))}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="status" className="text-right">
+                Trạng thái
+              </Label>
+              <Select name="status" value={formData["status"]} onValueChange={(value) => handleValueChange("status", value)}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue
+                   placeholder="Chọn trạng thái"
+                    defaultValue="active"
+                  />
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </SelectTrigger>
+              </Select>
+            </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
