@@ -10,11 +10,7 @@ import {
   IStudentRepository,
   STUDENT_REPOSITORY,
 } from '../output/IStudentRepository';
-import {
-  StudentRequestDTO,
-  StudentResponseDTO,
-  StudentsResponseDTO,
-} from '../../dto/student-dto';
+import { StudentRequestDTO } from '../../dto/student-dto';
 import { SearchRequestDTO } from '../../dto/search-dto';
 import { DeleteStudentResponseDTO } from '../../dto/delete-dto';
 import {
@@ -23,6 +19,10 @@ import {
   isNotNullPrismaError,
   isUniqueConstraintPrismaError,
 } from 'src/shared/helpers/error';
+import {
+  StudentResponseDTO,
+  StudentsResponseDTO,
+} from '../../dto/student-response-dto';
 
 @Injectable()
 export class StudentService implements IStudentService {
@@ -40,7 +40,6 @@ export class StudentService implements IStudentService {
         total: total,
       };
     } catch (error) {
-      console.log('🔥 Lỗi xảy ra:', error);
       if (isNotFoundPrismaError(error)) {
         throw new NotFoundException('No students found matching the criteria');
       }

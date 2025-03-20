@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IStudentRepository } from '../../domain/port/output/IStudentRepository';
 import { PrismaService } from 'src/shared/services/database/prisma.service';
 import { SearchStudent } from './types/search-type';
-import { Student } from './types/student-type';
+import { Student, StudentResponse } from './types/student-type';
 
 @Injectable()
 export class StudentRepository implements IStudentRepository {
@@ -11,87 +11,322 @@ export class StudentRepository implements IStudentRepository {
     return this.prismaService.student.count();
   }
 
-  async create(student: Student): Promise<Student> {
+  async create(student: Student): Promise<StudentResponse> {
     const response = await this.prismaService.student.create({
-      data: student,
-      include: {
-        faculty: true,
-        identityPaper: true,
-        mailingAddress: true,
-        permanentAddress: true,
-        program: true,
-        status: true,
-        temporaryAddress: true,
+      select: {
+        studentId: true,
+        name: true,
+        dateOfBirth: true,
+        gender: true,
+        course: true,
+        email: true,
+        phone: true,
+        nationality: true,
+
+        faculty: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        mailingAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        program: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        status: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        identityPaper: {
+          select: {
+            id: true,
+            type: true,
+            number: true,
+            issueDate: true,
+            expirationDate: true,
+            placeOfIssue: true,
+            hasChip: true,
+            issuingCountry: true,
+            notes: true,
+          },
+        },
       },
+      data: student,
     });
 
     return response;
   }
-  async delete(studentId: string): Promise<Student> {
+  async delete(studentId: string): Promise<StudentResponse> {
     return await this.prismaService.student.delete({
+      select: {
+        studentId: true,
+        name: true,
+        dateOfBirth: true,
+        gender: true,
+        course: true,
+        email: true,
+        phone: true,
+        nationality: true,
+
+        faculty: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        mailingAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        program: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        status: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        identityPaper: {
+          select: {
+            id: true,
+            type: true,
+            number: true,
+            issueDate: true,
+            expirationDate: true,
+            placeOfIssue: true,
+            hasChip: true,
+            issuingCountry: true,
+            notes: true,
+          },
+        },
+      },
       where: {
         studentId: studentId,
-      },
-      include: {
-        faculty: true,
-        identityPaper: true,
-        mailingAddress: true,
-        permanentAddress: true,
-        program: true,
-        status: true,
-        temporaryAddress: true,
       },
     });
   }
 
-  async update(student: Student): Promise<Student> {
+  async update(student: Student): Promise<StudentResponse> {
     const { studentId, ...data } = student;
     return await this.prismaService.student.update({
+      select: {
+        studentId: true,
+        name: true,
+        dateOfBirth: true,
+        gender: true,
+        course: true,
+        email: true,
+        phone: true,
+        nationality: true,
+
+        faculty: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        mailingAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        program: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        status: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        identityPaper: {
+          select: {
+            id: true,
+            type: true,
+            number: true,
+            issueDate: true,
+            expirationDate: true,
+            placeOfIssue: true,
+            hasChip: true,
+            issuingCountry: true,
+            notes: true,
+          },
+        },
+      },
       where: {
         studentId: studentId,
       },
       data: data,
-      include: {
-        faculty: true,
-        identityPaper: true,
-        mailingAddress: true,
-        permanentAddress: true,
-        program: true,
-        status: true,
-        temporaryAddress: true,
-      },
     });
   }
-  async findById(studentId: string): Promise<Student | null> {
+  async findById(studentId: string): Promise<StudentResponse | null> {
     const response = await this.prismaService.student.findUnique({
+      select: {
+        studentId: true,
+        name: true,
+        dateOfBirth: true,
+        gender: true,
+        course: true,
+        email: true,
+        phone: true,
+        nationality: true,
+
+        faculty: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        mailingAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        program: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        status: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        identityPaper: {
+          select: {
+            id: true,
+            type: true,
+            number: true,
+            issueDate: true,
+            expirationDate: true,
+            placeOfIssue: true,
+            hasChip: true,
+            issuingCountry: true,
+            notes: true,
+          },
+        },
+      },
       where: {
         studentId: studentId,
-      },
-      include: {
-        faculty: true,
-        identityPaper: true,
-        mailingAddress: true,
-        permanentAddress: true,
-        program: true,
-        status: true,
-        temporaryAddress: true,
       },
     });
 
     return response;
   }
 
-  async search(query: SearchStudent): Promise<Student[]> {
+  async search(query: SearchStudent): Promise<StudentResponse[]> {
     const { key, limit, page, faculty } = query;
     return this.prismaService.student.findMany({
-      include: {
-        program: true,
-        status: true,
-        permanentAddress: true,
-        temporaryAddress: true,
-        mailingAddress: true,
-        identityPaper: true,
-        faculty: true,
+      select: {
+        studentId: true,
+        name: true,
+        dateOfBirth: true,
+        gender: true,
+        course: true,
+        email: true,
+        phone: true,
+        nationality: true,
+
+        faculty: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        mailingAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        program: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        status: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        identityPaper: {
+          select: {
+            id: true,
+            type: true,
+            number: true,
+            issueDate: true,
+            expirationDate: true,
+            placeOfIssue: true,
+            hasChip: true,
+            issuingCountry: true,
+            notes: true,
+          },
+        },
       },
       where: {
         OR: [

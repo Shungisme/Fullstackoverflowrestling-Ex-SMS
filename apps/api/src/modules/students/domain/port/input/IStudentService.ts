@@ -2,10 +2,12 @@ import { DeleteStudentResponseDTO } from '../../dto/delete-dto';
 import { SearchRequestDTO } from '../../dto/search-dto';
 import {
   StudentRequestDTO,
-  StudentResponseDTO,
-  StudentsResponseDTO,
   UpdateStudentRequestDTO,
 } from '../../dto/student-dto';
+import {
+  StudentResponseDTO,
+  StudentsResponseDTO,
+} from '../../dto/student-response-dto';
 
 export interface IStudentService {
   create(student: StudentRequestDTO): Promise<StudentResponseDTO>;
