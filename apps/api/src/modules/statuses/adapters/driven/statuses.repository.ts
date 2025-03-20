@@ -9,11 +9,11 @@ export class StatusesRepository implements IStatusesRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async count(): Promise<number> {
-    return await this.prismaService.statuses.count();
+    return await this.prismaService.status.count();
   }
 
   async create(status: CreateStatusDTO): Promise<StatusesDto> {
-    const createdStatus = await this.prismaService.statuses.create({
+    const createdStatus = await this.prismaService.status.create({
       data: status,
     });
     return {
@@ -23,7 +23,7 @@ export class StatusesRepository implements IStatusesRepository {
   }
 
   async delete(statusId: string): Promise<StatusesDto> {
-    const deletedStatus = await this.prismaService.statuses.delete({
+    const deletedStatus = await this.prismaService.status.delete({
       where: { id: statusId },
     });
     return {
@@ -33,7 +33,7 @@ export class StatusesRepository implements IStatusesRepository {
   }
 
   async findAll(page: number, limit: number): Promise<StatusesDto[]> {
-    const statuses = await this.prismaService.statuses.findMany({
+    const statuses = await this.prismaService.status.findMany({
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -44,7 +44,7 @@ export class StatusesRepository implements IStatusesRepository {
   }
 
   async findById(statusId: string): Promise<StatusesDto> {
-    const status = await this.prismaService.statuses.findUnique({
+    const status = await this.prismaService.status.findUnique({
       where: { id: statusId },
     });
 
@@ -59,7 +59,7 @@ export class StatusesRepository implements IStatusesRepository {
   }
 
   async update(statusId: string, data: CreateStatusDTO): Promise<StatusesDto> {
-    const updatedStatus = await this.prismaService.statuses.update({
+    const updatedStatus = await this.prismaService.status.update({
       where: { id: statusId },
       data,
     });
