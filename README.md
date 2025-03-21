@@ -220,12 +220,14 @@ pnpm dev
 1. **Xem danh sách sinh viên**
 
    - Danh sách sinh viên sẽ hiển thị trong bảng
+     ![Dashboard](./images//dashboard.png)
 
 2. **Thêm sinh viên mới**
 
    - Nhấp vào nút "Thêm sinh viên" phía trên bảng
    - Điền đầy đủ thông tin sinh viên vào biểu mẫu (các trường có dấu \* là bắt buộc)
    - Nhấp nút "Lưu" để hoàn tất
+     ![Add Student](./images//add-student.png)
 
 3. **Chỉnh sửa thông tin sinh viên**
 
@@ -233,16 +235,163 @@ pnpm dev
    - Nhấp vào biểu tượng bút chì ở cột "Thao tác"
    - Thay đổi thông tin cần thiết trong biểu mẫu
    - Nhấp nút "Cập nhật" để hoàn tất
+     ![Edit Student](./images//edit-student.png)
 
 4. **Xóa sinh viên**
 
    - Tìm sinh viên cần xóa trong danh sách
    - Nhấp vào biểu tượng thùng rác ở cột "Thao tác"
    - Xác nhận xóa khi hộp thoại hiện lên
+     ![Delete Student](./images//delete-student.png)
 
 5. **Tìm kiếm sinh viên**
    - Tìm kiếm sinh viên bằng thanh tìm kiếm trên màn hình
    - Nhập mã số sinh viên hoặc tên sinh viên để tìm kiếm
+     ![Search Student](./images//search-student.png)
+
+#### Quản lý khoa
+
+1. **Xem danh sách khoa**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Khoa"
+   - Danh sách khoa sẽ hiển thị trong bảng
+     ![Faculty](./images//faculty.png)
+
+2. **Thêm khoa mới**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Khoa"
+   - Nhấp vào nút "Thêm khoa mới" phía trên bảng
+   - Điền đầy đủ thông tin khoa vào biểu mẫu
+   - Nhấp nút "Lưu" để hoàn tất
+     ![Add Faculty](./images//add-faculty.png)
+
+3. **Chỉnh sửa thông tin khoa**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Khoa"
+   - Tìm khoa cần chỉnh sửa trong danh sách
+   - Nhấp vào biểu tượng bút chì ở cột "Thao tác"
+   - Thay đổi thông tin cần thiết trong biểu mẫu
+   - Nhấp nút "Cập nhật" để hoàn tất
+     ![Edit Faculty](./images//edit-faculty.png)
+
+4. **Xóa khoa**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Khoa"
+   - Tìm khoa cần xóa trong danh sách
+   - Nhấp vào biểu tượng thùng rác ở cột "Thao tác"
+   - Xác nhận xóa khi hộp thoại hiện lên
+     ![Delete Faculty](./images//delete-faculty.png)
+     ![Delete Faculty 2](./images//delete-faculty-2.png)
+
+#### Quản lý chương trình học
+
+1. **Xem danh sách chương trình học**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Chương trình học"
+   - Danh sách chương trình học sẽ hiển thị trong bảng
+     ![Program](./images//program.png)
+
+2. **Thêm chương trình học mới**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Chương trình học"
+   - Nhấp vào nút "Thêm chương trình học mới" phía trên bảng
+   - Điền đầy đủ thông tin sinh viên vào biểu mẫu
+   - Nhấp nút "Lưu" để hoàn tất
+     ![Add Program](./images//add-program.png)
+
+3. **Chỉnh sửa thông tin chương trình học**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Chương trình học"
+   - Tìm chương trình học cần chỉnh sửa trong danh sách
+   - Nhấp vào biểu tượng bút chì ở cột "Thao tác"
+   - Thay đổi thông tin cần thiết trong biểu mẫu
+   - Nhấp nút "Cập nhật" để hoàn tất
+     ![Edit Program](./images//edit-program.png)
+
+4. **Xóa chương trình học**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Chương trình học"
+   - Tìm chương trình học cần xóa trong danh sách
+   - Nhấp vào biểu tượng thùng rác ở cột "Thao tác"
+   - Xác nhận xóa khi hộp thoại hiện lên
+     ![Delete Program](./images//delete-program.png)
+     ![Delete Program 2](./images//delete-program-2.png)
+
+#### Quản lý trạng thái sinh viên
+
+1. **Xem danh sách trạng thái sinh viên**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Tình trạng sinh viên"
+   - Danh sách trạng thái sinh viên sẽ hiển thị trong bảng
+     ![Status](./images//status.png)
+
+2. **Thêm trạng thái sinh viên mới**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Tình trạng sinh viên"
+   - Nhấp vào nút "Thêm tình trạng sinh viên mới" phía trên bảng
+   - Điền đầy đủ thông tin sinh viên vào biểu mẫu
+   - Nhấp nút "Lưu" để hoàn tất
+     ![Add Status](./images//add-status.png)
+
+3. **Chỉnh sửa trạng thái sinh viên**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Tình trạng sinh viên"
+   - Tìm tình trạng sinh viên cần chỉnh sửa trong danh sách
+   - Nhấp vào biểu tượng bút chì ở cột "Thao tác"
+   - Thay đổi thông tin cần thiết trong biểu mẫu
+   - Nhấp nút "Cập nhật" để hoàn tất
+     ![Edit Status](./images//edit-status.png)
+
+4. **Xóa trạng thái sinh viên**
+
+   - Vào mục "Cài đặt"
+   - Chọn tab "Tình trạng sinh viên"
+   - Tìm tình trạng sinh viên cần xóa trong danh sách
+   - Nhấp vào biểu tượng thùng rác ở cột "Thao tác"
+   - Xác nhận xóa khi hộp thoại hiện lên
+     ![Delete Status](./images//delete-status.png)
+
+#### Import và export dữ liệu
+
+- Cho phép import/ export dữ liệu danh sách sinh viên dễ dàng, nhanh chóng
+- Hỗ trợ JSON và XLSX
+
+##### File mẫu cho import/export dữ liệu
+
+- **File JSON mẫu**:  
+   Định dạng JSON cho import/export dữ liệu sinh viên.  
+   [Tải file JSON mẫu](./export-import/test.json)
+
+- **File XLSX mẫu**:  
+   Định dạng Excel (XLSX) cho import/export dữ liệu sinh viên.  
+   [Tải file XLSX mẫu](./export-import/test.xlsx)
+
+#### Cơ chế logging để kiểm tra hoạt động của server trên local và production
+
+- Cho phép hiển thị các hoạt động diễn ra trong server thông qua console
+- Cho phép lưu trữ các hoạt động diễn ra trong server vào file log
+- Cơ chế dọn dẹp file log bằng giới hạn số ngày log lưu trữ
+  ![ERROR-Log](./images//error-log.png)
+  ![HTTP-Log](./images//http-log.png)
+
+#### Cơ chế thống kê
+
+- Cho phép hiển thị thống kê của sinh viên phân bố theo trạng thái
+- Cho phép hiển thị thống kê của sinh viên phân bố theo khoa
+- Cho phéo hiển thị thống kê của sinh viên đang theo học, tốt nghiệp, tỷ lệ tốt nghiệp và tổng số sinh viên
+  ![Dashboard](./images//dashboard.png)
+  ![Statistic](./images//statistic.png)
 
 ### Xử lý sự cố
 
