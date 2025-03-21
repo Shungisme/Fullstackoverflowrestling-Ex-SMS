@@ -32,7 +32,7 @@ export async function getStudent(id: string): Promise<IAPIResponse<Student>> {
     return res.json();
 }
 
-export async function searchStudents(searchTerm: string): Promise<StudentList> {
+export async function searchStudents(searchTerm: string): Promise<IAPIResponse<StudentList>> {
   const queryString = toQueryString({
     key: searchTerm,
   });
@@ -48,7 +48,7 @@ export async function searchStudents(searchTerm: string): Promise<StudentList> {
   return res.json();
 }
 
-export async function addStudent(student: Student): Promise<Student> {
+export async function addStudent(student: Student): Promise<IAPIResponse<Student>> {
   const res = await fetch(studentURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

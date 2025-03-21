@@ -67,6 +67,8 @@ export default function StudentStatusSettings() {
   const handleSave = async (item: StudentStatus) => {
     if (currentItem) {
       if (!item.id) return;
+      delete item.createdAt;
+      delete item.updatedAt;
       const edited = await StudentStatusService.update(item.id, item);
       setStatuses(statuses.map((f) => (f.id === edited.data.id ? edited.data : f)));
       toast.info("Thông tin sinh viên đã được cập nhật thành công");

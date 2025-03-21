@@ -19,6 +19,7 @@ export interface Student {
     facultyId?: string;
     identityPaperId?: string;
     identityPaper: IdentityPapers;
+    mailingAddressId?: string;
 }
 
 export interface FormErrors {
@@ -43,6 +44,8 @@ export interface Faculty {
     title: string;
     description: string;
     status: string;
+    updatedAt?: Date;
+    createdAt?: Date;
 }
 
 export interface Address {
@@ -59,6 +62,8 @@ export interface Program {
     title: string;
     description: string;
     status: string;
+    updatedAt?: Date;
+    createdAt?: Date;
 }
 
 export interface StudentStatus {
@@ -66,6 +71,8 @@ export interface StudentStatus {
     title: string;
     description: string;
     status: string;
+    updatedAt?: Date;
+    createdAt?: Date;
 }
 
 export type IdentityPaperType = "CMND" | "CCCD" | "PASSPORT";

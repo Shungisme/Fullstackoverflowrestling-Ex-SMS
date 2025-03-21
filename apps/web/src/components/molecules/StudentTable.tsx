@@ -25,7 +25,7 @@ import {
 import { toast } from "sonner";
 import StudentDetails from "../organisms/StudentDetails";
 import { Student, StudentList } from "../../types";
-import { format } from "date-fns";
+import { format, formatDate } from "date-fns";
 import { EngVietFalcutyMap, EngVietStatusMap } from "../../utils/mapper";
 import ConfirmDialog from "./ConfirmDialog";
 import { useConfirmDialog } from "@/src/hooks/useConfirmDialog";
@@ -167,6 +167,7 @@ export default function StudentTable({
     };
 
     if (!data || !Array.isArray(data.students)) return null;
+    console.log(data);
     return (
         <>
             <div className="flex justify-between items-center p-4">
@@ -278,7 +279,7 @@ export default function StudentTable({
                                     </TableCell>
                                     <TableCell>{student.name}</TableCell>
                                     <TableCell>
-                                        {format(new Date(student.dateOfBirth), "dd/MM/yyyy")}
+                                        {formatDate(student.dateOfBirth, "dd/MM/yyyy")}
                                     </TableCell>
                                     <TableCell>{student.faculty.title}</TableCell>
                                     <TableCell>{student.course}</TableCell>

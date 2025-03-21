@@ -249,7 +249,7 @@ export default function StudentDetailPage({
                 type: editingAddress.type
             })
             const response = await fetch(
-                `${BASE_URL}/addresses/${params.id}?${queryString}`,
+                `${BASE_URL}/addresses/${editingAddress.address.id}?${queryString}`,
                 {
                     method: "PATCH",
                     headers: {

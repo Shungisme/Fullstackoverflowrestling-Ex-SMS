@@ -74,6 +74,8 @@ export default function ProgramSettings() {
         toast.error("Có lỗi khi sửa chương trình học!");
         return;
       }
+      delete item.updatedAt;
+      delete item.createdAt;
       const edited = await ProgramService.update(item.id, item);
       setFaculties(
         faculties.map((f) => (f.id === edited.data.id ? edited.data : f)),

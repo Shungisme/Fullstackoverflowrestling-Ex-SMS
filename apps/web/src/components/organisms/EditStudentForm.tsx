@@ -21,6 +21,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import AddressForm from "../molecules/AddressForm";
 import { Program, StudentStatus, Faculty } from "../../types";
+import { formatDate } from "date-fns";
 
 interface EditStudentFormProps {
     student: Student;
@@ -42,7 +43,7 @@ export default function EditStudentForm({
     const [formData, setFormData] = useState<Student>({
         ...student,
         dateOfBirth:
-            student.dateOfBirth ??
+            formatDate(student.dateOfBirth, "yyyy-MM-dd") ??
             new Date(student.dateOfBirth).toISOString().split("T")[0],
     });
     const [errors, setErrors] = useState<FormErrors>({});
@@ -76,8 +77,8 @@ export default function EditStudentForm({
         if (!formData.course) newErrors.course = "Khóa không được để trống";
         if (!formData.program.title.trim())
             newErrors.program = "Chương trình không được để trống";
-        if (!formData.address?.trim())
-            newErrors.address = "Địa chỉ không được để trống";
+        //if (!formData.address?.trim())
+        //    newErrors.address = "Địa chỉ không được để trống";
 
         if (formData.email && !validateEmail(formData.email)) {
             newErrors.email = "Email không hợp lệ";
@@ -96,7 +97,15 @@ export default function EditStudentForm({
         if (validateForm()) {
             setIsSubmitting(true);
             try {
-                onSubmit(formData);
+                const newData: Student = {
+                    ...formData,
+                    facultyId: formData.faculty.id,
+                    statusId: formData.status.id,
+                    programId: formData.program.id,
+                    mailingAddressId: formData.mailingAddress.id,
+                    identityPaperId: formData.identityPaper.id,
+                };
+                onSubmit(newData);
             } catch {
                 toast.error("Gap loi khi cap nhat sinh vien");
             } finally {
@@ -208,7 +217,7 @@ export default function EditStudentForm({
                             </Label>
                             <Select
                                 name="faculty"
-                                value={formData.facultyId ?? formData.faculty.title}
+                                value={formData.faculty.id}
                                 onValueChange={(value) =>
                                     handleSelectChange("facultyId", value)
                                 }
