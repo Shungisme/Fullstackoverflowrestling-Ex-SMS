@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateIdentityPaperDTO } from '../../dto/create-identity-paper.dto';
 import { UpdateIdentityPaperDTO } from '../../dto/update-identity-paper.dto';
-import { IIdentityPapersRepository } from '../output/IIdentityPapersRepository';
+import {
+  IDENTITY_REPOSITORY,
+  IIdentityPapersRepository,
+} from '../output/IIdentityPapersRepository';
 import { IIdentityPapersService } from './IIdentityPapersService';
 import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
 import { IdentityPapersDto } from '../../dto/identity-papers.dto';
@@ -9,7 +12,7 @@ import { IdentityPapersDto } from '../../dto/identity-papers.dto';
 @Injectable()
 export class IdentityPapersService implements IIdentityPapersService {
   constructor(
-    @Inject('IIdentityPapersRepository')
+    @Inject(IDENTITY_REPOSITORY)
     private identityPapersRepository: IIdentityPapersRepository,
   ) {}
 

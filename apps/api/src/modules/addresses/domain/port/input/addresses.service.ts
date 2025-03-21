@@ -1,16 +1,32 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateAddressDTO } from '../../dto/create-address.dto';
 import { UpdateAddressDTO } from '../../dto/update-address.dto';
-import { IAddressesRepository } from '../output/IAddressesRepository';
+import {
+  ADDRESSES_REPOSITORY,
+  IAddressesRepository,
+} from '../output/IAddressesRepository';
 import { IAddressesService } from './IAddressesService';
 import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
 import { AddressesDto } from '../../dto/addresses.dto';
+import {
+  IStudentRepository,
+  STUDENT_REPOSITORY,
+} from 'src/modules/students/domain/port/output/IStudentRepository';
+import { validFields } from 'src/shared/utils/parse-adress';
+import { isNotFoundPrismaError } from 'src/shared/helpers/error';
 
 @Injectable()
 export class AddressesService implements IAddressesService {
   constructor(
-    @Inject('IAddressesRepository')
-    private addressesRepository: IAddressesRepository,
+    @Inject(ADDRESSES_REPOSITORY)
+    private readonly addressesRepository: IAddressesRepository,
+    @Inject(STUDENT_REPOSITORY)
+    private readonly studentRepository: IStudentRepository,
   ) {}
 
   async count(): Promise<number> {
@@ -29,6 +45,45 @@ export class AddressesService implements IAddressesService {
     }
   }
 
+  async createForStudent(
+    studentId: string,
+    type: 'permanentAddress' | 'temporaryAddress' | 'mailingAddress',
+    address: CreateAddressDTO,
+  ): Promise<AddressesDto> {
+    try {
+      if (!studentId) {
+        throw new BadRequestException('studentId must have');
+      }
+      const student = await this.studentRepository.findById(studentId);
+      if (!student) {
+        throw new NotFoundException('Student not found');
+      }
+
+      const response = await this.addressesRepository.create(address);
+      const field = validFields[type];
+
+      if (!field) {
+        throw new BadRequestException('type createForStudent not valid');
+      }
+
+      const id = student[field];
+
+      await this.studentRepository.updateStudentField(
+        studentId,
+        field,
+        response.id,
+      );
+
+      await this.delete(id);
+
+      return response;
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw new NotFoundException(error.message);
+      }
+      throw new Error(`Error creating address: ${error.message}`);
+    }
+  }
   async delete(addressId: string) {
     try {
       return await this.addressesRepository.delete(addressId);

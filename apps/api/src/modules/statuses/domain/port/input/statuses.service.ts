@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateStatusDTO } from '../../dto/create-status.dto';
 import { UpdateStatusDTO } from '../../dto/update-status.dto';
-import { IStatusesRepository } from '../output/IStatusesRepository';
+import {
+  IStatusesRepository,
+  STATUS_REPOSITORY,
+} from '../output/IStatusesRepository';
 import { IStatusesService } from './IStatusesService';
 import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
 import { StatusesDto } from '../../dto/statuses.dto';
@@ -9,7 +12,7 @@ import { StatusesDto } from '../../dto/statuses.dto';
 @Injectable()
 export class StatusesService implements IStatusesService {
   constructor(
-    @Inject('IStatusesRepository')
+    @Inject(STATUS_REPOSITORY)
     private statusesRepository: IStatusesRepository,
   ) {}
 

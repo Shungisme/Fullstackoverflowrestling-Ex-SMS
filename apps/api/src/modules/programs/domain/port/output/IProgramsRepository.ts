@@ -10,7 +10,11 @@ export interface IProgramsRepository {
 
   findById(programId: string): Promise<ProgramsDto>;
 
+  findByName(programName: string): Promise<ProgramsDto>;
+
   findAll(page: number, limit: number): Promise<ProgramsDto[]>;
 
   count(): Promise<number>;
 }
+
+export const PROGRAM_REPOSITORY = Symbol('IProgramsRepository');

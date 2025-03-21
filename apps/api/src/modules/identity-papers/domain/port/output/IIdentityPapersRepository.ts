@@ -13,7 +13,14 @@ export interface IIdentityPapersRepository {
 
   findById(identityPaperId: string): Promise<IdentityPapersDto>;
 
+  findByTypeAndNumber(
+    type: string,
+    number: string,
+  ): Promise<IdentityPapersDto | null>;
+
   findAll(page: number, limit: number): Promise<IdentityPapersDto[]>;
 
   count(): Promise<number>;
 }
+
+export const IDENTITY_REPOSITORY = Symbol('IIdentityPapersRepository');

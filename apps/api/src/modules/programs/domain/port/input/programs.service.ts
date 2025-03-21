@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateProgramDTO } from '../../dto/create-program.dto';
 import { UpdateProgramDTO } from '../../dto/update-program.dto';
-import { IProgramsRepository } from '../output/IProgramsRepository';
+import {
+  IProgramsRepository,
+  PROGRAM_REPOSITORY,
+} from '../output/IProgramsRepository';
 import { IProgramsService } from './IProgramsService';
 import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
 import { ProgramsDto } from '../../dto/programs.dto';
@@ -9,7 +12,7 @@ import { ProgramsDto } from '../../dto/programs.dto';
 @Injectable()
 export class ProgramsService implements IProgramsService {
   constructor(
-    @Inject('IProgramsRepository')
+    @Inject(PROGRAM_REPOSITORY)
     private programsRepository: IProgramsRepository,
   ) {}
 

@@ -9,6 +9,9 @@ import {
   Patch,
   Post,
   Query,
+  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { StudentService } from '../../domain/port/input/student.service';
 import { StudentRequestDTO } from '../../domain/dto/student-dto';
@@ -25,6 +28,8 @@ import {
   StudentsResponseDTO,
   StudentsResponseWrapperDTO,
 } from '../../domain/dto/student-response-dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 
 @ApiTags('Students')
 @Controller({ path: 'students', version: '1' })
@@ -46,20 +51,6 @@ export class StudentController {
     @Body() studentDto: StudentRequestDTO,
   ): Promise<StudentResponseDTO> {
     return await this.studentService.create(studentDto);
-  }
-
-  @Get(':studentId')
-  @HttpCode(HttpStatus?.OK)
-  @ZodSerializerDto(StudentResponseDTO)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'find a student by id',
-    type: StudentResponseWrapperDTO,
-  })
-  async findById(
-    @Param('studentId') studentId: string,
-  ): Promise<StudentResponseDTO> {
-    return await this.studentService.findById(studentId);
   }
 
   @Patch(':studentId')
@@ -114,6 +105,38 @@ export class StudentController {
     type: String,
   })
   async search(@Query() query: SearchRequestDTO): Promise<StudentsResponseDTO> {
-    return this.studentService.search(query);
+    return await this.studentService.search(query);
+  }
+
+  @Post('import')
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(HttpStatus.CREATED)
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ isCreated: boolean; message: string }> {
+    return await this.studentService.upload(file);
+  }
+
+  @Get('export')
+  @HttpCode(HttpStatus.OK)
+  async exportFile(
+    @Query('type') type: string,
+    @Res() res: Response,
+  ): Promise<any> {
+    return await this.studentService.exportFile(type, res);
+  }
+
+  @Get(':studentId')
+  @HttpCode(HttpStatus?.OK)
+  @ZodSerializerDto(StudentResponseDTO)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'find a student by id',
+    type: StudentResponseWrapperDTO,
+  })
+  async findById(
+    @Param('studentId') studentId: string,
+  ): Promise<StudentResponseDTO> {
+    return await this.studentService.findById(studentId);
   }
 }

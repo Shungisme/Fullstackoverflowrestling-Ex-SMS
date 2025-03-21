@@ -57,6 +57,21 @@ export class StatusesRepository implements IStatusesRepository {
       status: status.status as 'active' | 'inactive',
     };
   }
+  async findByName(statusName: string): Promise<StatusesDto> {
+    const status = await this.prismaService.status.findFirstOrThrow({
+      where: {
+        title: {
+          contains: statusName,
+          mode: 'insensitive',
+        },
+      },
+    });
+
+    return {
+      ...status,
+      status: status.status as 'active' | 'inactive',
+    };
+  }
 
   async update(statusId: string, data: CreateStatusDTO): Promise<StatusesDto> {
     const updatedStatus = await this.prismaService.status.update({

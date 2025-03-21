@@ -14,3 +14,5 @@ export interface IAddressesRepository {
 
   count(): Promise<number>;
 }
+
+export const ADDRESSES_REPOSITORY = Symbol('IAddressesRepository');

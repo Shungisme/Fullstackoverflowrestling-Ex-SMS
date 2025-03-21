@@ -10,7 +10,11 @@ export interface IStatusesRepository {
 
   findById(statusId: string): Promise<StatusesDto>;
 
+  findByName(statusName: string): Promise<StatusesDto>;
+
   findAll(page: number, limit: number): Promise<StatusesDto[]>;
 
   count(): Promise<number>;
 }
+
+export const STATUS_REPOSITORY = Symbol('IStatusesRepository');

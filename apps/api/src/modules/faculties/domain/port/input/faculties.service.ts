@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateFacultyDTO } from '../../dto/create-faculty.dto';
 import { UpdateFacultyDTO } from '../../dto/update-faculty.dto';
-import { IFacultiesRepository } from '../output/IFacultiesRepository';
+import {
+  FACULTIES_REPOSITORY,
+  IFacultiesRepository,
+} from '../output/IFacultiesRepository';
 import { IFacultiesService } from './IFaculitiesService';
 import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
 import { FacultiesDto } from '../../dto/faculties.dto';
@@ -9,7 +12,7 @@ import { FacultiesDto } from '../../dto/faculties.dto';
 @Injectable()
 export class FacultiesService implements IFacultiesService {
   constructor(
-    @Inject('IFacultiesRepository')
+    @Inject(FACULTIES_REPOSITORY)
     private facultiesRepository: IFacultiesRepository,
   ) {}
 

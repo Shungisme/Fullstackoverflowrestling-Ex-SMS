@@ -59,6 +59,22 @@ export class FacultiesRepository implements IFacultiesRepository {
     };
   }
 
+  async findByName(facultyName: string): Promise<FacultiesDto> {
+    const faculty = await this.prismaService.faculty.findFirstOrThrow({
+      where: {
+        title: {
+          contains: facultyName,
+          mode: 'insensitive',
+        },
+      },
+    });
+
+    return {
+      ...faculty,
+      status: faculty.status as 'active' | 'inactive',
+    };
+  }
+
   async update(
     facultyId: string,
     data: CreateFacultyDTO,

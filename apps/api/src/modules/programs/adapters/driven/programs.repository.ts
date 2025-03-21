@@ -58,6 +58,22 @@ export class ProgramsRepository implements IProgramsRepository {
     };
   }
 
+  async findByName(programName: string): Promise<ProgramsDto> {
+    const program = await this.prismaService.program.findFirstOrThrow({
+      where: {
+        title: {
+          contains: programName,
+          mode: 'insensitive',
+        },
+      },
+    });
+
+    return {
+      ...program,
+      status: program.status as 'active' | 'inactive',
+    };
+  }
+
   async update(
     programId: string,
     data: CreateProgramDTO,
