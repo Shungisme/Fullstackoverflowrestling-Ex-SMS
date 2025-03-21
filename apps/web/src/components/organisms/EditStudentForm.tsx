@@ -18,6 +18,7 @@ import {
 import { validateEmail, validatePhone } from "validations";
 import { Student, FormErrors } from "../../types";
 import { ArrowLeft, Save } from "lucide-react";
+import { toast } from "sonner";
 
 interface EditStudentFormProps {
   student: Student;
@@ -32,7 +33,7 @@ export default function EditStudentForm({
 }: EditStudentFormProps) {
   const [formData, setFormData] = useState<Student>({
     ...student,
-    dateOfBirth: new Date(student.dateOfBirth).toISOString().split("T")[0],
+    dateOfBirth: student.dateOfBirth ?? new Date(student.dateOfBirth).toISOString().split("T")[0],
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,10 +86,11 @@ export default function EditStudentForm({
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        // Simulate an API call
-        await new Promise((resolve) => setTimeout(resolve, 500));
         onSubmit(formData);
-      } finally {
+      } catch {
+        toast.error("Gap loi khi cap nhat sinh vien");
+      }
+      finally {
         setIsSubmitting(false);
       }
     }
