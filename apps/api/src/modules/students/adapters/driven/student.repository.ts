@@ -127,6 +127,22 @@ export class StudentRepository implements IStudentRepository {
         },
       });
 
+      let permanentAddressData: { id: string } | null = null;
+      if (student.permanentAddress) {
+        permanentAddressData = await tx.address.create({
+          data: student.permanentAddress,
+          select: { id: true },
+        });
+      }
+
+      let temporaryAddressData: { id: string } | null = null;
+      if (student.temporaryAddress) {
+        temporaryAddressData = await tx.address.create({
+          data: student.temporaryAddress,
+          select: { id: true },
+        });
+      }
+
       const {
         mailingAddress,
         temporaryAddress,
@@ -198,6 +214,8 @@ export class StudentRepository implements IStudentRepository {
           ...studentData,
           mailingAddressId: mailingAddressData.id,
           identityPaperId: identityPaperData.id,
+          temporaryAddressId: temporaryAddressData?.id,
+          permanentAddressId: permanentAddressData?.id,
         },
       });
 
