@@ -44,6 +44,28 @@ export class StudentRepository implements IStudentRepository {
           },
         },
 
+        permanentAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        temporaryAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
         program: {
           select: {
             id: true,
@@ -135,6 +157,27 @@ export class StudentRepository implements IStudentRepository {
               country: true,
             },
           },
+          permanentAddress: {
+            select: {
+              id: true,
+              number: true,
+              street: true,
+              district: true,
+              city: true,
+              country: true,
+            },
+          },
+
+          temporaryAddress: {
+            select: {
+              id: true,
+              number: true,
+              street: true,
+              district: true,
+              city: true,
+              country: true,
+            },
+          },
           program: { select: { id: true, title: true } },
           status: { select: { id: true, title: true } },
           identityPaper: {
@@ -183,6 +226,28 @@ export class StudentRepository implements IStudentRepository {
         },
 
         mailingAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        permanentAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        temporaryAddress: {
           select: {
             id: true,
             number: true,
@@ -259,6 +324,28 @@ export class StudentRepository implements IStudentRepository {
           },
         },
 
+        permanentAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        temporaryAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
         program: {
           select: {
             id: true,
@@ -315,6 +402,28 @@ export class StudentRepository implements IStudentRepository {
         },
 
         mailingAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        permanentAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        temporaryAddress: {
           select: {
             id: true,
             number: true,
@@ -386,6 +495,28 @@ export class StudentRepository implements IStudentRepository {
           },
         },
 
+        permanentAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        temporaryAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
         program: {
           select: {
             id: true,
@@ -444,6 +575,28 @@ export class StudentRepository implements IStudentRepository {
         },
 
         mailingAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        permanentAddress: {
+          select: {
+            id: true,
+            number: true,
+            street: true,
+            district: true,
+            city: true,
+            country: true,
+          },
+        },
+
+        temporaryAddress: {
           select: {
             id: true,
             number: true,
