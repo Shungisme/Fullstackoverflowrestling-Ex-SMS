@@ -41,7 +41,7 @@ export class StudentController {
   @HttpCode(HttpStatus.CREATED)
   @ZodSerializerDto(StudentResponseDTO)
   @ApiBody({
-    type: StudentRequestDTO,
+    type: CreateStudentWithAddressDTO,
   })
   @ApiResponse({
     status: HttpStatus.CREATED,
