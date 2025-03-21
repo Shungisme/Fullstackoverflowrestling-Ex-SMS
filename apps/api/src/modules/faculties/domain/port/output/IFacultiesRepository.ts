@@ -10,7 +10,11 @@ export interface IFacultiesRepository {
 
   findById(facultyId: string): Promise<FacultiesDto>;
 
+  findByName(facultyName: string): Promise<FacultiesDto>;
+
   findAll(page: number, limit: number): Promise<FacultiesDto[]>;
 
   count(): Promise<number>;
 }
+
+export const FACULTIES_REPOSITORY = Symbol('IFacultiesRepository');

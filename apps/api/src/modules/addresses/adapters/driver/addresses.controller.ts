@@ -16,7 +16,6 @@ import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
 import { AddressesDto } from '../../domain/dto/addresses.dto';
 import { AddressesService } from '../../domain/port/input/addresses.service';
 import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ZodSerializerDto } from 'nestjs-zod';
 
 @ApiTags('Addresses')
 @Controller({ path: 'addresses', version: '1' })
@@ -33,6 +32,28 @@ export class AddressesController {
   })
   create(@Body() createAddressDto: CreateAddressDTO) {
     return this.addressesService.create(createAddressDto);
+  }
+
+  @Post(':studentId')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiBody({ type: CreateAddressDTO })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Create an address link with student',
+    type: AddressesDto,
+  })
+  @ApiQuery({ name: 'studentId', type: String })
+  createForStudent(
+    @Body() createAddressDto: CreateAddressDTO,
+    @Query('type')
+    type: 'permanentAddress' | 'temporaryAddress' | 'mailingAddress',
+    @Param('studentId') studentId: string,
+  ) {
+    return this.addressesService.createForStudent(
+      studentId,
+      type,
+      createAddressDto,
+    );
   }
 
   @Get()

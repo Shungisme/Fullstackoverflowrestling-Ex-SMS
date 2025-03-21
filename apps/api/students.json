@@ -1,0 +1,194 @@
+[
+  {
+    "studentId": "22120264",
+    "name": "Phan Tấn Phát",
+    "dateOfBirth": "1970-01-01",
+    "gender": "MALE",
+    "course": 2022,
+    "email": "22120264@student.hcmus.edu.vn",
+    "phone": "396188707",
+    "nationality": "VietNam",
+    "faculty": "Công nghệ thông tin",
+    "permanentAddress": null,
+    "temporaryAddress": null,
+    "mailingAddress": {
+      "number": "21",
+      "street": "Đường Phan Tấn Phát",
+      "district": "quận 1",
+      "city": "hồ chính minh",
+      "country": "phường hải ngoại"
+    },
+    "program": "Đại trà",
+    "status": "Đang học",
+    "identityPaper": {
+      "type": "IDENTITY_CARD",
+      "number": "87204001123",
+      "issueDate": "2002-12-02",
+      "expirationDate": "2003-11-01",
+      "placeOfIssue": "VietNam",
+      "hasChip": null,
+      "issuingCountry": null,
+      "notes": null
+    }
+  },
+  {
+    "studentId": "22120265",
+    "name": "Nguyễn Văn A",
+    "dateOfBirth": "1970-01-01",
+    "gender": "MALE",
+    "course": 2022,
+    "email": "22120265@student.hcmus.edu.vn",
+    "phone": "396188207",
+    "nationality": "VietNam",
+    "faculty": "Công nghệ thông tin",
+    "permanentAddress": null,
+    "temporaryAddress": null,
+    "mailingAddress": {
+      "number": "21",
+      "street": "Đường Phan Tấn Phát",
+      "district": "quận 1",
+      "city": "hồ chính minh",
+      "country": "phường hải ngoại"
+    },
+    "program": "Đại trà",
+    "status": "Đang học",
+    "identityPaper": {
+      "type": "IDENTITY_CARD",
+      "number": "87204011123",
+      "issueDate": "2002-12-02",
+      "expirationDate": "2003-11-01",
+      "placeOfIssue": "VietNam",
+      "hasChip": null,
+      "issuingCountry": null,
+      "notes": null
+    }
+  },
+  {
+    "studentId": "22120267",
+    "name": "Nguyễn Văn V",
+    "dateOfBirth": "1970-01-01",
+    "gender": "OTHER",
+    "course": 2021,
+    "email": "22120267@student.hcmus.edu.vn",
+    "phone": "396188207",
+    "nationality": "VietNam",
+    "faculty": "Công nghệ thông tin",
+    "permanentAddress": null,
+    "temporaryAddress": null,
+    "mailingAddress": {
+      "number": "21",
+      "street": "Đường Phan Tấn Phát",
+      "district": "quận 1",
+      "city": "hồ chính minh",
+      "country": "phường hải ngoại"
+    },
+    "program": "Đại trà",
+    "status": "Đang học",
+    "identityPaper": {
+      "type": "IDENTITY_CARD",
+      "number": "87204111423",
+      "issueDate": "2002-12-02",
+      "expirationDate": "2003-11-01",
+      "placeOfIssue": "VietNam",
+      "hasChip": null,
+      "issuingCountry": null,
+      "notes": null
+    }
+  },
+  {
+    "studentId": "22130567",
+    "name": "Trần Minh Khôi",
+    "dateOfBirth": "2003-07-15",
+    "gender": "MALE",
+    "course": 2023,
+    "email": "22130567@student.hcmus.edu.vn",
+    "phone": "398765432",
+    "nationality": "VietNam",
+    "faculty": "Khoa Vật lý - Vật lý Kỹ thuật",
+    "permanentAddress": null,
+    "temporaryAddress": null,
+    "mailingAddress": {
+      "number": "789",
+      "street": "Đường Trần Hưng Đạo",
+      "district": "Quận 5",
+      "city": "Hồ Chí Minh",
+      "country": "VietNam"
+    },
+    "program": "Đại trà",
+    "status": "Đang học",
+    "identityPaper": {
+      "type": "IDENTITY_CARD",
+      "number": "87456321098",
+      "issueDate": "2001-05-20",
+      "expirationDate": "2031-05-20",
+      "placeOfIssue": "VietNam",
+      "hasChip": true,
+      "issuingCountry": "VietNam",
+      "notes": "Có tích hợp CCCD gắn chip"
+    }
+  },
+  {
+    "studentId": "22140978",
+    "name": "Nguyễn Thị Mai",
+    "dateOfBirth": "2004-11-22",
+    "gender": "FEMALE",
+    "course": 2024,
+    "email": "22140978@student.hcmus.edu.vn",
+    "phone": "397654321",
+    "nationality": "VietNam",
+    "faculty": "Khoa Vật lý - Vật lý Kỹ thuật",
+    "permanentAddress": null,
+    "temporaryAddress": null,
+    "mailingAddress": {
+      "number": "77",
+      "street": "Đường Võ Văn Kiệt",
+      "district": "Quận 6",
+      "city": "Hồ Chí Minh",
+      "country": "VietNam"
+    },
+    "program": "Đại trà",
+    "status": "Đang học",
+    "identityPaper": {
+      "type": "PASSPORT",
+      "number": "B12345678",
+      "issueDate": "2018-06-15",
+      "expirationDate": "2028-06-15",
+      "placeOfIssue": "Cục Quản lý Xuất nhập cảnh",
+      "hasChip": false,
+      "issuingCountry": "VietNam",
+      "notes": null
+    }
+  },
+  {
+    "studentId": "22151234",
+    "name": "Lê Văn An",
+    "dateOfBirth": "2002-03-30",
+    "gender": "MALE",
+    "course": 2021,
+    "email": "22151234@student.hcmus.edu.vn",
+    "phone": "398812345",
+    "nationality": "VietNam",
+    "faculty": "Công nghệ thông tin",
+    "permanentAddress": null,
+    "temporaryAddress": null,
+    "mailingAddress": {
+      "number": "234",
+      "street": "Đường Nguyễn Văn Linh",
+      "district": "Quận 7",
+      "city": "Hồ Chí Minh",
+      "country": "VietNam"
+    },
+    "program": "Đại trà",
+    "status": "Đang học",
+    "identityPaper": {
+      "type": "IDENTITY_CARD",
+      "number": "87901234567",
+      "issueDate": "2002-09-10",
+      "expirationDate": "2032-09-10",
+      "placeOfIssue": "VietNam",
+      "hasChip": true,
+      "issuingCountry": "VietNam",
+      "notes": "Đã cập nhật CMND sang CCCD"
+    }
+  }
+]

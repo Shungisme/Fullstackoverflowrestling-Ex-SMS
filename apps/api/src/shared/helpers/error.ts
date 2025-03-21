@@ -49,3 +49,13 @@ export const isIncompatibleNullValueError = (
     error.code === 'P2032'
   );
 };
+
+// Lỗi tham chiếu không hợp lệ (P2023)
+export const isInvalidReferenceError = (
+  error: any,
+): error is Prisma.PrismaClientKnownRequestError => {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2023'
+  );
+};

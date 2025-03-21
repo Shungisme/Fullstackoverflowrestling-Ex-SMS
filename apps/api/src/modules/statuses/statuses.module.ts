@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { StatusesService } from './domain/port/input/statuses.service';
 import { StatusesController } from './adapters/driver/statuses.controller';
 import { StatusesRepository } from './adapters/driven/statuses.repository';
+import { STATUS_REPOSITORY } from './domain/port/output/IStatusesRepository';
 
 @Module({
   exports: [StatusesService],
@@ -9,7 +10,7 @@ import { StatusesRepository } from './adapters/driven/statuses.repository';
   providers: [
     StatusesService,
     {
-      provide: 'IStatusesRepository',
+      provide: STATUS_REPOSITORY,
       useClass: StatusesRepository,
     },
   ],

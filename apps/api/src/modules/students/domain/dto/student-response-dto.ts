@@ -39,6 +39,7 @@ export const FacultySchema = z.object({
 });
 
 export const StudentSchema = z.object({
+  id: z.string(),
   studentId: z.string(),
   name: z.string(),
   dateOfBirth: z.date(),

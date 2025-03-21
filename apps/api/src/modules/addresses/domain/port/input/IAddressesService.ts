@@ -5,6 +5,12 @@ import { AddressesDto } from '../../dto/addresses.dto';
 export interface IAddressesService {
   create(address: CreateAddressDTO): Promise<AddressesDto>;
 
+  createForStudent(
+    studentId: string,
+    type: 'permanentAddress' | 'temporaryAddress' | 'mailingAddress',
+    address: CreateAddressDTO,
+  ): Promise<AddressesDto>;
+
   update(addressId: string, data: CreateAddressDTO): Promise<AddressesDto>;
 
   delete(addressId: string): Promise<AddressesDto>;

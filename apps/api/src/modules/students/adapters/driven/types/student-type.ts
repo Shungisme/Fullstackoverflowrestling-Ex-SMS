@@ -73,6 +73,7 @@ export class FacultyResponse {
 }
 
 export class StudentResponse {
+  id: string;
   studentId: string;
   name: string;
   dateOfBirth: Date;

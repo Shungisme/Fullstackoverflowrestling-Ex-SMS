@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/services/database/prisma.service';
 import { IIdentityPapersRepository } from '../../domain/port/output/IIdentityPapersRepository';
 import { IdentityPapersDto } from '../../domain/dto/identity-papers.dto';
@@ -46,6 +46,35 @@ export class IdentityPapersRepository implements IIdentityPapersRepository {
     }
 
     return identityPaper;
+  }
+
+  async findByTypeAndNumber(
+    type: string,
+    number: string,
+  ): Promise<IdentityPapersDto | null> {
+    const identityPaper = await this.prismaService.identityPaper.findFirst({
+      where: {
+        AND: [
+          {
+            type: {
+              contains: type,
+              mode: 'insensitive',
+            },
+          },
+          {
+            number: number,
+          },
+        ],
+      },
+    });
+
+    if (identityPaper) {
+      throw new ConflictException(
+        `Identity paper with number ${number} is existed`,
+      );
+    }
+
+    return null;
   }
 
   async update(
