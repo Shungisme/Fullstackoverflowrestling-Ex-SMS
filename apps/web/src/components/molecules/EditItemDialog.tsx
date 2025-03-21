@@ -116,7 +116,7 @@ export default function EditItemDialog({
               </Select>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex flex-col">
             <Button type="button" variant="outline" onClick={onClose}>
               Hủy
             </Button>

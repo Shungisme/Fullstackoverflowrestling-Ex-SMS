@@ -167,7 +167,6 @@ export default function StudentTable({
     };
 
     if (!data || !Array.isArray(data.students)) return null;
-    console.log(data);
     return (
         <>
             <div className="flex justify-between items-center p-4">

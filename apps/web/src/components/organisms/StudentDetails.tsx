@@ -99,11 +99,9 @@ export default function StudentDetails({
               </p>
               <div className="mt-2 flex items-center justify-center gap-2">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs flex items-center gap-1 ${getStatusClass(
-                    student.status,
-                  )}`}
+                  className={`px-3 py-1 rounded-full text-xs flex items-center gap-1` }
                 >
-                  {getStatusIcon(student.status)} {student.status}
+                  {getStatusIcon(student.status.title)} {student.status.title}
                 </span>
               </div>
             </div>
@@ -137,7 +135,7 @@ export default function StudentDetails({
                   <div>
                     <p className="text-sm font-medium">Khoa</p>
                     <p className="text-sm text-muted-foreground">
-                      {EngVietFalcutyMap[student.faculty]}
+                      {student.faculty.title}
                     </p>
                   </div>
                 </div>
@@ -157,7 +155,7 @@ export default function StudentDetails({
                   <div>
                     <p className="text-sm font-medium">Chương trình</p>
                     <p className="text-sm text-muted-foreground">
-                      {student.program}
+                      {student.program.title}
                     </p>
                   </div>
                 </div>
