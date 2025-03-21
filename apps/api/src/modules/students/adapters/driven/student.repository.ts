@@ -572,7 +572,26 @@ export class StudentRepository implements IStudentRepository {
   }
 
   async search(query: SearchStudent): Promise<StudentResponse[]> {
-    const { key, limit, page, faculty } = query;
+    const { key, limit = 5, page = 1, faculty } = query;
+
+    const whereCondition: any = {};
+
+    if (key) {
+      whereCondition.OR = [
+        { name: { contains: key, mode: 'insensitive' } },
+        { studentId: { contains: key, mode: 'insensitive' } },
+      ];
+    }
+
+    if (faculty) {
+      whereCondition.faculty = {
+        title: {
+          contains: faculty,
+          mode: 'insensitive',
+        },
+      };
+    }
+
     return this.prismaService.student.findMany({
       select: {
         id: true,
@@ -653,20 +672,7 @@ export class StudentRepository implements IStudentRepository {
           },
         },
       },
-      where: {
-        OR: [
-          { name: { contains: key, mode: 'insensitive' } },
-          { studentId: { contains: key, mode: 'insensitive' } },
-          {
-            faculty: {
-              title: {
-                contains: faculty,
-                mode: 'insensitive',
-              },
-            },
-          },
-        ],
-      },
+      where: whereCondition,
       skip: Number((page - 1) * limit),
       take: Number(limit),
     });
