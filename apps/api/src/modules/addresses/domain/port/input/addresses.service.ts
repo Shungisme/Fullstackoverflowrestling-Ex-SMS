@@ -66,7 +66,7 @@ export class AddressesService implements IAddressesService {
         throw new BadRequestException('type createForStudent not valid');
       }
 
-      const id = student[field];
+      const id = student[type]?.id;
 
       await this.studentRepository.updateStudentField(
         studentId,
@@ -74,7 +74,9 @@ export class AddressesService implements IAddressesService {
         response.id,
       );
 
-      await this.delete(id);
+      if (id) {
+        await this.delete(id);
+      }
 
       return response;
     } catch (error) {
