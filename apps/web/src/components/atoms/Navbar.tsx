@@ -21,16 +21,10 @@ export default function Navbar() {
             Dashboard
           </Link>
           <Link
-            href="/students"
+            href="/settings"
             className="text-foreground hover:text-primary transition-colors"
           >
-            Students
-          </Link>
-          <Link
-            href="/reports"
-            className="text-foreground hover:text-primary transition-colors"
-          >
-            Reports
+            Cài đặt
           </Link>
         </nav>
         <div className="flex items-center gap-2">
