@@ -656,10 +656,13 @@ export class StudentRepository implements IStudentRepository {
       where: {
         OR: [
           { name: { contains: key, mode: 'insensitive' } },
-          { studentId: key },
+          { studentId: { contains: key, mode: 'insensitive' } },
           {
             faculty: {
-              title: faculty,
+              title: {
+                contains: faculty,
+                mode: 'insensitive',
+              },
             },
           },
         ],
