@@ -30,6 +30,7 @@ import {
 } from '../../domain/dto/student-response-dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
+import { CreateStudentWithAddressDTO } from '../../domain/dto/create-student-dto';
 
 @ApiTags('Students')
 @Controller({ path: 'students', version: '1' })
@@ -48,7 +49,7 @@ export class StudentController {
     type: StudentResponseWrapperDTO,
   })
   async create(
-    @Body() studentDto: StudentRequestDTO,
+    @Body() studentDto: CreateStudentWithAddressDTO,
   ): Promise<StudentResponseDTO> {
     return await this.studentService.create(studentDto);
   }

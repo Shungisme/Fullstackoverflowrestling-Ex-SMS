@@ -85,7 +85,7 @@ export class StudentResponse {
   faculty: FacultyResponse;
   permanentAddress?: AddressResponse | null;
   temporaryAddress?: AddressResponse | null;
-  mailingAddress: AddressResponse;
+  mailingAddress?: AddressResponse;
   program: ProgramResponse;
   status: StatusResponse;
   identityPaper: IdentityPaperResponse;
