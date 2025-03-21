@@ -3,9 +3,10 @@ import {
   StudentResponse,
 } from 'src/modules/students/adapters/driven/types/student-type';
 import { SearchStudent } from 'src/modules/students/adapters/driven/types/search-type';
+import { CreateStudentWithAddressDTO } from '../../dto/create-student-dto';
 
 export interface IStudentRepository {
-  create(student: Student): Promise<StudentResponse>;
+  create(student: CreateStudentWithAddressDTO): Promise<StudentResponse>;
   createMany(students: Student[]): Promise<number>;
   delete(studentId: string): Promise<StudentResponse>;
   update(student: Student): Promise<StudentResponse>;

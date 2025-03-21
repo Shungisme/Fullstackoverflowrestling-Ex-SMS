@@ -55,6 +55,8 @@ import {
 import { writeFileSync } from 'fs';
 import * as XLSX from 'xlsx';
 import { Response } from 'express';
+import { CreateAddressDTO } from '../../dto/address-dto';
+import { CreateStudentWithAddressDTO } from '../../dto/create-student-dto';
 
 @Injectable()
 export class StudentService implements IStudentService {
@@ -471,7 +473,9 @@ export class StudentService implements IStudentService {
     }
   }
 
-  async create(student: StudentRequestDTO): Promise<StudentResponseDTO> {
+  async create(
+    student: CreateStudentWithAddressDTO,
+  ): Promise<StudentResponseDTO> {
     try {
       return this.studentRepository.create(student);
     } catch (error) {
