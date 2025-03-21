@@ -2,7 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import { Gender } from '@prisma/client';
 import { ObjectId } from 'mongodb';
-const StudentSchema = z.object({
+export const StudentSchema = z.object({
   id: z
     .string()
     .refine((id) => ObjectId.isValid(id), { message: 'Invalid ObjectId' })
@@ -39,9 +39,7 @@ export class UpdateStudentRequestDTO extends createZodDto(
 export type StudentRequestType = z.infer<typeof StudentSchema>;
 
 export class StudentDTO extends createZodDto(StudentSchema) {}
-export class CreateStudentDTO extends createZodDto(
-  StudentSchema.omit({ id: true }),
-) {}
+
 export class UpdateStudentDTO extends createZodDto(
   StudentSchema.omit({ id: true }).partial(),
 ) {}

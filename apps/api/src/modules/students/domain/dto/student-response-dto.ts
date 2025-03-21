@@ -51,7 +51,7 @@ export const StudentSchema = z.object({
   faculty: FacultySchema,
   permanentAddress: AddressSchema.nullable().optional(),
   temporaryAddress: AddressSchema.nullable().optional(),
-  mailingAddress: AddressSchema,
+  mailingAddress: AddressSchema.optional(),
   program: ProgramSchema,
   status: StatusSchema,
   identityPaper: IdentityPaperSchema,

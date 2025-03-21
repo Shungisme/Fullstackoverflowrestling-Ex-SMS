@@ -3,6 +3,7 @@ import { IStudentRepository } from '../../domain/port/output/IStudentRepository'
 import { PrismaService } from 'src/shared/services/database/prisma.service';
 import { SearchStudent } from './types/search-type';
 import { Student, StudentResponse } from './types/student-type';
+import { CreateStudentWithAddressDTO } from '../../domain/dto/create-student-dto';
 
 @Injectable()
 export class StudentRepository implements IStudentRepository {
@@ -90,70 +91,77 @@ export class StudentRepository implements IStudentRepository {
     return this.prismaService.student.count();
   }
 
-  async create(student: Student): Promise<StudentResponse> {
-    const response = await this.prismaService.student.create({
-      select: {
-        id: true,
-        studentId: true,
-        name: true,
-        dateOfBirth: true,
-        gender: true,
-        course: true,
-        email: true,
-        phone: true,
-        nationality: true,
+  async create(student: CreateStudentWithAddressDTO): Promise<StudentResponse> {
+    return await this.prismaService.$transaction(async (tx) => {
+      const mailingAddressData = await tx.address.create({
+        data: student.mailingAddress,
+        select: { id: true },
+      });
 
-        faculty: {
-          select: {
-            id: true,
-            title: true,
+      const identityPaperData = await tx.identityPaper.create({
+        data: student.identityPaper,
+        select: {
+          id: true,
+        },
+      });
+
+      const {
+        mailingAddress,
+        temporaryAddress,
+        permanentAddress,
+        identityPaper,
+        ...studentData
+      } = student;
+
+      const createdStudent = await tx.student.create({
+        select: {
+          id: true,
+          studentId: true,
+          name: true,
+          dateOfBirth: true,
+          gender: true,
+          course: true,
+          email: true,
+          phone: true,
+          nationality: true,
+          faculty: { select: { id: true, title: true } },
+          mailingAddress: {
+            select: {
+              id: true,
+              number: true,
+              street: true,
+              district: true,
+              city: true,
+              country: true,
+            },
+          },
+          program: { select: { id: true, title: true } },
+          status: { select: { id: true, title: true } },
+          identityPaper: {
+            select: {
+              id: true,
+              type: true,
+              number: true,
+              issueDate: true,
+              expirationDate: true,
+              placeOfIssue: true,
+              hasChip: true,
+              issuingCountry: true,
+              notes: true,
+            },
           },
         },
-
-        mailingAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
+        data: {
+          ...studentData,
+          mailingAddressId: mailingAddressData.id,
+          identityPaperId: identityPaperData.id,
         },
+      });
 
-        program: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        status: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        identityPaper: {
-          select: {
-            id: true,
-            type: true,
-            number: true,
-            issueDate: true,
-            expirationDate: true,
-            placeOfIssue: true,
-            hasChip: true,
-            issuingCountry: true,
-            notes: true,
-          },
-        },
-      },
-      data: student,
+      return createdStudent;
     });
-
-    return response;
   }
+
   async delete(studentId: string): Promise<StudentResponse> {
     return await this.prismaService.student.delete({
       select: {
