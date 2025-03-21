@@ -9,13 +9,15 @@ import {
 import { Button } from "../atoms/Button";
 import { Input, Label } from "@repo/ui";
 import { Upload } from "lucide-react";
+import LoadingSpinner from "../LoadingSpinner";
 
 interface FileUploadDialogProps {
-    onUpload: (file: File) => void;
+    onUpload: (file: File) => Promise<boolean>;
 }
 
 export default function FileUploadDialog({ onUpload }: FileUploadDialogProps) {
     const [file, setFile] = useState<File | null>(null);
+    const [isLoading, setIsLoading] =  useState(false);
     const allowedTypes = [
         "application/json",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -34,11 +36,15 @@ export default function FileUploadDialog({ onUpload }: FileUploadDialogProps) {
         }
     };
 
-    const handleUpload = () => {
+    const handleUpload = async () => {
         if (file) {
             // Handle file upload logic here
-            onUpload(file);
-            setFile(null);
+            setIsLoading(true);
+            const success = await onUpload(file);
+            setIsLoading(false);
+            if (success) {
+                setFile(null);
+            }
         }
     };
 
@@ -64,8 +70,13 @@ export default function FileUploadDialog({ onUpload }: FileUploadDialogProps) {
                     {file && (
                         <p className="text-sm text-gray-500">Selected file: {file.name}</p>
                     )}
-                    <Button onClick={handleUpload} disabled={!file} className="mt-2">
-                        Upload
+                    <Button onClick={handleUpload} disabled={!file || isLoading} className="mt-2">
+                        {isLoading ? (
+                            <>
+                                <LoadingSpinner />
+                                <span>Uploading...</span>
+                            </>
+                        ) : <span>Upload</span>}
                     </Button>
                 </div>
             </DialogContent>

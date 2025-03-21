@@ -134,7 +134,7 @@ export default function StudentTable({
     };
 
     const handleImportData = async (file: File) => {
-        if (!file) return;
+        if (!file) return false;
 
         const formData = new FormData();
         formData.append("file", file);
@@ -147,11 +147,14 @@ export default function StudentTable({
 
             if (!res.ok) {
                 toast.error("File upload failed");
+                return false;
             }
 
             toast.success("File upload successfully");
+            return true;
         } catch {
             toast.error("Error uploading file!");
+            return false;
         }
     };
 
@@ -277,7 +280,7 @@ export default function StudentTable({
                                     <TableCell>
                                         {format(new Date(student.dateOfBirth), "dd/MM/yyyy")}
                                     </TableCell>
-                                    <TableCell>{student.facultyId}</TableCell>
+                                    <TableCell>{student.faculty.title}</TableCell>
                                     <TableCell>{student.course}</TableCell>
                                     <TableCell>
                                         <span

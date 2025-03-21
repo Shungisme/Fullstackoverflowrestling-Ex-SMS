@@ -3,12 +3,9 @@
 import { useEffect, useState } from "react";
 import {
     Address,
-    Faculty,
     FormErrors,
     IAPIResponse,
-    Program,
     Student,
-    StudentStatus,
 } from "@/src/types";
 import {
     Card,
@@ -50,22 +47,9 @@ import {
 } from "@/src/components/atoms/Dialog";
 import { Button } from "@/src/components/atoms/Button";
 import AddressForm from "@/src/components/molecules/AddressForm";
-import {
-    FacultyService,
-    ProgramService,
-    StudentStatusService,
-} from "@/src/lib/api/school-service";
 import IdentityPapersTab from "@/src/components/organisms/IdentityPapers";
 import { toQueryString } from "@/src/utils/helper";
 
-const mockAddress: Address = {
-    id: "1",
-    number: "123",
-    street: "Main Street",
-    district: "Downtown",
-    city: "New York",
-    country: "USA",
-};
 
 export default function StudentDetailPage({
     params,
@@ -82,9 +66,6 @@ export default function StudentDetailPage({
     const [addressFormErrors, setAddressFormErrors] = useState<FormErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAddingAddress, setIsAddingAddress] = useState<string | null>(null);
-    const [faculty, setFaculty] = useState<Faculty | null>(null);
-    const [program, setProgram] = useState<Program | null>(null);
-    const [status, setStatus] = useState<StudentStatus | null>(null);
 
     const createNewAddress = async () => {
         if (!isAddingAddress || !editingAddress || !student) return;
@@ -113,6 +94,7 @@ export default function StudentDetailPage({
         try {
             const queryString = toQueryString({
                 type: isAddingAddress,
+                studentId: params.id
             });
             const response = await fetch(
                 `${BASE_URL}/addresses/${params.id}?${queryString}`,
@@ -131,9 +113,9 @@ export default function StudentDetailPage({
 
             // Update local state
             const updatedStudent = { ...student };
-            if (isAddingAddress === "permanent") {
+            if (isAddingAddress === "permanentAddress") {
                 updatedStudent.permanentAddress = editingAddress.address;
-            } else if (isAddingAddress === "temporary") {
+            } else if (isAddingAddress === "temporaryAddress") {
                 updatedStudent.temporaryAddress = editingAddress.address;
             }
 
@@ -158,17 +140,8 @@ export default function StudentDetailPage({
                     throw new Error("Failed to load student data");
                 }
                 const data: IAPIResponse<Student> = await res.json();
-                const [facultyRes, programRes, statusRes] = await Promise.all([
-                    await FacultyService.getById(data.data.facultyId!),
-                    await ProgramService.getById(data.data.programId!),
-                    await StudentStatusService.getById(data.data.statusId!),
-                ]);
-                setFaculty(facultyRes.data);
-                setProgram(programRes.data);
-                setStatus(statusRes.data);
                 setStudent({
                     ...data.data,
-                    mailingAddress: mockAddress,
                 });
                 setLoading(false);
             } catch (err) {
@@ -292,11 +265,11 @@ export default function StudentDetailPage({
 
             // Update local state
             const updatedStudent = { ...student };
-            if (editingAddress.type === "mailing") {
+            if (editingAddress.type === "mailingAddress") {
                 updatedStudent.mailingAddress = editingAddress.address;
-            } else if (editingAddress.type === "permanent") {
+            } else if (editingAddress.type === "permanentAddress") {
                 updatedStudent.permanentAddress = editingAddress.address;
-            } else if (editingAddress.type === "temporary") {
+            } else if (editingAddress.type === "temporaryAddress") {
                 updatedStudent.temporaryAddress = editingAddress.address;
             }
 
@@ -333,12 +306,12 @@ export default function StudentDetailPage({
                             <span className="hidden md:inline">•</span>
                             <span className="flex items-center gap-1">
                                 <School size={16} />
-                                {faculty?.title}
+                                {student.faculty.title}
                             </span>
                         </div>
                     </div>
                 </div>
-                <Badge className="text-xs py-1 px-3">{status?.title}</Badge>
+                <Badge className="text-xs py-1 px-3">{student.status.title}</Badge>
             </div>
 
             <Tabs defaultValue="overview" className="mt-6">
@@ -430,7 +403,7 @@ export default function StudentDetailPage({
                                                     className="h-8"
                                                     onClick={() =>
                                                         setEditingAddress({
-                                                            type: "mailing",
+                                                            type: "mailingAddress",
                                                             address: { ...student.mailingAddress },
                                                         })
                                                     }
@@ -498,7 +471,7 @@ export default function StudentDetailPage({
                                                         onClick={() => {
                                                             if (student.permanentAddress) {
                                                                 setEditingAddress({
-                                                                    type: "permanent",
+                                                                    type: "permanentAddress",
                                                                     address: student.permanentAddress,
                                                                 });
                                                             }
@@ -519,7 +492,7 @@ export default function StudentDetailPage({
                                                         }
                                                         onChange={handleAddressChange}
                                                         errors={addressFormErrors}
-                                                        errorKey="permanent"
+                                                        errorKey="permanentAddress"
                                                     />
                                                     <DialogFooter className="mt-4">
                                                         <Button
@@ -560,9 +533,9 @@ export default function StudentDetailPage({
                                                     variant="outline"
                                                     className="w-full flex items-center justify-center gap-2 p-3 border-dashed"
                                                     onClick={() => {
-                                                        setIsAddingAddress("permanent");
+                                                        setIsAddingAddress("permanentAddress");
                                                         setEditingAddress({
-                                                            type: "permanent",
+                                                            type: "permanentAddress",
                                                             address: {
                                                                 number: "",
                                                                 street: "",
@@ -593,7 +566,7 @@ export default function StudentDetailPage({
                                                     }
                                                     onChange={handleAddressChange}
                                                     errors={addressFormErrors}
-                                                    errorKey="permanent"
+                                                    errorKey="permanentAddress"
                                                 />
                                                 <DialogFooter className="mt-4">
                                                     <Button
@@ -634,7 +607,7 @@ export default function StudentDetailPage({
                                                         onClick={() => {
                                                             if (student.temporaryAddress) {
                                                                 setEditingAddress({
-                                                                    type: "temporary",
+                                                                    type: "temporaryAddress",
                                                                     address: student.temporaryAddress,
                                                                 });
                                                             }
@@ -696,9 +669,9 @@ export default function StudentDetailPage({
                                                     variant="outline"
                                                     className="w-full flex items-center justify-center gap-2 p-3 border-dashed"
                                                     onClick={() => {
-                                                        setIsAddingAddress("temporary");
+                                                        setIsAddingAddress("temporaryAddress");
                                                         setEditingAddress({
-                                                            type: "temporary",
+                                                            type: "temporaryAddress",
                                                             address: {
                                                                 number: "",
                                                                 street: "",
@@ -773,7 +746,7 @@ export default function StudentDetailPage({
                                         </span>
                                         <div className="flex items-center gap-2">
                                             <School size={18} className="text-primary" />
-                                            <span className="font-medium">{faculty?.title}</span>
+                                            <span className="font-medium">{student.faculty.title}</span>
                                         </div>
                                     </div>
 
@@ -783,7 +756,7 @@ export default function StudentDetailPage({
                                         </span>
                                         <div className="flex items-center gap-2">
                                             <BookOpen size={18} className="text-primary" />
-                                            <span className="font-medium">{program?.title}</span>
+                                            <span className="font-medium">{student.program.title}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -804,7 +777,7 @@ export default function StudentDetailPage({
                                         <span className="text-sm text-muted-foreground">
                                             Status
                                         </span>
-                                        <Badge className="w-fit">{status?.title}</Badge>
+                                        <Badge className="w-fit">{student.status.title}</Badge>
                                     </div>
                                 </div>
                             </div>
@@ -868,7 +841,7 @@ export default function StudentDetailPage({
 
                 {/* Identity Card Tab */}
                 <TabsContent value="indentity" className="mt-6">
-                    <IdentityPapersTab id={student.identityPaperId!} />
+                    <IdentityPapersTab id={student.identityPaper.id!} />
                 </TabsContent>
             </Tabs>
         </div>

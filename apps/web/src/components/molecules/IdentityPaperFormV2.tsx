@@ -1,7 +1,7 @@
-import { FormErrors, IdentityPapers } from "@/src/types";
+// This component serve as a temporary fix for the add/edit form. Will be replace later
+import { FormErrors, IdentityPapers, IdentityPaperType } from "@/src/types";
 import { Input, Label } from "@repo/ui";
-import React, { useState } from "react";
-import { Checkbox } from "../atoms/Checkbox";
+import React from "react";
 import {
   Select,
   SelectContent,
@@ -9,24 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../atoms/Select";
+import { Checkbox } from "../atoms/Checkbox";
 import { CheckedState } from "@radix-ui/react-checkbox";
-import { Button } from "../atoms/Button";
-import { IdentityPaperType } from "@/src/types";
-import { formatDate } from "date-fns";
 
-interface IdentityPaperFormProps {
-  initial?: IdentityPapers;
-  onSubmit: (value: IdentityPapers) => Promise<void>;
-  onCancel: () => void;
-  isSubmitting: boolean;
+interface IdentityPaperFormV2Props {
+  identityPaper: IdentityPapers;
+  onChange: (field: keyof IdentityPapers, value: string | boolean) => void;
+  errors: FormErrors;
+  errorKey?: string;
 }
-const initialValue: IdentityPapers = {
-  type: "CMND",
-  number: "",
-  issueDate: "",
-  expirationDate: "",
-  placeOfIssue: "",
-};
 
 const getTypeString = (type: IdentityPaperType | string) => {
   switch (type) {
@@ -41,44 +32,21 @@ const getTypeString = (type: IdentityPaperType | string) => {
   }
 };
 
-const IdentityPaperForm = ({
-  initial = initialValue,
-  onSubmit,
-  onCancel,
-  isSubmitting,
-}: IdentityPaperFormProps) => {
-  const [formData, setFormData] = useState<IdentityPapers>({
-    ...initial,
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    // Clear error when field is changed
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: undefined });
-    }
-  };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-  const changeType = (type: IdentityPaperType) => {
-    setFormData({
-      ...formData,
-      type,
-    });
-  };
-
+const IdentityPaperFormV2 = ({
+  identityPaper,
+  onChange,
+  errors,
+  errorKey,
+}: IdentityPaperFormV2Props) => {
   return (
-    <form className="space-y-2" onSubmit={handleSubmit}>
+    <div className="space-y-2">
       <div className="space-y-2">
-        <Label htmlFor="name">Loại giấy tờ</Label>
+        <Label htmlFor="type">Chọn loại giấy tờ</Label>
         <Select
           name="type"
-          value={formData.type}
-          onValueChange={(value: IdentityPaperType) => changeType(value)}
+          onValueChange={(value: IdentityPaperType) => {
+            onChange("type", value);
+          }}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Chọn loại giấy tờ" defaultValue="CCCD" />
@@ -94,14 +62,14 @@ const IdentityPaperForm = ({
       </div>
       <div className="space-y-2">
         <Label htmlFor="name">
-          Số <span>{getTypeString(formData.type)}</span>
+          Số <span>{getTypeString(identityPaper.type)}</span>
         </Label>
         <Input
           name="number"
-          value={formData.number}
-          onChange={handleChange}
+          value={identityPaper.number}
+          onChange={(e) => onChange("number", e.target.value)}
           id="name"
-          placeholder={`Nhập số ${getTypeString(formData.type)}`}
+          placeholder={`Nhập số ${getTypeString(identityPaper.type)}`}
         />
       </div>
       <div className="space-y-2">
@@ -110,7 +78,8 @@ const IdentityPaperForm = ({
           id="issueDate"
           name="issueDate"
           type="date"
-          value={formatDate(formData.issueDate, "yyyy-MM-dd")}
+          onChange={(e) => onChange("issueDate", e.target.value)}
+          value={identityPaper.issueDate}
           className={errors.issueDate && "border-destructive"}
         />
       </div>
@@ -120,7 +89,8 @@ const IdentityPaperForm = ({
           id="expirationDate"
           name="expirationDate"
           type="date"
-          value={formatDate(formData.expirationDate, "yyyy-MM-dd")}
+          value={identityPaper.expirationDate}
+          onChange={(e) => onChange("expirationDate", e.target.value)}
           className={errors.expirationDate && "border-destructive"}
         />
       </div>
@@ -129,11 +99,12 @@ const IdentityPaperForm = ({
         <Input
           id="placeOfIssue"
           name="placeOfIssue"
-          value={formData.placeOfIssue}
+          value={identityPaper.placeOfIssue}
+          onChange={(e) => onChange("placeOfIssue", e.target.value)}
           className={errors.placeOfIssue && "border-destructive"}
         />
       </div>
-      {formData.type === "CCCD" && (
+      {identityPaper.type === "CCCD" && (
         <div className="flex items-center gap-4">
           <Label htmlFor="hasChip">Có chip</Label>
           <Checkbox
@@ -141,27 +112,24 @@ const IdentityPaperForm = ({
             name="hasChip"
             onCheckedChange={(e: CheckedState) => {
               if (e !== "indeterminate") {
-                setFormData({
-                  ...formData,
-                  hasChip: e,
-                });
+                onChange("hasChip", e);
               }
             }}
-            checked={formData.hasChip}
+            checked={identityPaper.hasChip}
             className={errors.hasChip && "border-destructive"}
           />
         </div>
       )}
 
-      {formData.type === "PASSPORT" && (
+      {identityPaper.type === "PASSPORT" && (
         <>
           <div className="space-y-2">
             <Label htmlFor="issuingCountry">Quốc gia cấp</Label>
             <Input
               id="issuingCountry"
               name="issuingCountry"
-              onChange={handleChange}
-              value={formData.issuingCountry}
+              onChange={(e) => onChange("issuingCountry", e.target.value)}
+              value={identityPaper.issuingCountry}
               className={errors.issuingCountry && "border-destructive"}
             />
           </div>
@@ -170,24 +138,15 @@ const IdentityPaperForm = ({
             <Input
               id="note"
               name="note"
-              onChange={handleChange}
-              value={formData.note}
+              onChange={(e) => onChange("note", e.target.value)}
+              value={identityPaper.note}
               className={errors.note && "border-destructive"}
             />
           </div>
         </>
       )}
-      <div className="flex justify-end space-x-2 mt-6">
-        <Button disabled={isSubmitting}>
-          {isSubmitting
-            ? "Saving..."
-            : initial
-              ? "Update Document"
-              : "Add Document"}
-        </Button>
-      </div>
-    </form>
+    </div>
   );
 };
 
-export default IdentityPaperForm;
+export default IdentityPaperFormV2;

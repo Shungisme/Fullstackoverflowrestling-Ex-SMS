@@ -17,13 +17,13 @@ export default function StatsList({ students }: StatsListProps) {
       />
       <StatCard
         title="Đang học"
-        value={students.filter((s) => s.status === "Currently Studying").length}
+        value={students.filter((s) => s.status.title === "Đang học").length}
         description="Sinh viên đang học tập"
         Icon={Rows}
       />
       <StatCard
         title="Tốt nghiệp"
-        value={students.filter((s) => s.status === "Graduated").length}
+        value={students.filter((s) => s.status.title === "Tốt nghiệp").length}
         description="Sinh viên đã tốt nghiệp"
         Icon={BarChart4}
       />
@@ -32,7 +32,7 @@ export default function StatsList({ students }: StatsListProps) {
         value={
           students.length
             ? Math.round(
-                (students.filter((s) => s.status === "Graduated").length /
+                (students.filter((s) => s.status.title === "Tốt nghiệp").length /
                   students.length) *
                   100
               ) + "%"

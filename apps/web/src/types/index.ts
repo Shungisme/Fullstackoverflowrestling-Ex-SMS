@@ -68,9 +68,11 @@ export interface StudentStatus {
     status: string;
 }
 
+export type IdentityPaperType = "CMND" | "CCCD" | "PASSPORT";
+
 export interface IdentityPapers {
     id?: string;
-    type: string;
+    type: IdentityPaperType;
     number: string;
     issueDate: string;
     expirationDate: string;
@@ -78,4 +80,6 @@ export interface IdentityPapers {
     hasChip?: boolean;
     issuingCountry?: string;
     note?: string;
+    updatedAt?: Date;
+    createdAt?: Date;
 }
