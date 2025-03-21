@@ -42,7 +42,6 @@ export class AddressesController {
     description: 'Create an address link with student',
     type: AddressesDto,
   })
-  @ApiQuery({ name: 'studentId', type: String })
   createForStudent(
     @Body() createAddressDto: CreateAddressDTO,
     @Query('type')
