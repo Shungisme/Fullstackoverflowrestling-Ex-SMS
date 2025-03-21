@@ -58,7 +58,11 @@ export default function ProgramSettings() {
 
   const confirmDelete = async () => {
     if (itemToDelete) {
-      await ProgramService.delete(itemToDelete);
+      const deleted = await ProgramService.delete(itemToDelete);
+      if (deleted.statusCode !== 200) {
+          toast.error(deleted.message);
+          return;
+      }
       setFaculties(faculties.filter((f) => f.id !== itemToDelete));
       toast.info("Đã xóa chương trình học");
     }

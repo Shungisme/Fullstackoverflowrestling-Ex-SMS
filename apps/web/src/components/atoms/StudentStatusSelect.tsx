@@ -1,38 +1,26 @@
 import React from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "./Select";
+import { Select, SelectTrigger } from "./Select";
 import { StudentStatusService } from "@/src/lib/api/school-service";
+import ServerSelectOption from "../molecules/ServerSelectOption";
 
 type StudentStatusSelectProps = Omit<
-  React.ComponentPropsWithoutRef<typeof Select>,
-  "children"
+    React.ComponentPropsWithoutRef<typeof Select>,
+    "children"
 > & {
-  children: React.ReactElement<
-    React.ComponentPropsWithoutRef<typeof SelectTrigger>
-  >;
+    children: React.ReactElement<
+        React.ComponentPropsWithoutRef<typeof SelectTrigger>
+    >;
 };
-const StudentStatusSelect = async ({
-  children,
-  ...props
-}: StudentStatusSelectProps) => {
-  if (React.isValidElement(children) && children.type !== SelectTrigger) {
-    throw new Error("FacultySelect only accepts SelectTrigger as children");
-  }
-  const res = await StudentStatusService.getAll();
-  const data = res.data.data;
+const StudentStatusSelect = async ({ children, ...props }: StudentStatusSelectProps) => {
+    if (React.isValidElement(children) && children.type !== SelectTrigger) {
+        throw new Error("StudentStatusSelect only accepts SelectTrigger as children");
+    }
 
-  return (
-    <Select {...props}>
-      {children}
-      <SelectContent>
-        {data.map((item) => {
-          return (
-            <SelectItem value={item.id ?? item.title} key={item.id}>
-              {item.title}
-            </SelectItem>
-          );
-        })}
-      </SelectContent>
-    </Select>
-  );
+    return (
+        <Select {...props}>
+            {children}
+            <ServerSelectOption service={StudentStatusService} />
+        </Select>
+    );
 };
 export default StudentStatusSelect;

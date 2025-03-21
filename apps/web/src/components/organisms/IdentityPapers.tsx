@@ -32,9 +32,7 @@ import { Badge } from "../atoms/Badge";
 import { format } from "date-fns";
 import IdentityPaperForm from "../molecules/IdentityPaperForm";
 import { toast } from "sonner";
-
-// Define base URL for API calls
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+import { BASE_URL } from "@/src/constants/constants";
 
 interface IdentityPapersTabProps {
   id: string; // Student ID
@@ -53,7 +51,7 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
         setIsLoading(true);
         setError(null);
         
-        const response = await fetch(`${BASE_URL}/students/${id}/identity-paper`);
+        const response = await fetch(`${BASE_URL}/identity-papers/${id}`);
         
         if (!response.ok) {
           // If 404, it might mean the student doesn't have a paper yet

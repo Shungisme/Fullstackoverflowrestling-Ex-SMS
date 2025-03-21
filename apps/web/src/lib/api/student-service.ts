@@ -15,7 +15,6 @@ export async function getStudents(
   });
   const url = `${studentURL}?${queryString}`;
   const res = await fetch(url, { next: { revalidate: 60 } });
-
   if (!res.ok) {
     throw new Error("Failed to fetch students");
   }

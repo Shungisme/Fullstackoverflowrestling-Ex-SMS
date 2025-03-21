@@ -10,7 +10,7 @@ interface PaginatedResponse<T> {
     total: number;
 }
 
-class CRUDService<T> {
+export class CRUDService<T> {
     private endpoint: string;
 
     constructor(endpoint: string) {

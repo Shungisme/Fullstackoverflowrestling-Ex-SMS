@@ -20,7 +20,6 @@ const StudentManagementTabs = () => {
     searchStudents,
     handlePageChange
   } = useStudentContext();
-
   const handleEditStudent = (studentId: string): void => {
     const student = students.students.find((s) => s.studentId === studentId);
     if (student) {
@@ -59,9 +58,12 @@ const StudentManagementTabs = () => {
               addStudent(student).then(success => {
                   if (success) {
                       setCurrentTab("list")
+                      return true;
+                  } else {
+                      return false;
                   }
               });
-              return Promise.resolve(true)
+              return Promise.resolve(false);
             }} 
           />
         </div>

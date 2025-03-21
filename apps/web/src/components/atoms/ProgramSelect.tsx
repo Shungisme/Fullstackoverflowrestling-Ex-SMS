@@ -1,36 +1,26 @@
 import React from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "./Select";
-import { Program } from "@/src/types";
+import { Select, SelectTrigger } from "./Select";
 import { ProgramService } from "@/src/lib/api/school-service";
+import ServerSelectOption from "../molecules/ServerSelectOption";
 
 type ProgramSelectProps = Omit<
-  React.ComponentPropsWithoutRef<typeof Select>,
-  "children"
+    React.ComponentPropsWithoutRef<typeof Select>,
+    "children"
 > & {
-  children: React.ReactElement<
-    React.ComponentPropsWithoutRef<typeof SelectTrigger>
-  >;
+    children: React.ReactElement<
+        React.ComponentPropsWithoutRef<typeof SelectTrigger>
+    >;
 };
 const ProgramSelect = async ({ children, ...props }: ProgramSelectProps) => {
-  if (React.isValidElement(children) && children.type !== SelectTrigger) {
-    throw new Error("ProgramSelect only accepts SelectTrigger as children");
-  }
-  const res = await ProgramService.getAll();
-  const data = res.data.data;
+    if (React.isValidElement(children) && children.type !== SelectTrigger) {
+        throw new Error("ProgramSelect only accepts SelectTrigger as children");
+    }
 
-  return (
-    <Select {...props}>
-      {children}
-      <SelectContent>
-        {data.map((program) => {
-          return (
-            <SelectItem value={program.id ?? program.title} key={program.id}>
-              {program.title}
-            </SelectItem>
-          );
-        })}
-      </SelectContent>
-    </Select>
-  );
+    return (
+        <Select {...props}>
+            {children}
+            <ServerSelectOption service={ProgramService} />
+        </Select>
+    );
 };
 export default ProgramSelect;
