@@ -8,17 +8,17 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Student } from "../../types";
-import { EngVietFalcutyMap, EngVietStatusMap } from "@/src/utils/mapper";
 interface DashboardProps {
   students: Student[];
 }
 
 export default function Dashboard({ students }: DashboardProps) {
   // Count students by status
+  if (!students) return null;
   const statusCounts = students.reduce(
     (acc: Record<string, number>, student) => {
-      acc[EngVietStatusMap[student.status]] =
-        (acc[EngVietStatusMap[student.status]] || 0) + 1;
+      acc[student.status.title] =
+        (acc[student.status.title] || 0) + 1;
       return acc;
     },
     {},
@@ -33,8 +33,8 @@ export default function Dashboard({ students }: DashboardProps) {
   // Count students by faculty
   const facultyCounts = students.reduce(
     (acc: Record<string, number>, student) => {
-      acc[EngVietFalcutyMap[student.faculty]] =
-        (acc[EngVietFalcutyMap[student.faculty]] || 0) + 1;
+      acc[student.faculty.title] =
+        (acc[student.faculty.title] || 0) + 1;
       return acc;
     },
     {},

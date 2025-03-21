@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Input, Label } from "@repo/ui";
 import {
   Card,
@@ -17,14 +17,24 @@ import {
 } from "../atoms/Select";
 
 import { validateEmail, validatePhone } from "validations";
-import { Student, FormErrors } from "../../types";
+import {
+  Student,
+  FormErrors,
+  Address,
+  Program,
+  StudentStatus,
+  Faculty,
+  IdentityPapers,
+} from "../../types";
 import { PlusCircle, Loader2 } from "lucide-react";
 import { parseISO } from "date-fns";
-import FacultySelect from "../atoms/FacultySelect";
-import StudentStatusSelect from "../atoms/StudentStatusSelect";
-import ProgramSelect from "../atoms/ProgramSelect";
+import AddressForm from "../molecules/AddressForm";
+import IdentityPaperFormV2 from "../molecules/IdentityPaperFormV2";
 
 interface AddStudentFormProps {
+  programOptions: Program[];
+  statusOptions: StudentStatus[];
+  facultyOptions: Faculty[];
   onSubmit: (student: Student) => Promise<boolean>;
 }
 const initialStudent: Student = {
@@ -32,13 +42,25 @@ const initialStudent: Student = {
   name: "",
   dateOfBirth: "",
   gender: "MALE",
-  faculty: "",
+  faculty: {
+    title: "",
+    description: "",
+    status: "",
+  },
   course: 0,
-  program: "",
+  program: {
+    title: "",
+    description: "",
+    status: "",
+  },
   address: "",
   email: "",
   phone: "",
-  status: "",
+  status: {
+    title: "",
+    description: "",
+    status: "",
+  },
   nationality: "",
   mailingAddress: {
     country: "",
@@ -47,8 +69,20 @@ const initialStudent: Student = {
     number: "",
     city: "",
   },
+  identityPaper: {
+    type: "CMND",
+    number: "",
+    issueDate: "",
+    placeOfIssue: "",
+    expirationDate: "",
+  },
 };
-export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
+export default function AddStudentForm({
+  onSubmit,
+  facultyOptions,
+  statusOptions,
+  programOptions,
+}: AddStudentFormProps) {
   const [formData, setFormData] = useState<Student>(initialStudent);
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -80,11 +114,12 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
     if (!formData.dateOfBirth)
       newErrors.dateOfBirth = "Ngày sinh không được để trống";
     if (!formData.gender) newErrors.gender = "Giới tính không được để trống";
-    if (!formData.faculty) newErrors.faculty = "Khoa không được để trống";
+    if (!formData.facultyId) newErrors.faculty = "Khoa không được để trống";
     if (!formData.course) newErrors.course = "Khóa không được để trống";
-    if (!formData.program.trim())
+    if (!formData.programId)
       newErrors.program = "Chương trình không được để trống";
-
+    if (!formData.nationality)
+      newErrors.nationality = "Quốc tịch không được để trống";
     if (formData.email && !validateEmail(formData.email)) {
       newErrors.email = "Email không hợp lệ";
     }
@@ -115,7 +150,6 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
       }
     }
   };
-
   return (
     <Card className="border-none shadow-none sm:border sm:shadow-sm">
       <CardHeader>
@@ -202,17 +236,26 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
               <Label htmlFor="faculty">
                 Khoa <span className="text-destructive">*</span>
               </Label>
-              <FacultySelect
+              <Select
                 name="faculty"
-                value={formData.faculty}
-                onValueChange={(value) => handleSelectChange("faculty", value)}
+                value={formData.facultyId}
+                onValueChange={(value) =>
+                  handleSelectChange("facultyId", value)
+                }
               >
                 <SelectTrigger
                   className={errors.faculty ? "border-destructive" : ""}
                 >
                   <SelectValue placeholder="Chọn khoa" />
                 </SelectTrigger>
-              </FacultySelect>
+                <SelectContent>
+                  {facultyOptions.map((item) => (
+                    <SelectItem key={item.id} value={item.id ?? ""}>
+                      {item.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {errors.faculty && (
                 <p className="text-xs text-destructive">{errors.faculty}</p>
               )}
@@ -239,17 +282,26 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
               <Label htmlFor="program">
                 Chương trình <span className="text-destructive">*</span>
               </Label>
-              <ProgramSelect
+              <Select
                 name="program"
-                value={formData.program}
-                onValueChange={(value) => handleSelectChange("program", value)}
+                value={formData.programId}
+                onValueChange={(value) =>
+                  handleSelectChange("programId", value)
+                }
               >
                 <SelectTrigger
                   className={errors.program ? "border-destructive" : ""}
                 >
                   <SelectValue placeholder="Nhập chương trình đào tạo" />
                 </SelectTrigger>
-              </ProgramSelect>
+                <SelectContent>
+                  {programOptions.map((item) => (
+                    <SelectItem key={item.id} value={item.id ?? ""}>
+                      {item.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {errors.program && (
                 <p className="text-xs text-destructive">{errors.program}</p>
               )}
@@ -257,15 +309,22 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="status">Tình trạng</Label>
-              <StudentStatusSelect
+              <Select
                 name="status"
-                value={formData.status}
-                onValueChange={(value) => handleSelectChange("status", value)}
+                value={formData.statusId}
+                onValueChange={(value) => handleSelectChange("statusId", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn tình trạng" />
                 </SelectTrigger>
-              </StudentStatusSelect>
+                <SelectContent>
+                  {statusOptions.map((item) => (
+                    <SelectItem key={item.id} value={item.id ?? ""}>
+                      {item.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -297,6 +356,64 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
               {errors.phone && (
                 <p className="text-xs text-destructive">{errors.phone}</p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nationality">
+                Quốc tịch <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="nationality"
+                name="nationality"
+                value={formData.nationality}
+                onChange={handleChange}
+                placeholder="Nhập quốc tịch"
+                className={errors.nationality ? "border-destructive" : ""}
+              />
+              {errors.nationality && (
+                <p className="text-xs text-destructive">{errors.nationality}</p>
+              )}
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="mailingAddress">
+                Địa chỉ nhận thư <span className="text-destructive">*</span>
+              </Label>
+              <AddressForm
+                address={formData.mailingAddress}
+                onChange={(field: keyof Address, value: string) => {
+                  setFormData({
+                    ...formData,
+                    mailingAddress: {
+                      ...formData.mailingAddress,
+                      [field]: value,
+                    },
+                  });
+                }}
+                errors={errors}
+                errorKey="mailingAddress"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="identityPaper">
+                Giấy tờ cá nhân <span className="text-destructive">*</span>
+              </Label>
+              <IdentityPaperFormV2
+                identityPaper={formData.identityPaper}
+                onChange={(
+                  field: keyof IdentityPapers,
+                  value: string | boolean,
+                ) => {
+                  setFormData({
+                    ...formData,
+                    identityPaper: {
+                      ...formData.identityPaper,
+                      [field]: value,
+                    },
+                  });
+                }}
+                errors={errors}
+              />
             </div>
           </div>
 

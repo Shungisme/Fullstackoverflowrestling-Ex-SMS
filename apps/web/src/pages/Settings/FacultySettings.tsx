@@ -71,6 +71,8 @@ export default function FacultySettings() {
         toast.error("Gặp lỗi khi cập nhật khoa!");
         return;
       }
+      delete item.createdAt;
+      delete item.updatedAt;
       const edited = await FacultyService.update(item.id, item);
       if (!edited) {
         toast.error("Gặp lỗi khi cập nhật khoa!");

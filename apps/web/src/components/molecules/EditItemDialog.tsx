@@ -10,6 +10,7 @@ import { Button } from "../../components/atoms/Button";
 import { Input } from "@repo/ui";
 import { Label } from "@repo/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../atoms/Select";
+import { toast } from "sonner";
 
 interface Field {
   name: string;
@@ -64,6 +65,10 @@ export default function EditItemDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.status || !formData.title || !formData.description) {
+        toast.error("Vui long nhap day du thong tin");
+        return;
+    }
     onSave(formData);
   };
 
@@ -111,7 +116,7 @@ export default function EditItemDialog({
               </Select>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex flex-col">
             <Button type="button" variant="outline" onClick={onClose}>
               Hủy
             </Button>

@@ -58,7 +58,11 @@ export default function ProgramSettings() {
 
   const confirmDelete = async () => {
     if (itemToDelete) {
-      await ProgramService.delete(itemToDelete);
+      const deleted = await ProgramService.delete(itemToDelete);
+      if (deleted.statusCode !== 200) {
+          toast.error(deleted.message);
+          return;
+      }
       setFaculties(faculties.filter((f) => f.id !== itemToDelete));
       toast.info("Đã xóa chương trình học");
     }
@@ -70,6 +74,8 @@ export default function ProgramSettings() {
         toast.error("Có lỗi khi sửa chương trình học!");
         return;
       }
+      delete item.updatedAt;
+      delete item.createdAt;
       const edited = await ProgramService.update(item.id, item);
       setFaculties(
         faculties.map((f) => (f.id === edited.data.id ? edited.data : f)),

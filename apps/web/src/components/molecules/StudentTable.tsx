@@ -22,21 +22,22 @@ import {
     FileDown,
     FileSpreadsheet,
 } from "lucide-react";
+import { toast } from "sonner";
 import StudentDetails from "../organisms/StudentDetails";
 import { Student, StudentList } from "../../types";
-import { format } from "date-fns";
+import { format, formatDate } from "date-fns";
 import { EngVietFalcutyMap, EngVietStatusMap } from "../../utils/mapper";
 import ConfirmDialog from "./ConfirmDialog";
 import { useConfirmDialog } from "@/src/hooks/useConfirmDialog";
-import { ListConfig } from "@/src/constants/constants";
+import { BASE_URL, ListConfig } from "@/src/constants/constants";
 import Link from "next/link";
-import { toast } from "sonner";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "../atoms/DropDownMenu";
+import FileUploadDialog from "./FileUploadDialog";
 
 interface StudentTableProps {
     data: StudentList;
@@ -47,7 +48,7 @@ interface StudentTableProps {
 
 type SortField = "studentId" | "name" | "dateOfBirth" | "faculty" | "course";
 type SortDirection = "asc" | "desc";
-
+type ExportType = "json" | "excel";
 export default function StudentTable({
     data,
     onEdit,
@@ -58,7 +59,7 @@ export default function StudentTable({
     const [sortField, setSortField] = useState<SortField>("studentId");
     const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
     const [page, setPage] = useState(1);
-    const [exporting, setExporting] = useState<"excel" | "csv" | null>(null);
+    const [exporting, setExporting] = useState<ExportType | null>(null);
     const rowsPerPage = ListConfig.rowsPerPage;
 
     const handlePageChange = (page: number) => {
@@ -85,22 +86,15 @@ export default function StudentTable({
         }
     };
 
-    const handleViewStudent = (studentId: string): void => {
-        const student = data.students.find((s) => s.studentId === studentId);
-        if (student) {
-            setViewingStudent(student);
-        }
-    };
-
-    const handleExport = async (type: "excel" | "csv") => {
+    const handleExport = async (type: ExportType) => {
         try {
             setExporting(type);
 
-            const exportUrl = `https://google.com`; // TODO: will replace by real url later
+            const exportUrl = `${BASE_URL}/students/export?type=${type}`; // TODO: will replace by real url later
 
             window.open(exportUrl, "_blank");
         } catch (error) {
-            console.error("Failed to export CSV", error);
+            console.error("Failed to export", error);
             toast.error("Không thể xuất file");
         } finally {
             setTimeout(() => setExporting(null), 1000);
@@ -139,6 +133,31 @@ export default function StudentTable({
         );
     };
 
+    const handleImportData = async (file: File) => {
+        if (!file) return false;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const res = await fetch(`${BASE_URL}/students/import`, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) {
+                toast.error("File upload failed");
+                return false;
+            }
+
+            toast.success("File upload successfully");
+            return true;
+        } catch {
+            toast.error("Error uploading file!");
+            return false;
+        }
+    };
+
     const handleDelete = (studentId: string) => {
         openConfirmDialog(studentId);
     };
@@ -147,42 +166,44 @@ export default function StudentTable({
         await confirmDelete(onDelete);
     };
 
-    if (!Array.isArray(data.students)) return null;
-
+    if (!data || !Array.isArray(data.students)) return null;
     return (
         <>
             <div className="flex justify-between items-center p-4">
                 <h2 className="text-xl font-semibold">Danh sách sinh viên</h2>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="gap-2">
-                            <Download className="h-4 w-4" />
-                            {exporting ? "Đang xuất..." : "Xuất dữ liệu"}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                            onClick={() => handleExport("csv")}
-                            disabled={exporting === "csv"}
-                            className="cursor-pointer"
-                        >
-                            <FileDown className="mr-2 h-4 w-4" />
-                            <span>
-                                {exporting === "csv" ? "Đang xuất CSV..." : "Xuất ra CSV"}
-                            </span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onClick={() => handleExport("excel")}
-                            disabled={exporting === "excel"}
-                            className="cursor-pointer"
-                        >
-                            <FileSpreadsheet className="mr-2 h-4 w-4" />
-                            <span>
-                                {exporting === "excel" ? "Đang xuất Excel..." : "Xuất ra Excel"}
-                            </span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center gap-2">
+                    <FileUploadDialog onUpload={handleImportData} />
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="gap-2">
+                                <Download className="h-4 w-4" />
+                                {exporting ? "Đang xuất..." : "Xuất dữ liệu"}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                                onClick={() => handleExport("excel")}
+                                disabled={exporting === "excel"}
+                                className="cursor-pointer"
+                            >
+                                <FileDown className="mr-2 h-4 w-4" />
+                                <span>
+                                    {exporting === "excel" ? "Đang xuất Excel..." : "Xuất ra Excel"}
+                                </span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => handleExport("json")}
+                                disabled={exporting === "json"}
+                                className="cursor-pointer"
+                            >
+                                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                <span>
+                                    {exporting === "json" ? "Đang xuất Json..." : "Xuất ra Json"}
+                                </span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
             <div className="rounded-md border">
                 <Table>
@@ -257,15 +278,15 @@ export default function StudentTable({
                                     </TableCell>
                                     <TableCell>{student.name}</TableCell>
                                     <TableCell>
-                                        {format(new Date(student.dateOfBirth), "dd/MM/yyyy")}
+                                        {formatDate(student.dateOfBirth, "dd/MM/yyyy")}
                                     </TableCell>
-                                    <TableCell>{EngVietFalcutyMap[student.faculty]}</TableCell>
+                                    <TableCell>{student.faculty.title}</TableCell>
                                     <TableCell>{student.course}</TableCell>
                                     <TableCell>
                                         <span
-                                            className={`px-2 py-1 rounded-full text-xs ${getStatusClass(student.status)}`}
+                                            className={`px-2 py-1 rounded-full text-xs ${getStatusClass(student.status.title)}`}
                                         >
-                                            {EngVietStatusMap[student.status]}
+                                            {student.status.title}
                                         </span>
                                     </TableCell>
                                     <TableCell className="text-right">

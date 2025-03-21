@@ -45,10 +45,11 @@ export function useStudents() {
 
   const addStudent = async (newStudent: Student): Promise<boolean> => {
     try {
-      await addStudentApi(newStudent);
+      const student = await addStudentApi(newStudent);
+
       setStudents({
         total: students.total + 1,
-        students: [...students.students, newStudent],
+        students: [...students.students, student.data],
       });
       toast.success("Đã thêm sinh viên mới vào hệ thống");
       return true;
@@ -99,7 +100,7 @@ export function useStudents() {
     try {
       setIsLoading(true);
       const data = await searchStudentsApi(searchTerm);
-      setStudents(data);
+      setStudents(data.data);
     } catch (e) {
       toast.error("Có lỗi server diễn ra!");
     } finally {

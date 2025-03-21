@@ -67,6 +67,8 @@ export default function StudentStatusSettings() {
   const handleSave = async (item: StudentStatus) => {
     if (currentItem) {
       if (!item.id) return;
+      delete item.createdAt;
+      delete item.updatedAt;
       const edited = await StudentStatusService.update(item.id, item);
       setStatuses(statuses.map((f) => (f.id === edited.data.id ? edited.data : f)));
       toast.info("Thông tin sinh viên đã được cập nhật thành công");
@@ -84,7 +86,7 @@ export default function StudentStatusSettings() {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Danh sách sinh viên</h3>
         <Button onClick={handleAddNew} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Thêm sinh viên mới
+          <Plus className="h-4 w-4" /> Thêm tình trạng sinh viên mới
         </Button>
       </div>
 

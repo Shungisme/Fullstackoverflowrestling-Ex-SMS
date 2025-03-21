@@ -32,9 +32,7 @@ import { Badge } from "../atoms/Badge";
 import { format } from "date-fns";
 import IdentityPaperForm from "../molecules/IdentityPaperForm";
 import { toast } from "sonner";
-
-// Define base URL for API calls
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+import { BASE_URL } from "@/src/constants/constants";
 
 interface IdentityPapersTabProps {
   id: string; // Student ID
@@ -53,7 +51,7 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
         setIsLoading(true);
         setError(null);
         
-        const response = await fetch(`${BASE_URL}/students/${id}/identity-paper`);
+        const response = await fetch(`${BASE_URL}/identity-papers/${id}`);
         
         if (!response.ok) {
           // If 404, it might mean the student doesn't have a paper yet
@@ -64,6 +62,7 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
           }
         } else {
           const data = await response.json();
+          console.log(data);
           setPaper(data.data);
         }
       } catch (err) {
@@ -112,9 +111,10 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
     if (!paper?.id) return;
     
     try {
-      setIsLoading(true);
-      
-      const response = await fetch(`${BASE_URL}/students/${id}/identity-paper/${paper.id}`, {
+      setIsLoading(true); 
+      delete paperData.updatedAt;
+      delete paperData.createdAt;
+      const response = await fetch(`${BASE_URL}/identity-papers/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -211,34 +211,6 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
           </CardDescription>
         </div>
         {/* Only show Add button if no paper exists */}
-        {!paper && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1"
-                onClick={() => setIsAddingPaper(true)}
-              >
-                <Plus className="h-4 w-4" />
-                Add Document
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Identity Document</DialogTitle>
-                <DialogDescription>
-                  Enter the details of the student's new identity document.
-                </DialogDescription>
-              </DialogHeader>
-              <IdentityPaperForm 
-                onSubmit={handleAddPaper}
-                onCancel={() => setIsAddingPaper(false)}
-                isSubmitting={isLoading}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
       </CardHeader>
       <CardContent className="space-y-4">
         {!paper ? (

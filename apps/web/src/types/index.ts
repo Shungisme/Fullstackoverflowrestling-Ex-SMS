@@ -3,13 +3,13 @@ export interface Student {
     name: string;
     dateOfBirth: string;
     gender: "MALE" | "FEMALE";
-    faculty: string;
+    faculty: Faculty;
     course: number;
-    program: string;
+    program: Program;
     address?: string;
     email?: string;
     phone: string;
-    status: string;
+    status: StudentStatus;
     nationality: string;
     temporaryAddress?: Address;
     permanentAddress?: Address;
@@ -18,6 +18,8 @@ export interface Student {
     statusId?: string;
     facultyId?: string;
     identityPaperId?: string;
+    identityPaper: IdentityPapers;
+    mailingAddressId?: string;
 }
 
 export interface FormErrors {
@@ -42,6 +44,8 @@ export interface Faculty {
     title: string;
     description: string;
     status: string;
+    updatedAt?: Date;
+    createdAt?: Date;
 }
 
 export interface Address {
@@ -58,6 +62,8 @@ export interface Program {
     title: string;
     description: string;
     status: string;
+    updatedAt?: Date;
+    createdAt?: Date;
 }
 
 export interface StudentStatus {
@@ -65,11 +71,15 @@ export interface StudentStatus {
     title: string;
     description: string;
     status: string;
+    updatedAt?: Date;
+    createdAt?: Date;
 }
+
+export type IdentityPaperType = "CMND" | "CCCD" | "PASSPORT";
 
 export interface IdentityPapers {
     id?: string;
-    type: string;
+    type: IdentityPaperType;
     number: string;
     issueDate: string;
     expirationDate: string;
@@ -77,4 +87,6 @@ export interface IdentityPapers {
     hasChip?: boolean;
     issuingCountry?: string;
     note?: string;
+    updatedAt?: Date;
+    createdAt?: Date;
 }
