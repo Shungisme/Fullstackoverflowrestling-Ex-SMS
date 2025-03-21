@@ -23,7 +23,7 @@ export default function Dashboard({ students }: DashboardProps) {
     },
     {},
   );
-  
+
   // Convert to array for charting
   const chartData = Object.entries(statusCounts).map(([name, value]) => ({
     name,

@@ -14,6 +14,10 @@ export interface Student {
     temporaryAddress?: Address;
     permanentAddress?: Address;
     mailingAddress: Address;
+    programId?: string;
+    statusId?: string;
+    facultyId?: string;
+    identityPaperId?: string;
 }
 
 export interface FormErrors {
@@ -67,7 +71,10 @@ export interface IdentityPapers {
     id?: string;
     type: string;
     number: string;
-    issueDate: Date;
-    expirationDate: Date;
+    issueDate: string;
+    expirationDate: string;
     placeOfIssue: string;
+    hasChip?: boolean;
+    issuingCountry?: string;
+    note?: string;
 }

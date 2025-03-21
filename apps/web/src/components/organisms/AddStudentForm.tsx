@@ -27,29 +27,29 @@ import ProgramSelect from "../atoms/ProgramSelect";
 interface AddStudentFormProps {
   onSubmit: (student: Student) => Promise<boolean>;
 }
-
+const initialStudent: Student = {
+  studentId: "",
+  name: "",
+  dateOfBirth: "",
+  gender: "MALE",
+  faculty: "",
+  course: 0,
+  program: "",
+  address: "",
+  email: "",
+  phone: "",
+  status: "",
+  nationality: "",
+  mailingAddress: {
+    country: "",
+    district: "",
+    street: "",
+    number: "",
+    city: "",
+  },
+};
 export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
-  const [formData, setFormData] = useState<Student>({
-    studentId: "",
-    name: "",
-    dateOfBirth: "",
-    gender: "MALE",
-    faculty: "",
-    course: 0,
-    program: "",
-    address: "",
-    email: "",
-    phone: "",
-    status: "",
-    nationality: "",
-    mailingAddress: {
-        country: "",
-        district: "",
-        street: "",
-        number: "",
-        city: ""
-    }
-  });
+  const [formData, setFormData] = useState<Student>(initialStudent);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,8 +84,6 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
     if (!formData.course) newErrors.course = "Khóa không được để trống";
     if (!formData.program.trim())
       newErrors.program = "Chương trình không được để trống";
-    if (!formData.address?.trim())
-      newErrors.address = "Địa chỉ không được để trống";
 
     if (formData.email && !validateEmail(formData.email)) {
       newErrors.email = "Email không hợp lệ";
@@ -110,19 +108,7 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
         };
         const success = await onSubmit(dateFormatedForm);
         if (success) {
-          setFormData({
-            studentId: "",
-            name: "",
-            dateOfBirth: "",
-            gender: "MALE",
-            faculty: "",
-            course: 0,
-            program: "",
-            address: "",
-            email: "",
-            phone: "",
-            status: "Currently Studying",
-          });
+          setFormData(initialStudent);
         }
       } finally {
         setIsSubmitting(false);
@@ -310,23 +296,6 @@ export default function AddStudentForm({ onSubmit }: AddStudentFormProps) {
               />
               {errors.phone && (
                 <p className="text-xs text-destructive">{errors.phone}</p>
-              )}
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="address">
-                Địa chỉ <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                placeholder="Nhập địa chỉ"
-                className={errors.address ? "border-destructive" : ""}
-              />
-              {errors.address && (
-                <p className="text-xs text-destructive">{errors.address}</p>
               )}
             </div>
           </div>
