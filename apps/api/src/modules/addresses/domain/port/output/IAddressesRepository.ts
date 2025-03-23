@@ -13,6 +13,12 @@ export interface IAddressesRepository {
   findAll(page: number, limit: number): Promise<AddressesDto[]>;
 
   count(): Promise<number>;
+
+  createAndLinkAddressForStudent(
+    studentId: string,
+    type: string,
+    address: CreateAddressDTO,
+  ): Promise<AddressesDto>;
 }
 
 export const ADDRESSES_REPOSITORY = Symbol('IAddressesRepository');
