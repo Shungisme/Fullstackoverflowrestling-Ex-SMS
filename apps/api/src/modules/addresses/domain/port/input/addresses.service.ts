@@ -13,11 +13,6 @@ import {
 import { IAddressesService } from './IAddressesService';
 import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
 import { AddressesDto } from '../../dto/addresses.dto';
-import {
-  IStudentRepository,
-  STUDENT_REPOSITORY,
-} from 'src/modules/students/domain/port/output/IStudentRepository';
-import { validFields } from 'src/shared/utils/parse-adress';
 import { isNotFoundPrismaError } from 'src/shared/helpers/error';
 
 @Injectable()
@@ -25,8 +20,6 @@ export class AddressesService implements IAddressesService {
   constructor(
     @Inject(ADDRESSES_REPOSITORY)
     private readonly addressesRepository: IAddressesRepository,
-    @Inject(STUDENT_REPOSITORY)
-    private readonly studentRepository: IStudentRepository,
   ) {}
 
   async count(): Promise<number> {
@@ -54,31 +47,12 @@ export class AddressesService implements IAddressesService {
       if (!studentId) {
         throw new BadRequestException('studentId must have');
       }
-      const student = await this.studentRepository.findById(studentId);
-      if (!student) {
-        throw new NotFoundException('Student not found');
-      }
 
-      const response = await this.addressesRepository.create(address);
-      const field = validFields[type];
-
-      if (!field) {
-        throw new BadRequestException('type createForStudent not valid');
-      }
-
-      const id = student[type]?.id;
-
-      await this.studentRepository.updateStudentField(
+      return await this.addressesRepository.createAndLinkAddressForStudent(
         studentId,
-        field,
-        response.id,
+        type,
+        address,
       );
-
-      if (id) {
-        await this.delete(id);
-      }
-
-      return response;
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
         throw new NotFoundException(error.message);

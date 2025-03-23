@@ -15,10 +15,6 @@ import { StudentRepository } from '../students/adapters/driven/student.repositor
       provide: ADDRESSES_REPOSITORY,
       useClass: AddressesRepository,
     },
-    {
-      provide: STUDENT_REPOSITORY,
-      useClass: StudentRepository,
-    },
   ],
 })
 export class AddressesModule {}
