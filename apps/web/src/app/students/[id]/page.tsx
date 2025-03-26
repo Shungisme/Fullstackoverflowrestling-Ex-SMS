@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-    Address,
-    FormErrors,
-    IAPIResponse,
-    Student,
-} from "@/src/types";
+import { Address, FormErrors, IAPIResponse, Student } from "@/src/types";
 import {
     Card,
     CardContent,
@@ -49,7 +44,7 @@ import { Button } from "@/src/components/atoms/Button";
 import AddressForm from "@/src/components/molecules/AddressForm";
 import IdentityPapersTab from "@/src/components/organisms/IdentityPapers";
 import { toQueryString } from "@/src/utils/helper";
-
+import { formatDate, setDefaultOptions } from "date-fns";
 
 export default function StudentDetailPage({
     params,
@@ -94,7 +89,7 @@ export default function StudentDetailPage({
         try {
             const queryString = toQueryString({
                 type: isAddingAddress,
-                studentId: params.id
+                studentId: params.id,
             });
             const response = await fetch(
                 `${BASE_URL}/addresses/${params.id}?${queryString}`,
@@ -147,7 +142,7 @@ export default function StudentDetailPage({
             } catch (err) {
                 setError("Failed to load student data");
                 setLoading(false);
-                console.error(err);
+                toast.error("Failed to load student data");
             }
         };
 
@@ -157,37 +152,11 @@ export default function StudentDetailPage({
     }, [params.id]);
 
     if (loading) {
-        return (
-            <div className="container mx-auto py-8 px-4">
-                <div className="flex items-center gap-4 mb-6">
-                    <Skeleton className="h-16 w-16 rounded-full" />
-                    <div className="space-y-2">
-                        <Skeleton className="h-8 w-48" />
-                        <Skeleton className="h-4 w-24" />
-                    </div>
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-2">
-                    <Skeleton className="h-[400px]" />
-                    <Skeleton className="h-[400px]" />
-                </div>
-            </div>
-        );
+        return <LoadingPlaceholder />;
     }
 
     if (error || !student) {
-        return (
-            <div className="container mx-auto py-16 px-4 text-center">
-                <h1 className="text-2xl font-bold text-red-500 mb-2">Error</h1>
-                <p className="text-gray-600 mb-6">{error || "Student not found"}</p>
-                <a
-                    href="/students"
-                    className="text-blue-500 hover:text-blue-700 underline"
-                >
-                    Back to student list
-                </a>
-            </div>
-        );
+        return ErrorNotifier(error);
     }
 
     // Get student initials for avatar fallback
@@ -197,15 +166,6 @@ export default function StudentDetailPage({
             .map((n) => n[0])
             .join("")
             .toUpperCase();
-    };
-
-    // Format date string nicely
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
     };
 
     const handleAddressChange = (field: keyof Address, value: string) => {
@@ -246,8 +206,8 @@ export default function StudentDetailPage({
 
         try {
             const queryString = toQueryString({
-                type: editingAddress.type
-            })
+                type: editingAddress.type,
+            });
             const response = await fetch(
                 `${BASE_URL}/addresses/${editingAddress.address.id}?${queryString}`,
                 {
@@ -316,10 +276,10 @@ export default function StudentDetailPage({
 
             <Tabs defaultValue="overview" className="mt-6">
                 <TabsList className="grid w-full grid-cols-3 md:w-auto md:inline-flex">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="academic">Academic</TabsTrigger>
-                    <TabsTrigger value="contact">Contact</TabsTrigger>
-                    <TabsTrigger value="indentity">Identity Card</TabsTrigger>
+                    <TabsTrigger value="overview">Tổng quan</TabsTrigger>
+                    <TabsTrigger value="academic">Học vấn</TabsTrigger>
+                    <TabsTrigger value="contact">Liên hệ</TabsTrigger>
+                    <TabsTrigger value="indentity">Thẻ định danh</TabsTrigger>
                 </TabsList>
 
                 {/* Overview Tab */}
@@ -327,40 +287,42 @@ export default function StudentDetailPage({
                     <div className="grid gap-6 md:grid-cols-2">
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-xl">Personal Information</CardTitle>
+                                <CardTitle className="text-xl">Thông tin cá nhân</CardTitle>
                                 <CardDescription>
-                                    Basic details about the student
+                                    Các thông tin cơ bản về sinh viên
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="flex flex-col gap-4">
                                     <div className="flex items-start">
                                         <div className="w-32 flex-shrink-0 text-muted-foreground">
-                                            Full Name
+                                            Họ tên
                                         </div>
                                         <div className="font-medium">{student.name}</div>
                                     </div>
 
                                     <div className="flex items-start">
                                         <div className="w-32 flex-shrink-0 text-muted-foreground">
-                                            Date of Birth
+                                            Ngày sinh
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Cake size={16} className="text-muted-foreground" />
-                                            <span>{formatDate(student.dateOfBirth)}</span>
+                                            <span>
+                                                {formatDate(student.dateOfBirth, "dd/MM/yyyy")}
+                                            </span>
                                         </div>
                                     </div>
 
                                     <div className="flex items-start">
                                         <div className="w-32 flex-shrink-0 text-muted-foreground">
-                                            Gender
+                                            Giới tính
                                         </div>
-                                        <div>{student.gender === "MALE" ? "Male" : "Female"}</div>
+                                        <div>{student.gender === "MALE" ? "Nam" : "Nữ"}</div>
                                     </div>
 
                                     <div className="flex items-start">
                                         <div className="w-32 flex-shrink-0 text-muted-foreground">
-                                            Nationality
+                                            Quốc tịch
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Flag size={16} className="text-muted-foreground" />
@@ -372,7 +334,7 @@ export default function StudentDetailPage({
                                 <Separator />
 
                                 <div>
-                                    <h4 className="text-sm font-semibold mb-3">Student ID</h4>
+                                    <h4 className="text-sm font-semibold mb-3">MSSV</h4>
                                     <div className="bg-muted p-3 rounded-md font-mono text-sm">
                                         {student.studentId}
                                     </div>
@@ -382,9 +344,9 @@ export default function StudentDetailPage({
 
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-xl">Address Information</CardTitle>
+                                <CardTitle className="text-xl">Thông tin địa chỉ</CardTitle>
                                 <CardDescription>
-                                    Student's registered addresses
+                                    Các địa chỉ được đăng ký của sinh viên
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -393,7 +355,7 @@ export default function StudentDetailPage({
                                     <div className="flex items-center justify-between mb-2">
                                         <h4 className="text-sm font-semibold flex items-center gap-2">
                                             <MapPin size={16} className="text-muted-foreground" />
-                                            Mailing Address
+                                            Địa chỉ nhận thư
                                         </h4>
                                         <Dialog>
                                             <DialogTrigger asChild>
@@ -409,7 +371,7 @@ export default function StudentDetailPage({
                                                     }
                                                 >
                                                     <Pencil size={14} className="mr-1" />
-                                                    Edit
+                                                    Chỉnh sửa
                                                 </Button>
                                             </DialogTrigger>
                                             <DialogContent>
@@ -460,7 +422,7 @@ export default function StudentDetailPage({
                                         <div className="flex items-center justify-between mb-2">
                                             <h4 className="text-sm font-semibold flex items-center gap-2">
                                                 <MapPin size={16} className="text-muted-foreground" />
-                                                Permanent Address
+                                                Địa chỉ thường trú
                                             </h4>
                                             <Dialog>
                                                 <DialogTrigger asChild>
@@ -505,7 +467,7 @@ export default function StudentDetailPage({
                                                             onClick={updateAddress}
                                                             disabled={isSubmitting}
                                                         >
-                                                            {isSubmitting ? "Saving..." : "Save Changes"}
+                                                            {isSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
                                                         </Button>
                                                     </DialogFooter>
                                                 </DialogContent>
@@ -734,29 +696,33 @@ export default function StudentDetailPage({
                 <TabsContent value="academic" className="mt-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-xl">Academic Information</CardTitle>
-                            <CardDescription>Student's educational details</CardDescription>
+                            <CardTitle className="text-xl">Thông tin học vấn</CardTitle>
+                            <CardDescription>Chi tiết về thông tin học vấn của sinh viên</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="grid gap-6 md:grid-cols-2">
                                 <div className="space-y-4">
                                     <div className="flex flex-col gap-1">
                                         <span className="text-sm text-muted-foreground">
-                                            Faculty
+                                            Khoa
                                         </span>
                                         <div className="flex items-center gap-2">
                                             <School size={18} className="text-primary" />
-                                            <span className="font-medium">{student.faculty.title}</span>
+                                            <span className="font-medium">
+                                                {student.faculty.title}
+                                            </span>
                                         </div>
                                     </div>
 
                                     <div className="flex flex-col gap-1">
                                         <span className="text-sm text-muted-foreground">
-                                            Program
+                                            Chương trình
                                         </span>
                                         <div className="flex items-center gap-2">
                                             <BookOpen size={18} className="text-primary" />
-                                            <span className="font-medium">{student.program.title}</span>
+                                            <span className="font-medium">
+                                                {student.program.title}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -764,18 +730,18 @@ export default function StudentDetailPage({
                                 <div className="space-y-4">
                                     <div className="flex flex-col gap-1">
                                         <span className="text-sm text-muted-foreground">
-                                            Course
+                                            Khóa
                                         </span>
                                         <div className="flex items-center gap-2">
                                             <Badge variant="outline" className="text-xs">
-                                                Year {student.course}
+                                                Năm {student.course}
                                             </Badge>
                                         </div>
                                     </div>
 
                                     <div className="flex flex-col gap-1">
                                         <span className="text-sm text-muted-foreground">
-                                            Status
+                                            Tình trạng
                                         </span>
                                         <Badge className="w-fit">{student.status.title}</Badge>
                                     </div>
@@ -789,15 +755,15 @@ export default function StudentDetailPage({
                 <TabsContent value="contact" className="mt-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-xl">Contact Information</CardTitle>
-                            <CardDescription>Ways to reach the student</CardDescription>
+                            <CardTitle className="text-xl">Thông tin liên hệ</CardTitle>
+                            <CardDescription>Thông tin liên lạc với sinh viên</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="grid gap-6 md:grid-cols-2">
                                 <div>
                                     <h4 className="text-sm font-semibold flex items-center gap-2 mb-3">
                                         <Phone size={16} className="text-muted-foreground" />
-                                        Phone Number
+                                        SĐT
                                     </h4>
                                     <div className="bg-muted p-3 rounded-md">
                                         <a
@@ -813,7 +779,7 @@ export default function StudentDetailPage({
                                     <div>
                                         <h4 className="text-sm font-semibold flex items-center gap-2 mb-3">
                                             <Mail size={16} className="text-muted-foreground" />
-                                            Email Address
+                                            Email
                                         </h4>
                                         <div className="bg-muted p-3 rounded-md">
                                             <a
@@ -826,15 +792,6 @@ export default function StudentDetailPage({
                                     </div>
                                 )}
                             </div>
-
-                            <div>
-                                <h4 className="text-sm font-semibold mb-3">
-                                    Emergency Contact
-                                </h4>
-                                <div className="bg-muted p-4 rounded-md text-center text-sm text-muted-foreground">
-                                    No emergency contact information available
-                                </div>
-                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -844,6 +801,39 @@ export default function StudentDetailPage({
                     <IdentityPapersTab id={student.identityPaper.id!} />
                 </TabsContent>
             </Tabs>
+        </div>
+    );
+}
+function ErrorNotifier(error: string | null) {
+    return (
+        <div className="container mx-auto py-16 px-4 text-center">
+            <h1 className="text-2xl font-bold text-red-500 mb-2">Error</h1>
+            <p className="text-gray-600 mb-6">{error || "Student not found"}</p>
+            <a
+                href="/students"
+                className="text-blue-500 hover:text-blue-700 underline"
+            >
+                Back to student list
+            </a>
+        </div>
+    );
+}
+
+function LoadingPlaceholder() {
+    return (
+        <div className="container mx-auto py-8 px-4">
+            <div className="flex items-center gap-4 mb-6">
+                <Skeleton className="h-16 w-16 rounded-full" />
+                <div className="space-y-2">
+                    <Skeleton className="h-8 w-48" />
+                    <Skeleton className="h-4 w-24" />
+                </div>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+                <Skeleton className="h-[400px]" />
+                <Skeleton className="h-[400px]" />
+            </div>
         </div>
     );
 }

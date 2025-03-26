@@ -6,7 +6,6 @@ import { Button } from "./Button";
 
 export function ModeToggle() {
   const { theme, setTheme } = useTheme();
-
   return (
     <Button
       variant="outline"

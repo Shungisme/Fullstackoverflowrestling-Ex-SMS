@@ -48,7 +48,7 @@ const IdentityPaperFormV2 = ({
                     onValueChange={(value: IdentityPaperType) => {
                         onChange("type", value);
                     }}
-                    value={identityPaper.id}
+                    value={identityPaper.type}
                 >
                     <SelectTrigger className="w-full">
                         <SelectValue placeholder="Chọn loại giấy tờ" defaultValue="CCCD" />

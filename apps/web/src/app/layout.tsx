@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="vi">
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ToastProvider>
-          <ThemeProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Navbar />
             <main className="flex-1 bg-background scroll-auto">
               <div className="container mx-auto py-6 px-4 max-w-6xl">

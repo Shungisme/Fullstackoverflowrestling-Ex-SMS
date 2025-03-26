@@ -62,7 +62,6 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
           }
         } else {
           const data = await response.json();
-          console.log(data);
           setPaper(data.data);
         }
       } catch (err) {
@@ -177,25 +176,13 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Identity Paper</CardTitle>
+          <CardTitle className="text-xl">Giấy tờ định danh</CardTitle>
           <CardDescription>
-            Student's official identification document
+            Giấy tờ tùy thân chính thức của sinh viên
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="bg-destructive/10 p-6 rounded-md text-center">
-            <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-3" />
-            <h3 className="text-sm font-medium mb-1">Error loading document</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {error}
-            </p>
-            <Button 
-              variant="outline" 
-              onClick={() => window.location.reload()}
-            >
-              Retry
-            </Button>
-          </div>
+          {ErrorNotifier(error)}
         </CardContent>
       </Card>
     );
@@ -205,9 +192,9 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle className="text-xl">Identity Paper</CardTitle>
+          <CardTitle className="text-xl">Giấy tờ định danh</CardTitle>
           <CardDescription>
-            Student's official identification document
+            Giấy tờ tùy thân chính thức của sinh viên
           </CardDescription>
         </div>
         {/* Only show Add button if no paper exists */}
@@ -334,3 +321,18 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
 };
 
 export default IdentityPapersTab;
+function ErrorNotifier(error: string) {
+    return <div className="bg-destructive/10 p-6 rounded-md text-center">
+        <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-3" />
+        <h3 className="text-sm font-medium mb-1">Lỗi khi tải thông tin sinh viên</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+            {error}
+        </p>
+        <Button
+            variant="outline"
+            onClick={() => window.location.reload()}
+        >
+            Thử lại
+        </Button>
+    </div>;
+}

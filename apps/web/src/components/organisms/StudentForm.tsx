@@ -90,7 +90,6 @@ export default function StudentForm({
 }: StudentFormProps) {
     let stateStudent = initialStudent;
     if (student) stateStudent = student;
-    console.log(stateStudent)
     const [formData, setFormData] = useState<Student>({
         ...stateStudent,
         dateOfBirth: formatDate(stateStudent.dateOfBirth, "yyyy-MM-dd"),
