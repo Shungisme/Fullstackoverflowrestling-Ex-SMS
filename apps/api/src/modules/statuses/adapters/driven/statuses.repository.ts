@@ -3,6 +3,7 @@ import { PrismaService } from 'src/shared/services/database/prisma.service';
 import { IStatusesRepository } from '../../domain/port/output/IStatusesRepository';
 import { StatusesDto } from '../../domain/dto/statuses.dto';
 import { CreateStatusDTO } from '../../domain/dto/create-status.dto';
+import { UpdateStatusDTO } from '../../domain/dto/update-status.dto';
 
 @Injectable()
 export class StatusesRepository implements IStatusesRepository {
@@ -73,7 +74,7 @@ export class StatusesRepository implements IStatusesRepository {
     };
   }
 
-  async update(statusId: string, data: CreateStatusDTO): Promise<StatusesDto> {
+  async update(statusId: string, data: UpdateStatusDTO): Promise<StatusesDto> {
     const updatedStatus = await this.prismaService.status.update({
       where: { id: statusId },
       data,

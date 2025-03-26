@@ -4,6 +4,7 @@ import { IFacultiesRepository } from '../../domain/port/output/IFacultiesReposit
 import { FacultiesDto } from '../../domain/dto/faculties.dto';
 import { CreateFacultyDTO } from '../../domain/dto/create-faculty.dto';
 import { Faculty } from '@prisma/client';
+import { UpdateFacultyDTO } from '../../domain/dto/update-faculty.dto';
 
 @Injectable()
 export class FacultiesRepository implements IFacultiesRepository {
@@ -77,7 +78,7 @@ export class FacultiesRepository implements IFacultiesRepository {
 
   async update(
     facultyId: string,
-    data: CreateFacultyDTO,
+    data: UpdateFacultyDTO,
   ): Promise<FacultiesDto> {
     const updatedFaculty = await this.prismaService.faculty.update({
       where: { id: facultyId },

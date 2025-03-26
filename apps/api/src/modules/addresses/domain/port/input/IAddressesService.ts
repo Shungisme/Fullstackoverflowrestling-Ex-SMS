@@ -1,6 +1,7 @@
 import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
 import { CreateAddressDTO } from '../../dto/create-address.dto';
 import { AddressesDto } from '../../dto/addresses.dto';
+import { UpdateAddressDTO } from '../../dto/update-address.dto';
 
 export interface IAddressesService {
   create(address: CreateAddressDTO): Promise<AddressesDto>;
@@ -11,7 +12,7 @@ export interface IAddressesService {
     address: CreateAddressDTO,
   ): Promise<AddressesDto>;
 
-  update(addressId: string, data: CreateAddressDTO): Promise<AddressesDto>;
+  update(addressId: string, data: UpdateAddressDTO): Promise<AddressesDto>;
 
   delete(addressId: string): Promise<AddressesDto>;
 
