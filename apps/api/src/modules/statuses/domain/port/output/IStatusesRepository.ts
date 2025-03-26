@@ -1,10 +1,11 @@
 import { CreateStatusDTO } from '../../dto/create-status.dto';
 import { StatusesDto } from '../../dto/statuses.dto';
+import { UpdateStatusDTO } from '../../dto/update-status.dto';
 
 export interface IStatusesRepository {
   create(status: CreateStatusDTO): Promise<StatusesDto>;
 
-  update(statusId: string, data: CreateStatusDTO): Promise<StatusesDto>;
+  update(statusId: string, data: UpdateStatusDTO): Promise<StatusesDto>;
 
   delete(statusId: string): Promise<StatusesDto>;
 

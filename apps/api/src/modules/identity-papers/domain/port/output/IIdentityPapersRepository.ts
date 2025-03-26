@@ -1,12 +1,13 @@
 import { CreateIdentityPaperDTO } from '../../dto/create-identity-paper.dto';
 import { IdentityPapersDto } from '../../dto/identity-papers.dto';
+import { UpdateIdentityPaperDTO } from '../../dto/update-identity-paper.dto';
 
 export interface IIdentityPapersRepository {
   create(identityPaper: CreateIdentityPaperDTO): Promise<IdentityPapersDto>;
 
   update(
     identityPaperId: string,
-    data: CreateIdentityPaperDTO,
+    data: UpdateIdentityPaperDTO,
   ): Promise<IdentityPapersDto>;
 
   delete(identityPaperId: string): Promise<IdentityPapersDto>;

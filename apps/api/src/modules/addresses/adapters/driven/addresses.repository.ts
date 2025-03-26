@@ -8,6 +8,7 @@ import { IAddressesRepository } from '../../domain/port/output/IAddressesReposit
 import { AddressesDto } from '../../domain/dto/addresses.dto';
 import { CreateAddressDTO } from '../../domain/dto/create-address.dto';
 import { validFields } from 'src/shared/utils/parse-adress';
+import { UpdateAddressDTO } from '../../domain/dto/update-address.dto';
 
 @Injectable()
 export class AddressesRepository implements IAddressesRepository {
@@ -96,7 +97,7 @@ export class AddressesRepository implements IAddressesRepository {
 
   async update(
     addressId: string,
-    data: CreateAddressDTO,
+    data: UpdateAddressDTO,
   ): Promise<AddressesDto> {
     const updatedAddress = await this.prismaService.address.update({
       where: { id: addressId },
