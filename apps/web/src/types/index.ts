@@ -6,8 +6,7 @@ export interface Student {
     faculty: Faculty;
     course: number;
     program: Program;
-    address?: string;
-    email?: string;
+    email: string;
     phone: string;
     status: StudentStatus;
     nationality: string;

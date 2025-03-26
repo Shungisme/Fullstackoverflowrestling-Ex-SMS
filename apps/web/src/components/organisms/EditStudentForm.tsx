@@ -42,9 +42,7 @@ export default function EditStudentForm({
 }: EditStudentFormProps) {
     const [formData, setFormData] = useState<Student>({
         ...student,
-        dateOfBirth:
-            formatDate(student.dateOfBirth, "yyyy-MM-dd") ??
-            new Date(student.dateOfBirth).toISOString().split("T")[0],
+        dateOfBirth: formatDate(student.dateOfBirth, "yyyy-MM-dd"),
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);

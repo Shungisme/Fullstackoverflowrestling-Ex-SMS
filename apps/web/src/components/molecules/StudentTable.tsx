@@ -25,8 +25,7 @@ import {
 import { toast } from "sonner";
 import StudentDetails from "../organisms/StudentDetails";
 import { Student, StudentList } from "../../types";
-import { format, formatDate } from "date-fns";
-import { EngVietFalcutyMap, EngVietStatusMap } from "../../utils/mapper";
+import { formatDate } from "date-fns";
 import ConfirmDialog from "./ConfirmDialog";
 import { useConfirmDialog } from "@/src/hooks/useConfirmDialog";
 import { BASE_URL, ListConfig } from "@/src/constants/constants";
@@ -188,7 +187,9 @@ export default function StudentTable({
                             >
                                 <FileDown className="mr-2 h-4 w-4" />
                                 <span>
-                                    {exporting === "excel" ? "Đang xuất Excel..." : "Xuất ra Excel"}
+                                    {exporting === "excel"
+                                        ? "Đang xuất Excel..."
+                                        : "Xuất ra Excel"}
                                 </span>
                             </DropdownMenuItem>
                             <DropdownMenuItem

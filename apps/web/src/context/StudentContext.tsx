@@ -13,7 +13,7 @@ type StudentContextType = {
   students: StudentList;
   isLoading: boolean;
   addStudent: (student: Student) => Promise<boolean>;
-  updateStudent: (student: Student) => Promise<void>;
+  updateStudent: (student: Student) => Promise<boolean>;
   deleteStudent: (studentId: string) => Promise<void>;
   searchStudents: (searchTerm: string) => Promise<void>;
   handlePageChange: (page: number) => boolean;
