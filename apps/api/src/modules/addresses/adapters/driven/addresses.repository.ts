@@ -1,14 +1,15 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/shared/services/database/prisma.service';
 import { IAddressesRepository } from '../../domain/port/output/IAddressesRepository';
 import { AddressesDto } from '../../domain/dto/addresses.dto';
-import { CreateAddressDTO } from '../../domain/dto/create-address.dto';
 import { validFields } from 'src/shared/utils/parse-adress';
 import { UpdateAddressDTO } from '../../domain/dto/update-address.dto';
+import { CreateAddressDTO } from '../../domain/dto/create-address.dto';
 
 @Injectable()
 export class AddressesRepository implements IAddressesRepository {
@@ -45,7 +46,7 @@ export class AddressesRepository implements IAddressesRepository {
           studentId: studentId,
         },
         data: {
-          [field]: addressData,
+          [field]: addressData.id,
         },
       });
 
