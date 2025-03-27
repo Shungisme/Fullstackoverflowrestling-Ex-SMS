@@ -38,14 +38,14 @@ const OverviewTab = ({ student, openAddressDialog }: OverviewTabProps) => {
             <AddressInfo
               type="mailingAddress"
               openAddressDialog={openAddressDialog}
-              address={student.mailingAddress}
+              address={student?.mailingAddress}
             />
             {/* Permanent Address */}
             {student?.permanentAddress ? (
               <AddressInfo
                 type="permanentAddress"
                 openAddressDialog={openAddressDialog}
-                address={student.permanentAddress}
+                address={student?.permanentAddress}
               />
             ) : (
               <AddAddressPlaceholder
@@ -58,7 +58,7 @@ const OverviewTab = ({ student, openAddressDialog }: OverviewTabProps) => {
               <AddressInfo
                 type="temporaryAddress"
                 openAddressDialog={openAddressDialog}
-                address={student.temporaryAddress}
+                address={student?.temporaryAddress}
               />
             ) : (
               <AddAddressPlaceholder
@@ -88,7 +88,7 @@ function InfoCard({ student }: { student: Student }) {
             <div className="w-32 flex-shrink-0 text-muted-foreground">
               Họ tên
             </div>
-            <div className="font-medium">{student.name}</div>
+            <div className="font-medium">{student?.name}</div>
           </div>
 
           <div className="flex items-start">
@@ -97,7 +97,7 @@ function InfoCard({ student }: { student: Student }) {
             </div>
             <div className="flex items-center gap-2">
               <Cake size={16} className="text-muted-foreground" />
-              <span>{formatDate(student.dateOfBirth, "dd/MM/yyyy")}</span>
+              <span>{formatDate(student?.dateOfBirth, "dd/MM/yyyy")}</span>
             </div>
           </div>
 
@@ -105,7 +105,7 @@ function InfoCard({ student }: { student: Student }) {
             <div className="w-32 flex-shrink-0 text-muted-foreground">
               Giới tính
             </div>
-            <div>{student.gender === "MALE" ? "Nam" : "Nữ"}</div>
+            <div>{student?.gender === "MALE" ? "Nam" : "Nữ"}</div>
           </div>
 
           <div className="flex items-start">
@@ -114,7 +114,7 @@ function InfoCard({ student }: { student: Student }) {
             </div>
             <div className="flex items-center gap-2">
               <Flag size={16} className="text-muted-foreground" />
-              <span>{student.nationality}</span>
+              <span>{student?.nationality}</span>
             </div>
           </div>
         </div>
@@ -124,7 +124,7 @@ function InfoCard({ student }: { student: Student }) {
         <div>
           <h4 className="text-sm font-semibold mb-3">MSSV</h4>
           <div className="bg-muted p-3 rounded-md font-mono text-sm">
-            {student.studentId}
+            {student?.studentId}
           </div>
         </div>
       </CardContent>

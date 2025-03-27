@@ -1,11 +1,6 @@
 "use client";
 
-import { 
-  createContext, 
-  useContext, 
-  ReactNode,
-  useMemo
-} from "react";
+import { createContext, useContext, ReactNode, useMemo } from "react";
 import { Student, StudentList } from "../types";
 import { useStudents } from "../hooks/useStudents";
 
@@ -20,7 +15,18 @@ type StudentContextType = {
   handlePageChange: (page: number) => boolean;
 };
 
-const StudentContext = createContext<StudentContextType | undefined>(undefined);
+const contextValue = {
+  students: { students: [], total: 0 },
+  allStudents: { students: [], total: 0 },
+  isLoading: false,
+  addStudent: async () => false,
+  updateStudent: async () => false,
+  deleteStudent: async () => {},
+  searchStudents: async () => {},
+  handlePageChange: () => false,
+};
+
+const StudentContext = createContext<StudentContextType>(contextValue);
 
 type StudentProviderProps = {
   children: ReactNode;
@@ -35,7 +41,7 @@ export function StudentProvider({ children }: StudentProviderProps) {
     updateStudent,
     deleteStudent,
     searchStudents,
-    handlePageChange
+    handlePageChange,
   } = useStudents();
 
   const value = useMemo(
@@ -47,15 +53,22 @@ export function StudentProvider({ children }: StudentProviderProps) {
       updateStudent,
       deleteStudent,
       searchStudents,
-      handlePageChange
+      handlePageChange,
     }),
-    [students, allStudents, isLoading, addStudent, updateStudent, deleteStudent, searchStudents, handlePageChange]
+    [
+      students,
+      allStudents,
+      isLoading,
+      addStudent,
+      updateStudent,
+      deleteStudent,
+      searchStudents,
+      handlePageChange,
+    ]
   );
 
   return (
-    <StudentContext.Provider value={value}>
-      {children}
-    </StudentContext.Provider>
+    <StudentContext.Provider value={value}>{children}</StudentContext.Provider>
   );
 }
 
