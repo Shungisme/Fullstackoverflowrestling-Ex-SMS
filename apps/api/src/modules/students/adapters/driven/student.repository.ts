@@ -4,6 +4,7 @@ import { PrismaService } from 'src/shared/services/database/prisma.service';
 import { SearchStudent } from './types/search-type';
 import { Student, StudentResponse } from './types/student-type';
 import { CreateStudentWithAddressDTO } from '../../domain/dto/create-student-dto';
+import { BusinessRulesConfig } from 'src/config/business-rules.config';
 
 @Injectable()
 export class StudentRepository implements IStudentRepository {
@@ -310,8 +311,42 @@ export class StudentRepository implements IStudentRepository {
     });
   }
 
-  async update(student: Student): Promise<StudentResponse> {
+  async update(student: Partial<Student>): Promise<StudentResponse> {
     const { studentId, ...data } = student;
+
+    if (data.statusId) {
+      const newStatus = await this.prismaService.status.findUnique({
+        where: {
+          id: data.statusId,
+        },
+      });
+
+      if (!newStatus) {
+        throw new Error('Invalid status');
+      }
+
+      const currentStatus = await this.prismaService.student.findUnique({
+        where: {
+          studentId: studentId,
+        },
+        select: {
+          status: true,
+        },
+      });
+
+      const businessRulesConfig = new BusinessRulesConfig();
+      const studentStatusRules = businessRulesConfig.get('studentStatusRules');
+
+      if (
+        newStatus.title &&
+        studentStatusRules[newStatus.title].includes(
+          currentStatus?.status.title,
+        )
+      ) {
+        throw new Error('Invalid status');
+      }
+    }
+
     return await this.prismaService.student.update({
       select: {
         id: true,

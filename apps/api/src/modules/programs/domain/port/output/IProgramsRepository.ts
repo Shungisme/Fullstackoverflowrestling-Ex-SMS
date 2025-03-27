@@ -1,10 +1,11 @@
 import { CreateProgramDTO } from '../../dto/create-program.dto';
 import { ProgramsDto } from '../../dto/programs.dto';
+import { UpdateProgramDTO } from '../../dto/update-program.dto';
 
 export interface IProgramsRepository {
   create(program: CreateProgramDTO): Promise<ProgramsDto>;
 
-  update(programId: string, data: CreateProgramDTO): Promise<ProgramsDto>;
+  update(programId: string, data: UpdateProgramDTO): Promise<ProgramsDto>;
 
   delete(programId: string): Promise<ProgramsDto>;
 

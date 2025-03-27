@@ -3,6 +3,7 @@ import { PrismaService } from 'src/shared/services/database/prisma.service';
 import { IIdentityPapersRepository } from '../../domain/port/output/IIdentityPapersRepository';
 import { IdentityPapersDto } from '../../domain/dto/identity-papers.dto';
 import { CreateIdentityPaperDTO } from '../../domain/dto/create-identity-paper.dto';
+import { UpdateIdentityPaperDTO } from '../../domain/dto/update-identity-paper.dto';
 
 @Injectable()
 export class IdentityPapersRepository implements IIdentityPapersRepository {
@@ -79,7 +80,7 @@ export class IdentityPapersRepository implements IIdentityPapersRepository {
 
   async update(
     identityPaperId: string,
-    data: CreateIdentityPaperDTO,
+    data: UpdateIdentityPaperDTO,
   ): Promise<IdentityPapersDto> {
     const updatedIdentityPaper = await this.prismaService.identityPaper.update({
       where: { id: identityPaperId },

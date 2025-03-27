@@ -3,6 +3,7 @@ import { PrismaService } from 'src/shared/services/database/prisma.service';
 import { IProgramsRepository } from '../../domain/port/output/IProgramsRepository';
 import { ProgramsDto } from '../../domain/dto/programs.dto';
 import { CreateProgramDTO } from '../../domain/dto/create-program.dto';
+import { UpdateProgramDTO } from '../../domain/dto/update-program.dto';
 
 @Injectable()
 export class ProgramsRepository implements IProgramsRepository {
@@ -76,7 +77,7 @@ export class ProgramsRepository implements IProgramsRepository {
 
   async update(
     programId: string,
-    data: CreateProgramDTO,
+    data: UpdateProgramDTO,
   ): Promise<ProgramsDto> {
     const updatedProgram = await this.prismaService.program.update({
       where: { id: programId },
