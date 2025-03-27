@@ -14,7 +14,7 @@ interface DashboardProps {
 
 export default function Dashboard({ students }: DashboardProps) {
   // Count students by status
-  if (!students) return null;
+  if (!students) return <div></div>;
   const statusCounts = students.reduce(
     (acc: Record<string, number>, student) => {
       acc[student.status.title] =

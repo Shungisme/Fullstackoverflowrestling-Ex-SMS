@@ -107,7 +107,7 @@ export default function StudentForm({
             setErrors({ ...errors, [name]: undefined });
         }
     };
-    console.log(formData);
+
     const handleSelectChange = (name: string, value: any) => {
         setFormData({ ...formData, [name]: value });
         if (errors[name]) {

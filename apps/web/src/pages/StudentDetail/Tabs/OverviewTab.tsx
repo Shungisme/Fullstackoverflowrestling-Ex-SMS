@@ -21,7 +21,7 @@ interface OverviewTabProps {
 }
 
 const OverviewTab = ({ student, openAddressDialog }: OverviewTabProps) => {
-  if (!student) return null;
+  if (!student) return <div></div>;
   return (
       <div className="grid gap-6 md:grid-cols-2">
         {student && <InfoCard student={student} />}

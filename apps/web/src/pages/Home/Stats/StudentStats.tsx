@@ -3,11 +3,11 @@ import React from "react";
 import StatsList from "./StatsList";
 import { useStudentContext } from "@/src/context/StudentContext";
 
-const StudentStats = async () => {
+const StudentStats = () => {
   const { allStudents } = useStudentContext();
 
   if (!allStudents) {
-    return null;
+    return <div></div>;
   }
   return <StatsList students={allStudents.students} />;
 };

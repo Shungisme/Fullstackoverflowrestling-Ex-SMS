@@ -6,7 +6,7 @@ interface StatsListProps {
 }
 
 export default function StatsList({ students }: StatsListProps) {
-  if (!Array.isArray(students)) return null;
+  if (!Array.isArray(students)) return <div></div>;
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <StatCard
