@@ -1,4 +1,5 @@
 export interface Student {
+    id?: string;
     studentId: string;
     name: string;
     dateOfBirth: string;
@@ -46,6 +47,7 @@ export interface Faculty {
     updatedAt?: Date;
     createdAt?: Date;
 }
+export type AddressType = "mailingAddress" | "permanentAddress" | "temporaryAddress";
 
 export interface Address {
     id?: string;

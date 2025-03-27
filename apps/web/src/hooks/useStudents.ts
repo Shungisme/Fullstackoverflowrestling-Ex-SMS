@@ -22,18 +22,20 @@ export function useStudents() {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
     const [page, setPage] = useState(ListConfig.defaultPage);
+
+    const fetchData = async () => {
+        try {
+            setIsLoading(true);
+            const data: StudentDataRespose = await getStudents(page);
+            setStudents(data.data);
+        } catch (e) {
+            toast.error("Có lỗi server diễn ra!");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsLoading(true);
-                const data: StudentDataRespose = await getStudents(page);
-                setStudents(data.data);
-            } catch (e) {
-                toast.error("Có lỗi server diễn ra!");
-            } finally {
-                setIsLoading(false);
-            }
-        };
         fetchData();
     }, [page]);
 
@@ -48,10 +50,11 @@ export function useStudents() {
         try {
             const student = await addStudentApi(newStudent);
 
-            setStudents({
-                total: students.total + 1,
-                students: [...students.students, student.data],
-            });
+            if (!student) {
+                toast.error("Không thể thêm sinh viên mới vào hệ thống");
+                return false;
+            }
+            await fetchData();
             toast.success("Đã thêm sinh viên mới vào hệ thống");
             return true;
         } catch (e) {
@@ -87,12 +90,7 @@ export function useStudents() {
     const deleteStudent = async (studentId: string): Promise<void> => {
         try {
             await deleteStudentApi(studentId);
-            setStudents({
-                students: students.students.filter(
-                    (student) => student.studentId !== studentId,
-                ),
-                total: students.total - 1,
-            });
+            await fetchData();
             toast.info("Sinh viên đã được xóa khỏi hệ thống");
         } catch (e) {
             toast.error("Không thể xóa được sinh viên!");

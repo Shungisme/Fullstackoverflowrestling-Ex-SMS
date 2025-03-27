@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Address, FormErrors, IAPIResponse, Student } from "@/src/types";
+import {
+    Address,
+    AddressType,
+    FormErrors,
+    IAPIResponse,
+    Student,
+} from "@/src/types";
 import {
     Card,
     CardContent,
@@ -17,34 +23,27 @@ import {
 } from "@/src/components/atoms/Avatar";
 import { Badge } from "@/src/components/atoms/Badge";
 import { Separator } from "@/src/components/atoms/Separator";
-import { Skeleton } from "@/src/components/atoms/Skeleton";
-import {
-    MapPin,
-    Mail,
-    Phone,
-    Cake,
-    School,
-    BookOpen,
-    Flag,
-    User,
-    Pencil,
-} from "lucide-react";
+import { Cake, School, Flag, User } from "lucide-react";
 import { BASE_URL } from "@/src/constants/constants";
 import { toast } from "sonner";
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/src/components/atoms/Dialog";
 import { Button } from "@/src/components/atoms/Button";
 import AddressForm from "@/src/components/molecules/AddressForm";
 import IdentityPapersTab from "@/src/components/organisms/IdentityPapers";
-import { toQueryString } from "@/src/utils/helper";
-import { formatDate, setDefaultOptions } from "date-fns";
+import { formatDate } from "date-fns";
+import { AddressService } from "@/src/lib/api/address-service";
+import AcademicTab from "@/src/pages/StudentDetail/Tabs/AcademicTab";
+import ContactTab from "@/src/pages/StudentDetail/Tabs/ContactTab";
+import LoadingPlaceholder from "@/src/pages/StudentDetail/LoadingPlaceholder";
+import ErrorNotifier from "@/src/pages/StudentDetail/ErrorNotifier";
+import AddressInfo from "@/src/pages/StudentDetail/AddressInfo";
+import AddAddressPlaceholder from "@/src/pages/StudentDetail/AddAddressPlaceholder";
 
 export default function StudentDetailPage({
     params,
@@ -55,16 +54,16 @@ export default function StudentDetailPage({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [editingAddress, setEditingAddress] = useState<{
-        type: string;
+        type: AddressType;
         address: Address;
     } | null>(null);
     const [addressFormErrors, setAddressFormErrors] = useState<FormErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isAddingAddress, setIsAddingAddress] = useState<string | null>(null);
+    const [addressAction, setAddressAction] = useState<"add" | "edit">("edit");
+    const [addressDialogOpen, setAddressDialogOpen] = useState(false);
 
-    const createNewAddress = async () => {
-        if (!isAddingAddress || !editingAddress || !student) return;
-
+    const validateAddressForm = () => {
+        if (!editingAddress || !student) return false;
         // Validate form
         const errors: FormErrors = {};
 
@@ -81,49 +80,86 @@ export default function StudentDetailPage({
 
         if (Object.keys(errors).length > 0) {
             setAddressFormErrors(errors);
-            return;
+            return false;
         }
+        return true;
+    };
+
+    const handleAddressSubmit = async () => {
+        if (!editingAddress || !student) return;
+
+        if (!validateAddressForm()) return;
 
         setIsSubmitting(true);
 
         try {
-            const queryString = toQueryString({
-                type: isAddingAddress,
-                studentId: params.id,
-            });
-            const response = await fetch(
-                `${BASE_URL}/addresses/${params.id}?${queryString}`,
-                {
-                    method: "POST", // Use POST for creating new address
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(editingAddress.address),
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error(`Failed to add ${isAddingAddress} address`);
+            if (addressAction === "edit" && editingAddress.address.id) {
+                // Update existing address
+                await AddressService.updateAddress(
+                    editingAddress.address.id,
+                    editingAddress.address,
+                    editingAddress.type,
+                );
+            } else {
+                delete editingAddress.address.id; // Remove id if exists
+                // Add new address
+                await AddressService.addAddress(
+                    params.id,
+                    editingAddress.address,
+                    editingAddress.type,
+                );
             }
 
             // Update local state
             const updatedStudent = { ...student };
-            if (isAddingAddress === "permanentAddress") {
-                updatedStudent.permanentAddress = editingAddress.address;
-            } else if (isAddingAddress === "temporaryAddress") {
-                updatedStudent.temporaryAddress = editingAddress.address;
-            }
-
+            updatedStudent[editingAddress.type] = editingAddress.address as Address;
             setStudent(updatedStudent);
+
+            // Close dialog and reset state
+            setAddressDialogOpen(false);
             setEditingAddress(null);
-            setIsAddingAddress(null);
-            toast.success("Address added successfully");
+
+            toast.success(
+                addressAction === "edit"
+                    ? "Address updated successfully"
+                    : "Address added successfully",
+            );
         } catch (err) {
             console.error(err);
-            toast.error(`Failed to add address`);
+            toast.error(
+                addressAction === "edit"
+                    ? "Failed to update address"
+                    : "Failed to add address",
+            );
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const openAddressDialog = (type: AddressType, action: "add" | "edit") => {
+        setAddressAction(action);
+
+        if (action === "edit" && student?.[type as keyof Student]) {
+            // For editing, use existing address
+            setEditingAddress({
+                type,
+                address: { ...(student[type as keyof Student] as Address) },
+            });
+        } else {
+            // For adding, create empty address
+            setEditingAddress({
+                type,
+                address: {
+                    number: "",
+                    street: "",
+                    district: "",
+                    city: "",
+                    country: "",
+                },
+            });
+        }
+
+        setAddressDialogOpen(true);
     };
 
     useEffect(() => {
@@ -156,7 +192,7 @@ export default function StudentDetailPage({
     }
 
     if (error || !student) {
-        return ErrorNotifier(error);
+        return <ErrorNotifier error={error} />;
     }
 
     // Get student initials for avatar fallback
@@ -177,70 +213,6 @@ export default function StudentDetailPage({
                     [field]: value,
                 },
             });
-        }
-    };
-
-    const updateAddress = async () => {
-        if (!editingAddress || !student) return;
-
-        // Validate form
-        const errors: FormErrors = {};
-
-        if (!editingAddress.address.street)
-            errors[`${editingAddress.type}`] = "Street is required";
-        if (!editingAddress.address.district)
-            errors[`${editingAddress.type}`] = "District is required";
-        if (!editingAddress.address.city)
-            errors[`${editingAddress.type}`] = "City is required";
-        if (!editingAddress.address.number)
-            errors[`${editingAddress.type}`] = "Province is required";
-        if (!editingAddress.address.country)
-            errors[`${editingAddress.type}`] = "Country is required";
-
-        if (Object.keys(errors).length > 0) {
-            setAddressFormErrors(errors);
-            return;
-        }
-
-        setIsSubmitting(true);
-
-        try {
-            const queryString = toQueryString({
-                type: editingAddress.type,
-            });
-            const response = await fetch(
-                `${BASE_URL}/addresses/${editingAddress.address.id}?${queryString}`,
-                {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(editingAddress.address),
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to update address");
-            }
-
-            // Update local state
-            const updatedStudent = { ...student };
-            if (editingAddress.type === "mailingAddress") {
-                updatedStudent.mailingAddress = editingAddress.address;
-            } else if (editingAddress.type === "permanentAddress") {
-                updatedStudent.permanentAddress = editingAddress.address;
-            } else if (editingAddress.type === "temporaryAddress") {
-                updatedStudent.temporaryAddress = editingAddress.address;
-            }
-
-            setStudent(updatedStudent);
-            setEditingAddress(null);
-            toast.success("Success");
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to update address");
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -351,489 +323,92 @@ export default function StudentDetailPage({
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 {/* Mailing Address */}
-                                <div>
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h4 className="text-sm font-semibold flex items-center gap-2">
-                                            <MapPin size={16} className="text-muted-foreground" />
-                                            Địa chỉ nhận thư
-                                        </h4>
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="h-8"
-                                                    onClick={() =>
-                                                        setEditingAddress({
-                                                            type: "mailingAddress",
-                                                            address: { ...student.mailingAddress },
-                                                        })
-                                                    }
-                                                >
-                                                    <Pencil size={14} className="mr-1" />
-                                                    Chỉnh sửa
-                                                </Button>
-                                            </DialogTrigger>
-                                            <DialogContent>
-                                                <DialogHeader>
-                                                    <DialogTitle>Edit Mailing Address</DialogTitle>
-                                                </DialogHeader>
-                                                <AddressForm
-                                                    address={
-                                                        editingAddress?.address || student.mailingAddress
-                                                    }
-                                                    onChange={handleAddressChange}
-                                                    errors={addressFormErrors}
-                                                    errorKey="mailing"
-                                                />
-                                                <DialogFooter className="mt-4">
-                                                    <DialogClose asChild>
-                                                        <Button
-                                                            variant="outline"
-                                                            onClick={() => setEditingAddress(null)}
-                                                        >
-                                                            Cancel
-                                                        </Button>
-                                                    </DialogClose>
-                                                    <Button
-                                                        onClick={updateAddress}
-                                                        disabled={isSubmitting}
-                                                    >
-                                                        {isSubmitting ? "Saving..." : "Save Changes"}
-                                                    </Button>
-                                                </DialogFooter>
-                                            </DialogContent>
-                                        </Dialog>
-                                    </div>
-                                    <div className="bg-muted p-3 rounded-md text-sm">
-                                        {student.mailingAddress.number}{" "}
-                                        {student.mailingAddress.street},
-                                        <br />
-                                        {student.mailingAddress.district},{" "}
-                                        {student.mailingAddress.city},
-                                        <br />
-                                        {student.mailingAddress.country}
-                                    </div>
-                                </div>
-
+                                <AddressInfo
+                                    type="mailingAddress"
+                                    openAddressDialog={openAddressDialog}
+                                    address={student.mailingAddress}
+                                />
                                 {/* Permanent Address */}
-                                {student.permanentAddress ? (
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <h4 className="text-sm font-semibold flex items-center gap-2">
-                                                <MapPin size={16} className="text-muted-foreground" />
-                                                Địa chỉ thường trú
-                                            </h4>
-                                            <Dialog>
-                                                <DialogTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="h-8"
-                                                        onClick={() => {
-                                                            if (student.permanentAddress) {
-                                                                setEditingAddress({
-                                                                    type: "permanentAddress",
-                                                                    address: student.permanentAddress,
-                                                                });
-                                                            }
-                                                        }}
-                                                    >
-                                                        <Pencil size={14} className="mr-1" />
-                                                        Edit
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>Edit Permanent Address</DialogTitle>
-                                                    </DialogHeader>
-                                                    <AddressForm
-                                                        address={
-                                                            editingAddress?.address ||
-                                                            student.permanentAddress
-                                                        }
-                                                        onChange={handleAddressChange}
-                                                        errors={addressFormErrors}
-                                                        errorKey="permanentAddress"
-                                                    />
-                                                    <DialogFooter className="mt-4">
-                                                        <Button
-                                                            variant="outline"
-                                                            onClick={() => setEditingAddress(null)}
-                                                        >
-                                                            Cancel
-                                                        </Button>
-                                                        <Button
-                                                            onClick={updateAddress}
-                                                            disabled={isSubmitting}
-                                                        >
-                                                            {isSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
-                                                        </Button>
-                                                    </DialogFooter>
-                                                </DialogContent>
-                                            </Dialog>
-                                        </div>
-                                        <div className="bg-muted p-3 rounded-md text-sm">
-                                            {student.permanentAddress.number}{" "}
-                                            {student.permanentAddress.street},
-                                            <br />
-                                            {student.permanentAddress.district},{" "}
-                                            {student.permanentAddress.city},
-                                            <br />
-                                            {student.permanentAddress.country}
-                                        </div>
-                                    </div>
+                                {student?.permanentAddress ? (
+                                    <AddressInfo
+                                        type="permanentAddress"
+                                        openAddressDialog={openAddressDialog}
+                                        address={student.permanentAddress}
+                                    />
                                 ) : (
-                                    <div>
-                                        <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
-                                            <MapPin size={16} className="text-muted-foreground" />
-                                            Permanent Address
-                                        </h4>
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    className="w-full flex items-center justify-center gap-2 p-3 border-dashed"
-                                                    onClick={() => {
-                                                        setIsAddingAddress("permanentAddress");
-                                                        setEditingAddress({
-                                                            type: "permanentAddress",
-                                                            address: {
-                                                                number: "",
-                                                                street: "",
-                                                                district: "",
-                                                                city: "",
-                                                                country: "",
-                                                            },
-                                                        });
-                                                    }}
-                                                >
-                                                    <Pencil size={14} />
-                                                    Add Permanent Address
-                                                </Button>
-                                            </DialogTrigger>
-                                            <DialogContent>
-                                                <DialogHeader>
-                                                    <DialogTitle>Add Permanent Address</DialogTitle>
-                                                </DialogHeader>
-                                                <AddressForm
-                                                    address={
-                                                        editingAddress?.address || {
-                                                            number: "",
-                                                            street: "",
-                                                            district: "",
-                                                            city: "",
-                                                            country: "",
-                                                        }
-                                                    }
-                                                    onChange={handleAddressChange}
-                                                    errors={addressFormErrors}
-                                                    errorKey="permanentAddress"
-                                                />
-                                                <DialogFooter className="mt-4">
-                                                    <Button
-                                                        variant="outline"
-                                                        onClick={() => {
-                                                            setEditingAddress(null);
-                                                            setIsAddingAddress(null);
-                                                        }}
-                                                    >
-                                                        Cancel
-                                                    </Button>
-                                                    <Button
-                                                        onClick={createNewAddress}
-                                                        disabled={isSubmitting}
-                                                    >
-                                                        {isSubmitting ? "Adding..." : "Add Address"}
-                                                    </Button>
-                                                </DialogFooter>
-                                            </DialogContent>
-                                        </Dialog>
-                                    </div>
+                                    <AddAddressPlaceholder
+                                        openAddressDialog={openAddressDialog}
+                                        type="permanentAddress"
+                                    />
                                 )}
-
                                 {/* Temporary Address */}
-                                {student.temporaryAddress ? (
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <h4 className="text-sm font-semibold flex items-center gap-2">
-                                                <MapPin size={16} className="text-muted-foreground" />
-                                                Temporary Address
-                                            </h4>
-                                            <Dialog>
-                                                <DialogTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="h-8"
-                                                        onClick={() => {
-                                                            if (student.temporaryAddress) {
-                                                                setEditingAddress({
-                                                                    type: "temporaryAddress",
-                                                                    address: student.temporaryAddress,
-                                                                });
-                                                            }
-                                                        }}
-                                                    >
-                                                        <Pencil size={14} className="mr-1" />
-                                                        Edit
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>Edit Temporary Address</DialogTitle>
-                                                    </DialogHeader>
-                                                    <AddressForm
-                                                        address={
-                                                            editingAddress?.address ||
-                                                            student.temporaryAddress
-                                                        }
-                                                        onChange={handleAddressChange}
-                                                        errors={addressFormErrors}
-                                                        errorKey="temporary"
-                                                    />
-                                                    <DialogFooter className="mt-4">
-                                                        <Button
-                                                            variant="outline"
-                                                            onClick={() => setEditingAddress(null)}
-                                                        >
-                                                            Cancel
-                                                        </Button>
-                                                        <Button
-                                                            onClick={updateAddress}
-                                                            disabled={isSubmitting}
-                                                        >
-                                                            {isSubmitting ? "Saving..." : "Save Changes"}
-                                                        </Button>
-                                                    </DialogFooter>
-                                                </DialogContent>
-                                            </Dialog>
-                                        </div>
-                                        <div className="bg-muted p-3 rounded-md text-sm">
-                                            {student.temporaryAddress.number}{" "}
-                                            {student.temporaryAddress.street},
-                                            <br />
-                                            {student.temporaryAddress.district},{" "}
-                                            {student.temporaryAddress.city},
-                                            <br />
-                                            {student.temporaryAddress.country}
-                                        </div>
-                                    </div>
+                                {student?.temporaryAddress ? (
+                                    <AddressInfo
+                                        type="temporaryAddress"
+                                        openAddressDialog={openAddressDialog}
+                                        address={student.temporaryAddress}
+                                    />
                                 ) : (
-                                    <div>
-                                        <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
-                                            <MapPin size={16} className="text-muted-foreground" />
-                                            Temporary Address
-                                        </h4>
-                                        <Dialog open={isAddingAddress !== null}>
-                                            <DialogTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    className="w-full flex items-center justify-center gap-2 p-3 border-dashed"
-                                                    onClick={() => {
-                                                        setIsAddingAddress("temporaryAddress");
-                                                        setEditingAddress({
-                                                            type: "temporaryAddress",
-                                                            address: {
-                                                                number: "",
-                                                                street: "",
-                                                                district: "",
-                                                                city: "",
-                                                                country: "",
-                                                            },
-                                                        });
-                                                    }}
-                                                >
-                                                    <Pencil size={14} />
-                                                    Add Temporary Address
-                                                </Button>
-                                            </DialogTrigger>
-                                            <DialogContent>
-                                                <DialogHeader>
-                                                    <DialogTitle>Add Temporary Address</DialogTitle>
-                                                </DialogHeader>
-                                                <AddressForm
-                                                    address={
-                                                        editingAddress?.address || {
-                                                            number: "",
-                                                            street: "",
-                                                            district: "",
-                                                            city: "",
-                                                            country: "",
-                                                        }
-                                                    }
-                                                    onChange={handleAddressChange}
-                                                    errors={addressFormErrors}
-                                                    errorKey="temporary"
-                                                />
-                                                <DialogFooter className="mt-4">
-                                                    <Button
-                                                        variant="outline"
-                                                        onClick={() => {
-                                                            setEditingAddress(null);
-                                                            setIsAddingAddress(null);
-                                                        }}
-                                                    >
-                                                        Cancel
-                                                    </Button>
-                                                    <Button
-                                                        onClick={createNewAddress}
-                                                        disabled={isSubmitting}
-                                                    >
-                                                        {isSubmitting ? "Adding..." : "Add Address"}
-                                                    </Button>
-                                                </DialogFooter>
-                                            </DialogContent>
-                                        </Dialog>
-                                    </div>
+                                    <AddAddressPlaceholder
+                                        openAddressDialog={openAddressDialog}
+                                        type="temporaryAddress"
+                                    />
                                 )}
                             </CardContent>
                         </Card>
                     </div>
                 </TabsContent>
 
-                {/* Academic Tab */}
-                <TabsContent value="academic" className="mt-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-xl">Thông tin học vấn</CardTitle>
-                            <CardDescription>Chi tiết về thông tin học vấn của sinh viên</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <div className="space-y-4">
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-sm text-muted-foreground">
-                                            Khoa
-                                        </span>
-                                        <div className="flex items-center gap-2">
-                                            <School size={18} className="text-primary" />
-                                            <span className="font-medium">
-                                                {student.faculty.title}
-                                            </span>
-                                        </div>
-                                    </div>
+                <AcademicTab student={student} />
 
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-sm text-muted-foreground">
-                                            Chương trình
-                                        </span>
-                                        <div className="flex items-center gap-2">
-                                            <BookOpen size={18} className="text-primary" />
-                                            <span className="font-medium">
-                                                {student.program.title}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                <ContactTab student={student} />
 
-                                <div className="space-y-4">
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-sm text-muted-foreground">
-                                            Khóa
-                                        </span>
-                                        <div className="flex items-center gap-2">
-                                            <Badge variant="outline" className="text-xs">
-                                                Năm {student.course}
-                                            </Badge>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-sm text-muted-foreground">
-                                            Tình trạng
-                                        </span>
-                                        <Badge className="w-fit">{student.status.title}</Badge>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                {/* Contact Tab */}
-                <TabsContent value="contact" className="mt-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-xl">Thông tin liên hệ</CardTitle>
-                            <CardDescription>Thông tin liên lạc với sinh viên</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <div>
-                                    <h4 className="text-sm font-semibold flex items-center gap-2 mb-3">
-                                        <Phone size={16} className="text-muted-foreground" />
-                                        SĐT
-                                    </h4>
-                                    <div className="bg-muted p-3 rounded-md">
-                                        <a
-                                            href={`tel:${student.phone}`}
-                                            className="text-primary hover:underline"
-                                        >
-                                            {student.phone}
-                                        </a>
-                                    </div>
-                                </div>
-
-                                {student.email && (
-                                    <div>
-                                        <h4 className="text-sm font-semibold flex items-center gap-2 mb-3">
-                                            <Mail size={16} className="text-muted-foreground" />
-                                            Email
-                                        </h4>
-                                        <div className="bg-muted p-3 rounded-md">
-                                            <a
-                                                href={`mailto:${student.email}`}
-                                                className="text-primary hover:underline break-all"
-                                            >
-                                                {student.email}
-                                            </a>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                {/* Identity Card Tab */}
                 <TabsContent value="indentity" className="mt-6">
                     <IdentityPapersTab id={student.identityPaper.id!} />
                 </TabsContent>
             </Tabs>
-        </div>
-    );
-}
-function ErrorNotifier(error: string | null) {
-    return (
-        <div className="container mx-auto py-16 px-4 text-center">
-            <h1 className="text-2xl font-bold text-red-500 mb-2">Error</h1>
-            <p className="text-gray-600 mb-6">{error || "Student not found"}</p>
-            <a
-                href="/students"
-                className="text-blue-500 hover:text-blue-700 underline"
-            >
-                Back to student list
-            </a>
-        </div>
-    );
-}
 
-function LoadingPlaceholder() {
-    return (
-        <div className="container mx-auto py-8 px-4">
-            <div className="flex items-center gap-4 mb-6">
-                <Skeleton className="h-16 w-16 rounded-full" />
-                <div className="space-y-2">
-                    <Skeleton className="h-8 w-48" />
-                    <Skeleton className="h-4 w-24" />
-                </div>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2">
-                <Skeleton className="h-[400px]" />
-                <Skeleton className="h-[400px]" />
-            </div>
+            <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>
+                            {addressAction === "edit" ? "Edit" : "Thêm"}{" "}
+                            {editingAddress &&
+                                AddressService.getAddressTypeName(editingAddress.type)}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <p>{editingAddress?.address.id}</p>
+                    {editingAddress && (
+                        <AddressForm
+                            address={editingAddress.address}
+                            onChange={handleAddressChange}
+                            errors={addressFormErrors}
+                            errorKey={editingAddress.type}
+                        />
+                    )}
+                    <DialogFooter className="mt-4">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setAddressDialogOpen(false);
+                                setEditingAddress(null);
+                                setAddressFormErrors({});
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button onClick={handleAddressSubmit} disabled={isSubmitting}>
+                            {isSubmitting
+                                ? addressAction === "edit"
+                                    ? "Đang lưu..."
+                                    : "Đang thêm..."
+                                : addressAction === "edit"
+                                    ? "Lưu thay đổi"
+                                    : "Thêm địa chỉ"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
