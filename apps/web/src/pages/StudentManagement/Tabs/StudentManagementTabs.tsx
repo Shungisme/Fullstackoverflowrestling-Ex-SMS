@@ -95,7 +95,7 @@ const StudentManagementTabs = () => {
             </TabsContent>
 
             <TabsContent value="dashboard" className="mt-0">
-                <DashboardTab students={students.students} />
+                <DashboardTab />
             </TabsContent>
         </Tabs>
     );
