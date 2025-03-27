@@ -1,11 +1,15 @@
+"use client";
 import React from "react";
 import StatsList from "./StatsList";
-import { getStudents } from "@/src/lib/api/student-service";
+import { useStudentContext } from "@/src/context/StudentContext";
 
 const StudentStats = async () => {
-  const data = await getStudents(1, 1000);
+  const { allStudents } = useStudentContext();
 
-  return <StatsList students={data.data.students} />;
+  if (!allStudents) {
+    return null;
+  }
+  return <StatsList students={allStudents.students} />;
 };
 
 export default StudentStats;

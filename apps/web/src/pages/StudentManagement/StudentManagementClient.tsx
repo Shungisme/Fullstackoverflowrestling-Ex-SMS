@@ -5,11 +5,9 @@ import StudentManagementTabs from "./Tabs/StudentManagementTabs";
 import { SchoolConfigProvider } from "@/src/context/SchoolConfigContext";
 
 export default function StudentManagementClient() {
-    return (
-        <StudentProvider>
-            <SchoolConfigProvider>
-                <StudentManagementTabs />
-            </SchoolConfigProvider>
-        </StudentProvider>
-    );
+  return (
+    <SchoolConfigProvider>
+      <StudentManagementTabs />
+    </SchoolConfigProvider>
+  );
 }

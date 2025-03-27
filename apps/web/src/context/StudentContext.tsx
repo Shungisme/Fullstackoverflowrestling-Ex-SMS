@@ -11,6 +11,7 @@ import { useStudents } from "../hooks/useStudents";
 
 type StudentContextType = {
   students: StudentList;
+  allStudents: StudentList;
   isLoading: boolean;
   addStudent: (student: Student) => Promise<boolean>;
   updateStudent: (student: Student) => Promise<boolean>;
@@ -28,6 +29,7 @@ type StudentProviderProps = {
 export function StudentProvider({ children }: StudentProviderProps) {
   const {
     students,
+    allStudents,
     isLoading,
     addStudent,
     updateStudent,
@@ -39,6 +41,7 @@ export function StudentProvider({ children }: StudentProviderProps) {
   const value = useMemo(
     () => ({
       students,
+      allStudents,
       isLoading,
       addStudent,
       updateStudent,
@@ -46,7 +49,7 @@ export function StudentProvider({ children }: StudentProviderProps) {
       searchStudents,
       handlePageChange
     }),
-    [students, isLoading, addStudent, updateStudent, deleteStudent, searchStudents, handlePageChange]
+    [students, allStudents, isLoading, addStudent, updateStudent, deleteStudent, searchStudents, handlePageChange]
   );
 
   return (
