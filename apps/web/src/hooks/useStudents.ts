@@ -58,7 +58,8 @@ export function useStudents() {
             toast.success("Đã thêm sinh viên mới vào hệ thống");
             return true;
         } catch (e) {
-            toast.error("Mã số sinh viên đã tồn tại!");
+            const message = e instanceof Error ? e.message : "Đã xảy ra lỗi không xác định";
+            toast.error(message);
             return false;
         }
     };

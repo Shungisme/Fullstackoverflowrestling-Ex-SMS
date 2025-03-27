@@ -1,4 +1,4 @@
-import { IAPIResponse, Student, StudentDataRespose, StudentList } from "@/src/types";
+import { APIError, IAPIResponse, Student, StudentDataRespose, StudentList } from "@/src/types";
 import { BASE_URL, ListConfig } from "@/src/constants/constants";
 import { stripEmptyValues } from "@/src/utils/cleaner";
 import { toQueryString } from "@/src/utils/helper";
@@ -14,7 +14,7 @@ export async function getStudents(
     page,
   });
   const url = `${studentURL}?${queryString}`;
-  const res = await fetch(url, { next: { revalidate: 60 } });
+  const res = await fetch(url, { next: { revalidate: 5 } });
   if (!res.ok) {
     throw new Error("Failed to fetch students");
   }
@@ -56,7 +56,9 @@ export async function addStudent(student: Student): Promise<IAPIResponse<Student
   });
 
   if (!res.ok) {
-    throw new Error("Failed to add student");
+    const data: APIError = await res.json();
+    const errorString = data.errors.map((e) => e.message).join("\n");
+    throw new Error(errorString);
   }
 
   return res.json();

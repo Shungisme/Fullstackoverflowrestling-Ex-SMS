@@ -32,6 +32,18 @@ export interface IAPIResponse<T> {
     data: T;
 }
 
+export interface APIError {
+    statusCode: number;
+    message: string;
+    errors: ResponseError[];
+}
+
+type ResponseError = {
+    code: string;
+    message: string;
+    path: string[];
+}
+
 export type StudentList = {
     students: Student[];
     total: number;

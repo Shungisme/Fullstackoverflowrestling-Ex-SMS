@@ -10,7 +10,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -23,7 +22,6 @@ import {
   FileText,
   MapPin,
   Pencil,
-  Plus,
   AlertCircle,
 } from "lucide-react";
 import { IdentityPapers } from "@/src/types";
@@ -50,15 +48,17 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const response = await fetch(`${BASE_URL}/identity-papers/${id}`);
-        
+
         if (!response.ok) {
           // If 404, it might mean the student doesn't have a paper yet
           if (response.status === 404) {
             setPaper(null);
           } else {
-            throw new Error(`Failed to fetch identity paper: ${response.statusText}`);
+            throw new Error(
+              `Failed to fetch identity paper: ${response.statusText}`,
+            );
           }
         } else {
           const data = await response.json();
@@ -81,19 +81,22 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
   const handleAddPaper = async (paperData: IdentityPapers) => {
     try {
       setIsLoading(true);
-      
-      const response = await fetch(`${BASE_URL}/students/${id}/identity-paper`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+
+      const response = await fetch(
+        `${BASE_URL}/students/${id}/identity-paper`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(paperData),
         },
-        body: JSON.stringify(paperData),
-      });
-      
+      );
+
       if (!response.ok) {
-        throw new Error('Failed to add identity paper');
+        throw new Error("Failed to add identity paper");
       }
-      
+
       const data = await response.json();
       setPaper(data.data);
       setIsAddingPaper(false);
@@ -108,23 +111,23 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
 
   const handleUpdatePaper = async (paperData: IdentityPapers) => {
     if (!paper?.id) return;
-    
+
     try {
-      setIsLoading(true); 
+      setIsLoading(true);
       delete paperData.updatedAt;
       delete paperData.createdAt;
       const response = await fetch(`${BASE_URL}/identity-papers/${id}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(paperData),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to update identity paper');
+        throw new Error("Failed to update identity paper");
       }
-      
+
       const data = await response.json();
       setPaper(data.data);
       setIsEditingPaper(false);
@@ -181,9 +184,7 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
             Giấy tờ tùy thân chính thức của sinh viên
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          {ErrorNotifier(error)}
-        </CardContent>
+        <CardContent>{ErrorNotifier(error)}</CardContent>
       </Card>
     );
   }
@@ -203,9 +204,9 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
         {!paper ? (
           <div className="bg-muted p-6 rounded-md text-center">
             <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-            <h3 className="text-sm font-medium mb-1">No document found</h3>
+            <h3 className="text-sm font-medium mb-1">Không tìm thấy giấy tờ</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              This student doesn't have an identity document registered yet.
+              Học sinh này chưa đăng ký giấy tờ tùy thân.
             </p>
           </div>
         ) : (
@@ -217,16 +218,13 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
                   <h3 className="font-medium flex items-center gap-2">
                     {paper.type}
                     {isExpired(paper.expirationDate) && (
-                      <Badge
-                        variant="destructive"
-                        className="text-[10px] py-0"
-                      >
-                        Expired
+                      <Badge variant="destructive" className="text-[10px] py-0">
+                        Quá hạn
                       </Badge>
                     )}
                     {paper.hasChip && (
                       <Badge variant="outline" className="text-[10px] py-0">
-                        Chip
+                        Có chip
                       </Badge>
                     )}
                   </h3>
@@ -235,7 +233,7 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
                   </p>
                 </div>
               </div>
-              
+
               {/* Edit button */}
               <Dialog>
                 <DialogTrigger asChild>
@@ -250,12 +248,12 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Edit Identity Document</DialogTitle>
+                    <DialogTitle>Chỉnh sửa giấy tờ tùy thân</DialogTitle>
                     <DialogDescription>
-                      Update the details of this identity document.
+                      Cập nhật thông tin chi tiết của giấy tờ tùy thân này.
                     </DialogDescription>
                   </DialogHeader>
-                  <IdentityPaperForm 
+                  <IdentityPaperForm
                     initial={paper}
                     onSubmit={handleUpdatePaper}
                     onCancel={() => setIsEditingPaper(false)}
@@ -268,7 +266,7 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 text-sm">
               <div>
                 <span className="text-muted-foreground block text-xs">
-                  Issue Date
+                  Ngày cấp
                 </span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
@@ -278,7 +276,7 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
 
               <div>
                 <span className="text-muted-foreground block text-xs">
-                  Expiration Date
+                  Ngày hết hạn
                 </span>
                 <span
                   className={`flex items-center gap-1 ${isExpired(paper.expirationDate) ? "text-destructive" : ""}`}
@@ -295,7 +293,7 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
 
               <div className="col-span-2">
                 <span className="text-muted-foreground block text-xs">
-                  Place of Issue
+                  Nơi cấp
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
@@ -307,7 +305,7 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
               {paper.note && (
                 <div className="col-span-2 mt-1">
                   <span className="text-muted-foreground block text-xs">
-                    Notes
+                    Ghi chú
                   </span>
                   <p className="text-sm italic">{paper.note}</p>
                 </div>
@@ -322,17 +320,16 @@ const IdentityPapersTab = ({ id }: IdentityPapersTabProps) => {
 
 export default IdentityPapersTab;
 function ErrorNotifier(error: string) {
-    return <div className="bg-destructive/10 p-6 rounded-md text-center">
-        <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-3" />
-        <h3 className="text-sm font-medium mb-1">Lỗi khi tải thông tin sinh viên</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-            {error}
-        </p>
-        <Button
-            variant="outline"
-            onClick={() => window.location.reload()}
-        >
-            Thử lại
-        </Button>
-    </div>;
+  return (
+    <div className="bg-destructive/10 p-6 rounded-md text-center">
+      <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-3" />
+      <h3 className="text-sm font-medium mb-1">
+        Lỗi khi tải thông tin sinh viên
+      </h3>
+      <p className="text-sm text-muted-foreground mb-4">{error}</p>
+      <Button variant="outline" onClick={() => window.location.reload()}>
+        Thử lại
+      </Button>
+    </div>
+  );
 }
