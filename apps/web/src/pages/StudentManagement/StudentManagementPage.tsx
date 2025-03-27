@@ -8,27 +8,25 @@ import { StudentProvider } from "@/src/context/StudentContext";
 
 const StudentManagementPage = () => {
   return (
-    <StudentProvider>
-      <div className="space-y-8">
-        <PageHeader
-          title="Hệ thống Quản lý Sinh viên"
-          description="Quản lý và theo dõi sinh viên trong một giao diện đơn giản."
-        />
-        <ErrorBoundary fallback={<p>{"Đã xảy ra lỗi khi tải thống kê."}</p>}>
-          <Suspense fallback={<LoadingSpinner />}>
-            <StudentStats />
-          </Suspense>
-        </ErrorBoundary>
+    <div className="space-y-8">
+      <PageHeader
+        title="Hệ thống Quản lý Sinh viên"
+        description="Quản lý và theo dõi sinh viên trong một giao diện đơn giản."
+      />
+      <ErrorBoundary fallback={<p>{"Đã xảy ra lỗi khi tải thống kê."}</p>}>
+        <Suspense fallback={<LoadingSpinner />}>
+          <StudentStats />
+        </Suspense>
+      </ErrorBoundary>
 
-        <ErrorBoundary
-          fallback={<p>{"Đã xảy ra lỗi khi tải quản lý sinh viên."}</p>}
-        >
-          <Suspense fallback={<LoadingSpinner />}>
-            <StudentManagementClient />
-          </Suspense>
-        </ErrorBoundary>
-      </div>
-    </StudentProvider>
+      <ErrorBoundary
+        fallback={<p>{"Đã xảy ra lỗi khi tải quản lý sinh viên."}</p>}
+      >
+        <Suspense fallback={<LoadingSpinner />}>
+          <StudentManagementClient />
+        </Suspense>
+      </ErrorBoundary>
+    </div>
   );
 };
 
