@@ -25,7 +25,7 @@ export default function StudentListTab({
   onEdit,
   onDelete,
   onAddClick,
-  onPageChange
+  onPageChange,
 }: StudentListTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -56,7 +56,13 @@ export default function StudentListTab({
       </div>
 
       <div className="rounded-md border">
-        <StudentTable data={students} onEdit={onEdit} onDelete={onDelete} onPageChange={onPageChange} />
+        <StudentTable
+          isLoading={isLoading}
+          data={students}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onPageChange={onPageChange}
+        />
       </div>
     </>
   );

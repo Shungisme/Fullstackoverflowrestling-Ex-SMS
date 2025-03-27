@@ -1,4 +1,5 @@
 export interface Student {
+    id?: string;
     studentId: string;
     name: string;
     dateOfBirth: string;
@@ -6,8 +7,7 @@ export interface Student {
     faculty: Faculty;
     course: number;
     program: Program;
-    address?: string;
-    email?: string;
+    email: string;
     phone: string;
     status: StudentStatus;
     nationality: string;
@@ -32,6 +32,18 @@ export interface IAPIResponse<T> {
     data: T;
 }
 
+export interface APIError {
+    statusCode: number;
+    message: string;
+    errors: ResponseError[];
+}
+
+type ResponseError = {
+    code: string;
+    message: string;
+    path: string[];
+}
+
 export type StudentList = {
     students: Student[];
     total: number;
@@ -47,6 +59,7 @@ export interface Faculty {
     updatedAt?: Date;
     createdAt?: Date;
 }
+export type AddressType = "mailingAddress" | "permanentAddress" | "temporaryAddress";
 
 export interface Address {
     id?: string;

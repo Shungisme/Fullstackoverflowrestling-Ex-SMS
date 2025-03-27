@@ -29,9 +29,6 @@ export default function Navbar() {
         </nav>
         <div className="flex items-center gap-2">
           <ModeToggle />
-          <Button size="sm" variant="outline">
-            Sign In
-          </Button>
         </div>
       </div>
     </header>

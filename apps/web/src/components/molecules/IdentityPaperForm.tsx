@@ -180,10 +180,10 @@ const IdentityPaperForm = ({
       <div className="flex justify-end space-x-2 mt-6">
         <Button disabled={isSubmitting}>
           {isSubmitting
-            ? "Saving..."
+            ? "Đang lưu..."
             : initial
-              ? "Update Document"
-              : "Add Document"}
+              ? "Cập nhật"
+              : "Thêm giấy tờ"}
         </Button>
       </div>
     </form>

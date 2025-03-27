@@ -1,31 +1,28 @@
 import { Student } from "@/src/types";
-import EditStudentForm from "@/src/components/organisms/EditStudentForm";
-import { FacultyService, ProgramService, StudentStatusService } from "@/src/lib/api/school-service";
+import { useSchoolConfigContext } from "@/src/context/SchoolConfigContext";
+import StudentForm from "@/src/components/organisms/StudentForm";
 
 type EditStudentTabProps = {
-  student: Student;
-  onSubmit: (student: Student) => Promise<void>;
-  onCancel: () => void;
+    student: Student;
+    onSubmit: (student: Student) => Promise<boolean>;
+    onCancel: () => void;
 };
 
-export default async function EditStudentTab({ 
-  student, 
-  onSubmit, 
-  onCancel 
+export default async function EditStudentTab({
+    student,
+    onSubmit,
+    onCancel,
 }: EditStudentTabProps) {
-    const [facultyRes, programRes, statusRes] = await Promise.all([
-        FacultyService.getAll(),
-        ProgramService.getAll(),
-        StudentStatusService.getAll(),
-    ]);
-  return (
-    <EditStudentForm
-      student={student}
-      onSubmit={onSubmit}
-      onCancel={onCancel}
-      facultyOptions={facultyRes.data.data}
-      programOptions={programRes.data.data}
-      statusOptions={statusRes.data.data}
-    />
-  );
+    const { faculties, statuses, programs } = useSchoolConfigContext();
+
+    return (
+        <StudentForm
+            student={student}
+            onSubmit={onSubmit}
+            onCancel={onCancel}
+            facultyOptions={faculties}
+            programOptions={programs}
+            statusOptions={statuses}
+        />
+    );
 }
