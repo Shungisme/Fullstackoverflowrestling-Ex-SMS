@@ -14,7 +14,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { StudentService } from '../../domain/port/input/student.service';
-import { StudentRequestDTO } from '../../domain/dto/student-dto';
+import {
+  StudentRequestDTO,
+  UpdateStudentRequestDTO,
+} from '../../domain/dto/student-dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
   DeleteStudentResponseDTO,
@@ -65,7 +68,7 @@ export class StudentController {
   })
   async update(
     @Param('studentId') studentId: string,
-    @Body() studentDto: StudentRequestDTO,
+    @Body() studentDto: UpdateStudentRequestDTO,
   ): Promise<StudentResponseDTO> {
     return await this.studentService.update({ ...studentDto, studentId });
   }
