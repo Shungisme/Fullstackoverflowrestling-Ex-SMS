@@ -10,7 +10,10 @@ import {
   IStudentRepository,
   STUDENT_REPOSITORY,
 } from '../output/IStudentRepository';
-import { StudentRequestDTO } from '../../dto/student-dto';
+import {
+  StudentRequestDTO,
+  UpdateStudentRequestDTO,
+} from '../../dto/student-dto';
 import { SearchRequestDTO } from '../../dto/search-dto';
 import { DeleteStudentResponseDTO } from '../../dto/delete-dto';
 import {
@@ -518,7 +521,7 @@ export class StudentService implements IStudentService {
     }
   }
 
-  async update(student: StudentRequestDTO): Promise<StudentResponseDTO> {
+  async update(student: UpdateStudentRequestDTO): Promise<StudentResponseDTO> {
     try {
       return await this.studentRepository.update(student);
     } catch (error) {

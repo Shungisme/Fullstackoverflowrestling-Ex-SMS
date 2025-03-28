@@ -4,12 +4,13 @@ import {
 } from 'src/modules/students/adapters/driven/types/student-type';
 import { SearchStudent } from 'src/modules/students/adapters/driven/types/search-type';
 import { CreateStudentWithAddressDTO } from '../../dto/create-student-dto';
+import { UpdateStudentRequestDTO } from '../../dto/student-dto';
 
 export interface IStudentRepository {
   create(student: CreateStudentWithAddressDTO): Promise<StudentResponse>;
   createMany(students: Student[]): Promise<number>;
   delete(studentId: string): Promise<StudentResponse>;
-  update(student: Student): Promise<StudentResponse>;
+  update(student: UpdateStudentRequestDTO): Promise<StudentResponse>;
   updateStudentField(
     studentId: string,
     field: keyof Student,
