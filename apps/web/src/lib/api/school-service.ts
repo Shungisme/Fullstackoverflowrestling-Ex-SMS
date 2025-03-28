@@ -17,8 +17,8 @@ export class CRUDService<T> {
     this.endpoint = endpoint;
   }
 
-  async getAll(query: string[]): Promise<IAPIResponse<PaginatedResponse<T>>> {
-    const queryString = query.length > 0 ? query.join("&") : "";
+  async getAll(query?: string[]): Promise<IAPIResponse<PaginatedResponse<T>>> {
+    const queryString = query && query.length > 0 ? query.join("&") : "";
     const response = await fetch(`${this.endpoint}?${queryString}`);
     return response.json();
   }
