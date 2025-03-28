@@ -165,7 +165,7 @@ export class StudentRepository implements IStudentRepository {
 
       if (
         newStatus.title &&
-        studentStatusRules[newStatus.title].includes(
+        studentStatusRules[newStatus.title]?.includes(
           currentStatus?.status.title,
         )
       ) {
