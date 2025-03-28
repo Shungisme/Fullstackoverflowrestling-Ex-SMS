@@ -15,7 +15,7 @@ export default function ProgramSettings() {
 
   const fetchData = async () => {
     try {
-      const res = await ProgramService.getAll();
+      const res = await ProgramService.getAll([]);
       if (res.statusCode !== 200) {
         toast.error(res.message);
       } else {
