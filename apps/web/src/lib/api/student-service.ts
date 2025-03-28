@@ -1,13 +1,19 @@
-import { APIError, IAPIResponse, Student, StudentDataRespose, StudentList } from "@/src/types";
+import {
+  APIError,
+  IAPIResponse,
+  Student,
+  StudentDataRespose,
+  StudentList,
+} from "@/src/types";
 import { BASE_URL, ListConfig } from "@/src/constants/constants";
 import { stripEmptyValues } from "@/src/utils/cleaner";
 import { toQueryString } from "@/src/utils/helper";
 
-const studentURL = BASE_URL + '/students'
+const studentURL = BASE_URL + "/students";
 
 export async function getStudents(
   page = ListConfig.defaultPage,
-  limit = ListConfig.rowsPerPage,
+  limit = ListConfig.rowsPerPage
 ): Promise<StudentDataRespose> {
   const queryString = toQueryString({
     limit,
@@ -23,16 +29,18 @@ export async function getStudents(
 }
 
 export async function getStudent(id: string): Promise<IAPIResponse<Student>> {
-    const res = await fetch(`${studentURL}/${id}`);
+  const res = await fetch(`${studentURL}/${id}`);
 
-    if (!res.ok) {
-        throw new Error("Failed to fetch student with id: " + id);
-    }
+  if (!res.ok) {
+    throw new Error("Failed to fetch student with id: " + id);
+  }
 
-    return res.json();
+  return res.json();
 }
 
-export async function searchStudents(searchTerm: string): Promise<IAPIResponse<StudentList>> {
+export async function searchStudents(
+  searchTerm: string
+): Promise<IAPIResponse<StudentList>> {
   const queryString = toQueryString({
     key: searchTerm,
   });
@@ -48,7 +56,9 @@ export async function searchStudents(searchTerm: string): Promise<IAPIResponse<S
   return res.json();
 }
 
-export async function addStudent(student: Student): Promise<IAPIResponse<Student>> {
+export async function addStudent(
+  student: Student
+): Promise<IAPIResponse<Student>> {
   const res = await fetch(studentURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -57,8 +67,8 @@ export async function addStudent(student: Student): Promise<IAPIResponse<Student
 
   if (!res.ok) {
     const data: APIError = await res.json();
-    const errorString = data.errors.map((e) => e.message).join("\n");
-    throw new Error(errorString);
+    // const errorString = data.errors.map((e) => e.message).join("\n");
+    throw new Error(data?.message);
   }
 
   return res.json();

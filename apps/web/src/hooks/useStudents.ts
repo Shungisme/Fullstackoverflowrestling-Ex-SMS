@@ -75,14 +75,7 @@ export function useStudents() {
   const updateStudent = async (updatedStudent: Student): Promise<boolean> => {
     try {
       await updateStudentApi(updatedStudent);
-      setStudents({
-        ...students,
-        students: students.students.map((student) =>
-          student.studentId === updatedStudent.studentId
-            ? updatedStudent
-            : student,
-        ),
-      });
+      await fetchData();
       toast.success("Đã cập nhật thông tin sinh viên");
       return true;
     } catch (e) {
