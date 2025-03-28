@@ -33,10 +33,18 @@ export class ProgramsRepository implements IProgramsRepository {
     };
   }
 
-  async findAll(page: number, limit: number): Promise<ProgramsDto[]> {
+  async findAll(
+    page: number,
+    limit: number,
+    status: string,
+  ): Promise<ProgramsDto[]> {
+    const whereOptions = {
+      status: status ? { equals: status as 'active' | 'inactive' } : undefined,
+    };
     const programs = await this.prismaService.program.findMany({
       skip: (page - 1) * limit,
       take: limit,
+      where: whereOptions,
     });
     return programs.map((program) => ({
       ...program,

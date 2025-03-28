@@ -13,9 +13,9 @@ export interface IFacultiesRepository {
 
   findByName(facultyName: string): Promise<FacultiesDto>;
 
-  findAll(page: number, limit: number): Promise<FacultiesDto[]>;
+  findAll(page: number, limit: number, status: string): Promise<FacultiesDto[]>;
 
-  count(): Promise<number>;
+  count(whereOptions: any): Promise<number>;
 }
 
 export const FACULTIES_REPOSITORY = Symbol('IFacultiesRepository');

@@ -16,9 +16,9 @@ export class ProgramsService implements IProgramsService {
     private programsRepository: IProgramsRepository,
   ) {}
 
-  async count(): Promise<number> {
+  async count(whereOptions: any): Promise<number> {
     try {
-      return await this.programsRepository.count();
+      return await this.programsRepository.count(whereOptions);
     } catch (error) {
       throw new Error(`Error counting programs: ${error.message}`);
     }
@@ -45,10 +45,15 @@ export class ProgramsService implements IProgramsService {
   async findAll(
     page: number,
     limit: number,
+    status: string,
   ): Promise<PaginatedResponse<ProgramsDto>> {
     try {
-      const programs = await this.programsRepository.findAll(page, limit);
-      const totalPrograms = await this.programsRepository.count();
+      const programs = await this.programsRepository.findAll(
+        page,
+        limit,
+        status,
+      );
+      const totalPrograms = programs.length;
 
       return {
         data: programs,

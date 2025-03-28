@@ -10,8 +10,10 @@ import { UpdateFacultyDTO } from '../../domain/dto/update-faculty.dto';
 export class FacultiesRepository implements IFacultiesRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async count(): Promise<number> {
-    return await this.prismaService.faculty.count();
+  async count(whereOptions: any): Promise<number> {
+    return await this.prismaService.faculty.count({
+      where: whereOptions,
+    });
   }
 
   async create(faculty: CreateFacultyDTO): Promise<FacultiesDto> {
@@ -34,10 +36,22 @@ export class FacultiesRepository implements IFacultiesRepository {
     };
   }
 
-  async findAll(page: number, limit: number): Promise<FacultiesDto[]> {
+  async findAll(
+    page: number,
+    limit: number,
+    status: string,
+  ): Promise<FacultiesDto[]> {
+    const whereOptions = {
+      status: status
+        ? {
+            equals: status as 'active' | 'inactive',
+          }
+        : undefined,
+    };
     const faculties = await this.prismaService.faculty.findMany({
       skip: (page - 1) * limit,
       take: limit,
+      where: whereOptions,
     });
     return faculties.map((faculty) => ({
       ...faculty,

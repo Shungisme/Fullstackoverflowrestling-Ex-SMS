@@ -65,11 +65,22 @@ export class ProgramsController {
     type: Number,
     description: 'Results per page, defaults to 10',
   })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    type: String,
+    description: 'Filter by status',
+  })
   async findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Query('status') status: string = '',
   ): Promise<PaginatedResponse<ProgramsDto>> {
-    return await this.programsService.findAll(Number(page), Number(limit));
+    return await this.programsService.findAll(
+      Number(page),
+      Number(limit),
+      status,
+    );
   }
 
   @Get(':id')

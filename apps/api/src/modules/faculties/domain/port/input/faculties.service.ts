@@ -16,9 +16,9 @@ export class FacultiesService implements IFacultiesService {
     private facultiesRepository: IFacultiesRepository,
   ) {}
 
-  async count(): Promise<number> {
+  async count(whereOptions: any): Promise<number> {
     try {
-      return await this.facultiesRepository.count();
+      return await this.facultiesRepository.count(whereOptions);
     } catch (error) {
       throw new Error(`Error counting faculties: ${error.message}`);
     }
@@ -45,10 +45,15 @@ export class FacultiesService implements IFacultiesService {
   async findAll(
     page: number,
     limit: number,
+    status: string,
   ): Promise<PaginatedResponse<FacultiesDto>> {
     try {
-      const faculties = await this.facultiesRepository.findAll(page, limit);
-      const totalFaculties = await this.facultiesRepository.count();
+      const faculties = await this.facultiesRepository.findAll(
+        page,
+        limit,
+        status,
+      );
+      const totalFaculties = faculties.length;
 
       return {
         data: faculties,
