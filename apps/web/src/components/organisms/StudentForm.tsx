@@ -32,6 +32,9 @@ import AddressForm from "../molecules/AddressForm";
 import IdentityPaperFormV2 from "../molecules/IdentityPaperFormV2";
 import { toast } from "sonner";
 
+const allowedEmailDomains = ["student.university.edu.vn"];
+const allowedPhoneNumber = /^(0|\+84)([3|5|7|8|9])([0-9]{8})$/;
+
 interface StudentFormProps {
   programOptions: Program[];
   statusOptions: StudentStatus[];
@@ -117,26 +120,32 @@ export default function StudentForm({
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
+    const requiredFields = [
+      { field: "studentId", message: "MSSV không được để trống" },
+      { field: "name", message: "Họ tên không được để trống" },
+      { field: "dateOfBirth", message: "Ngày sinh không được để trống" },
+      { field: "gender", message: "Giới tính không được để trống" },
+      { field: "facultyId", message: "Khoa không được để trống" },
+      { field: "course", message: "Khóa không được để trống" },
+      { field: "programId", message: "Chương trình không được để trống" },
+      { field: "statusId", message: "Tình trạng không được để trống" },
+      { field: "nationality", message: "Quốc tịch không được để trống" },
+    ];
 
-    if (!formData.studentId.trim())
-      newErrors.studentId = "MSSV không được để trống";
-    if (!formData.name.trim()) newErrors.name = "Họ tên không được để trống";
-    if (!formData.dateOfBirth)
-      newErrors.dateOfBirth = "Ngày sinh không được để trống";
-    if (!formData.gender) newErrors.gender = "Giới tính không được để trống";
-    if (!formData.facultyId) newErrors.faculty = "Khoa không được để trống";
-    if (!formData.course) newErrors.course = "Khóa không được để trống";
-    if (!formData.programId)
-      newErrors.program = "Chương trình không được để trống";
-    if (!formData.statusId) newErrors.status = "Tình trạng không được để trống";
-    if (!formData.nationality)
-      newErrors.nationality = "Quốc tịch không được để trống";
+    requiredFields.forEach(({ field, message }) => {
+      if (!formData[field as keyof Student]?.toString().trim()) {
+        newErrors[field as keyof Student] = message;
+      }
+    });
+
     if (formData.email && !validateEmail(formData.email)) {
-      newErrors.email = "Email không hợp lệ";
+      newErrors.email = `Email không hợp lệ. Hãy kiểm tra và chắc chắn rằng email của bạn là hợp lệ. Chỉ chấp nhận email của miền trường đại học: ${allowedEmailDomains.join(
+        ", "
+      )}`;
     }
 
     if (formData.phone && !validatePhone(formData.phone)) {
-      newErrors.phone = "Số điện thoại không hợp lệ";
+      newErrors.phone = `Số điện thoại không hợp lệ. Hãy thử nhập theo định dạng số điện thoại: ${String(allowedPhoneNumber)} `;
     }
 
     setErrors(newErrors);

@@ -4,8 +4,12 @@
  * @returns Whether the email is valid
  */
 export const validateEmail = (email: string): boolean => {
+  const allowedEmailDomains = ["student.university.edu.vn"];
   const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  return re.test(String(email).toLowerCase());
+  return (
+    re.test(String(email).toLowerCase()) &&
+    allowedEmailDomains.some((domain) => email.endsWith(domain))
+  );
 };
 
 /**

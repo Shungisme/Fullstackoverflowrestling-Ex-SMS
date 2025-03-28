@@ -6,6 +6,64 @@ import { Student, StudentResponse } from './types/student-type';
 import { CreateStudentWithAddressDTO } from '../../domain/dto/create-student-dto';
 import { BusinessRulesConfig } from 'src/config/business-rules.config';
 
+const studentSelect = {
+  id: true,
+  studentId: true,
+  name: true,
+  dateOfBirth: true,
+  gender: true,
+  course: true,
+  email: true,
+  phone: true,
+  nationality: true,
+  faculty: { select: { id: true, title: true } },
+  mailingAddress: {
+    select: {
+      id: true,
+      number: true,
+      street: true,
+      district: true,
+      city: true,
+      country: true,
+    },
+  },
+  permanentAddress: {
+    select: {
+      id: true,
+      number: true,
+      street: true,
+      district: true,
+      city: true,
+      country: true,
+    },
+  },
+  temporaryAddress: {
+    select: {
+      id: true,
+      number: true,
+      street: true,
+      district: true,
+      city: true,
+      country: true,
+    },
+  },
+  program: { select: { id: true, title: true } },
+  status: { select: { id: true, title: true } },
+  identityPaper: {
+    select: {
+      id: true,
+      type: true,
+      number: true,
+      issueDate: true,
+      expirationDate: true,
+      placeOfIssue: true,
+      hasChip: true,
+      issuingCountry: true,
+      notes: true,
+    },
+  },
+};
+
 @Injectable()
 export class StudentRepository implements IStudentRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -15,92 +73,10 @@ export class StudentRepository implements IStudentRepository {
     field: keyof Student,
     value: any,
   ): Promise<StudentResponse | null> {
-    return await this.prismaService.student.update({
-      select: {
-        id: true,
-        studentId: true,
-        name: true,
-        dateOfBirth: true,
-        gender: true,
-        course: true,
-        email: true,
-        phone: true,
-        nationality: true,
-
-        faculty: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        mailingAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        permanentAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        temporaryAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        program: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        status: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        identityPaper: {
-          select: {
-            id: true,
-            type: true,
-            number: true,
-            issueDate: true,
-            expirationDate: true,
-            placeOfIssue: true,
-            hasChip: true,
-            issuingCountry: true,
-            notes: true,
-          },
-        },
-      },
-      where: {
-        studentId: studentId,
-      },
-      data: {
-        [field]: value,
-      },
+    return this.prismaService.student.update({
+      select: studentSelect,
+      where: { studentId },
+      data: { [field]: value },
     });
   }
 
@@ -110,12 +86,13 @@ export class StudentRepository implements IStudentRepository {
     });
     return result.count;
   }
+
   async count(): Promise<number> {
     return this.prismaService.student.count();
   }
 
   async create(student: CreateStudentWithAddressDTO): Promise<StudentResponse> {
-    return await this.prismaService.$transaction(async (tx) => {
+    return this.prismaService.$transaction(async (tx) => {
       const mailingAddressData = await tx.address.create({
         data: student.mailingAddress,
         select: { id: true },
@@ -123,26 +100,22 @@ export class StudentRepository implements IStudentRepository {
 
       const identityPaperData = await tx.identityPaper.create({
         data: student.identityPaper,
-        select: {
-          id: true,
-        },
+        select: { id: true },
       });
 
-      let permanentAddressData: { id: string } | null = null;
-      if (student.permanentAddress) {
-        permanentAddressData = await tx.address.create({
-          data: student.permanentAddress,
-          select: { id: true },
-        });
-      }
+      const permanentAddressData = student.permanentAddress
+        ? await tx.address.create({
+            data: student.permanentAddress,
+            select: { id: true },
+          })
+        : null;
 
-      let temporaryAddressData: { id: string } | null = null;
-      if (student.temporaryAddress) {
-        temporaryAddressData = await tx.address.create({
-          data: student.temporaryAddress,
-          select: { id: true },
-        });
-      }
+      const temporaryAddressData = student.temporaryAddress
+        ? await tx.address.create({
+            data: student.temporaryAddress,
+            select: { id: true },
+          })
+        : null;
 
       const {
         mailingAddress,
@@ -152,65 +125,8 @@ export class StudentRepository implements IStudentRepository {
         ...studentData
       } = student;
 
-      const createdStudent = await tx.student.create({
-        select: {
-          id: true,
-          studentId: true,
-          name: true,
-          dateOfBirth: true,
-          gender: true,
-          course: true,
-          email: true,
-          phone: true,
-          nationality: true,
-          faculty: { select: { id: true, title: true } },
-          mailingAddress: {
-            select: {
-              id: true,
-              number: true,
-              street: true,
-              district: true,
-              city: true,
-              country: true,
-            },
-          },
-          permanentAddress: {
-            select: {
-              id: true,
-              number: true,
-              street: true,
-              district: true,
-              city: true,
-              country: true,
-            },
-          },
-
-          temporaryAddress: {
-            select: {
-              id: true,
-              number: true,
-              street: true,
-              district: true,
-              city: true,
-              country: true,
-            },
-          },
-          program: { select: { id: true, title: true } },
-          status: { select: { id: true, title: true } },
-          identityPaper: {
-            select: {
-              id: true,
-              type: true,
-              number: true,
-              issueDate: true,
-              expirationDate: true,
-              placeOfIssue: true,
-              hasChip: true,
-              issuingCountry: true,
-              notes: true,
-            },
-          },
-        },
+      return tx.student.create({
+        select: studentSelect,
         data: {
           ...studentData,
           mailingAddressId: mailingAddressData.id,
@@ -219,95 +135,13 @@ export class StudentRepository implements IStudentRepository {
           permanentAddressId: permanentAddressData?.id,
         },
       });
-
-      return createdStudent;
     });
   }
 
   async delete(studentId: string): Promise<StudentResponse> {
-    return await this.prismaService.student.delete({
-      select: {
-        id: true,
-        studentId: true,
-        name: true,
-        dateOfBirth: true,
-        gender: true,
-        course: true,
-        email: true,
-        phone: true,
-        nationality: true,
-
-        faculty: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        mailingAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        permanentAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        temporaryAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        program: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        status: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        identityPaper: {
-          select: {
-            id: true,
-            type: true,
-            number: true,
-            issueDate: true,
-            expirationDate: true,
-            placeOfIssue: true,
-            hasChip: true,
-            issuingCountry: true,
-            notes: true,
-          },
-        },
-      },
-      where: {
-        studentId: studentId,
-      },
+    return this.prismaService.student.delete({
+      select: studentSelect,
+      where: { studentId },
     });
   }
 
@@ -316,22 +150,14 @@ export class StudentRepository implements IStudentRepository {
 
     if (data.statusId) {
       const newStatus = await this.prismaService.status.findUnique({
-        where: {
-          id: data.statusId,
-        },
+        where: { id: data.statusId },
       });
 
-      if (!newStatus) {
-        throw new Error('Invalid status');
-      }
+      if (!newStatus) throw new Error('Invalid status');
 
       const currentStatus = await this.prismaService.student.findUnique({
-        where: {
-          studentId: studentId,
-        },
-        select: {
-          status: true,
-        },
+        where: { studentId },
+        select: { status: true },
       });
 
       const businessRulesConfig = new BusinessRulesConfig();
@@ -347,263 +173,22 @@ export class StudentRepository implements IStudentRepository {
       }
     }
 
-    return await this.prismaService.student.update({
-      select: {
-        id: true,
-        studentId: true,
-        name: true,
-        dateOfBirth: true,
-        gender: true,
-        course: true,
-        email: true,
-        phone: true,
-        nationality: true,
-
-        faculty: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        mailingAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        permanentAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        temporaryAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        program: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        status: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        identityPaper: {
-          select: {
-            id: true,
-            type: true,
-            number: true,
-            issueDate: true,
-            expirationDate: true,
-            placeOfIssue: true,
-            hasChip: true,
-            issuingCountry: true,
-            notes: true,
-          },
-        },
-      },
-      where: {
-        studentId: studentId,
-      },
-      data: data,
+    return this.prismaService.student.update({
+      select: studentSelect,
+      where: { studentId },
+      data,
     });
   }
 
   async getAll(): Promise<StudentResponse[] | null> {
-    return await this.prismaService.student.findMany({
-      select: {
-        id: true,
-        studentId: true,
-        name: true,
-        dateOfBirth: true,
-        gender: true,
-        course: true,
-        email: true,
-        phone: true,
-        nationality: true,
-
-        faculty: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        mailingAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        permanentAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        temporaryAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        program: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        status: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        identityPaper: {
-          select: {
-            id: true,
-            type: true,
-            number: true,
-            issueDate: true,
-            expirationDate: true,
-            placeOfIssue: true,
-            hasChip: true,
-            issuingCountry: true,
-            notes: true,
-          },
-        },
-      },
-    });
+    return this.prismaService.student.findMany({ select: studentSelect });
   }
+
   async findById(studentId: string): Promise<StudentResponse | null> {
-    const response = await this.prismaService.student.findUnique({
-      select: {
-        id: true,
-        studentId: true,
-        name: true,
-        dateOfBirth: true,
-        gender: true,
-        course: true,
-        email: true,
-        phone: true,
-        nationality: true,
-
-        faculty: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        mailingAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        permanentAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        temporaryAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        program: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        status: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        identityPaper: {
-          select: {
-            id: true,
-            type: true,
-            number: true,
-            issueDate: true,
-            expirationDate: true,
-            placeOfIssue: true,
-            hasChip: true,
-            issuingCountry: true,
-            notes: true,
-          },
-        },
-      },
-      where: {
-        studentId: studentId,
-      },
+    return this.prismaService.student.findUnique({
+      select: studentSelect,
+      where: { studentId },
     });
-
-    return response;
   }
 
   async search(query: SearchStudent): Promise<StudentResponse[]> {
@@ -620,96 +205,15 @@ export class StudentRepository implements IStudentRepository {
 
     if (faculty) {
       whereCondition.faculty = {
-        title: {
-          contains: faculty,
-          mode: 'insensitive',
-        },
+        title: { contains: faculty, mode: 'insensitive' },
       };
     }
 
     return this.prismaService.student.findMany({
-      select: {
-        id: true,
-        studentId: true,
-        name: true,
-        dateOfBirth: true,
-        gender: true,
-        course: true,
-        email: true,
-        phone: true,
-        nationality: true,
-
-        faculty: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        mailingAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        permanentAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        temporaryAddress: {
-          select: {
-            id: true,
-            number: true,
-            street: true,
-            district: true,
-            city: true,
-            country: true,
-          },
-        },
-
-        program: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        status: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-
-        identityPaper: {
-          select: {
-            id: true,
-            type: true,
-            number: true,
-            issueDate: true,
-            expirationDate: true,
-            placeOfIssue: true,
-            hasChip: true,
-            issuingCountry: true,
-            notes: true,
-          },
-        },
-      },
+      select: studentSelect,
       where: whereCondition,
-      skip: Number((page - 1) * limit),
-      take: Number(limit),
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 }
