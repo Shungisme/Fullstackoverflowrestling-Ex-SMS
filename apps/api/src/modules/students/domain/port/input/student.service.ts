@@ -10,10 +10,7 @@ import {
   IStudentRepository,
   STUDENT_REPOSITORY,
 } from '../output/IStudentRepository';
-import {
-  StudentRequestDTO,
-  UpdateStudentRequestDTO,
-} from '../../dto/student-dto';
+import { UpdateStudentRequestDTO } from '../../dto/student-dto';
 import { SearchRequestDTO } from '../../dto/search-dto';
 import { DeleteStudentResponseDTO } from '../../dto/delete-dto';
 import {
@@ -58,7 +55,6 @@ import {
 import { writeFileSync } from 'fs';
 import * as XLSX from 'xlsx';
 import { Response } from 'express';
-import { CreateAddressDTO } from '../../dto/address-dto';
 import { CreateStudentWithAddressDTO } from '../../dto/create-student-dto';
 
 @Injectable()
@@ -480,6 +476,14 @@ export class StudentService implements IStudentService {
     student: CreateStudentWithAddressDTO,
   ): Promise<StudentResponseDTO> {
     try {
+      const existed = await this.studentRepository.findById(student.studentId);
+
+      if (existed) {
+        throw new ConflictException(
+          `Student with ID ${student.studentId} already exists`,
+        );
+      }
+
       return this.studentRepository.create(student);
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {

@@ -1,4 +1,3 @@
-import { CreateAddressDTO } from '../../dto/address-dto';
 import { CreateStudentWithAddressDTO } from '../../dto/create-student-dto';
 import { DeleteStudentResponseDTO } from '../../dto/delete-dto';
 import { SearchRequestDTO } from '../../dto/search-dto';

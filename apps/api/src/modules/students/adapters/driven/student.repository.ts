@@ -155,9 +155,12 @@ export class StudentRepository implements IStudentRepository {
 
       if (!newStatus) throw new Error('Invalid status');
 
-      const currentStatus = await this.prismaService.student.findUnique({
+      const currentStudent = await this.prismaService.student.findUnique({
         where: { studentId },
-        select: { status: true },
+      });
+
+      const currentStatus = await this.prismaService.status.findUnique({
+        where: { id: currentStudent?.statusId },
       });
 
       const businessRulesConfig = new BusinessRulesConfig();
@@ -165,9 +168,8 @@ export class StudentRepository implements IStudentRepository {
 
       if (
         newStatus.title &&
-        studentStatusRules[newStatus.title]?.includes(
-          currentStatus?.status.title,
-        )
+        currentStatus?.title &&
+        studentStatusRules[currentStatus.title]?.includes(newStatus?.title)
       ) {
         throw new Error('Invalid status');
       }
@@ -196,18 +198,24 @@ export class StudentRepository implements IStudentRepository {
 
     const whereCondition: any = {};
 
-    if (key) {
-      whereCondition.OR = [
-        { name: { contains: key, mode: 'insensitive' } },
-        { studentId: { contains: key, mode: 'insensitive' } },
-      ];
-    }
+    whereCondition.OR = [
+      { name: { contains: key, mode: 'insensitive' } },
+      { studentId: { contains: key, mode: 'insensitive' } },
+      {
+        faculty: {
+          title: {
+            contains: key,
+            mode: 'insensitive',
+          },
+        },
+      },
+    ];
 
-    if (faculty) {
-      whereCondition.faculty = {
-        title: { contains: faculty, mode: 'insensitive' },
-      };
-    }
+    // if (faculty) {
+    //   whereCondition.faculty = {
+    //     title: { contains: faculty, mode: 'insensitive' },
+    //   };
+    // }
 
     return this.prismaService.student.findMany({
       select: studentSelect,
