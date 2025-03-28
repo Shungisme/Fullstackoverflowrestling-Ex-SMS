@@ -8,7 +8,7 @@ type EditStudentTabProps = {
     onCancel: () => void;
 };
 
-export default async function EditStudentTab({
+export default function EditStudentTab({
     student,
     onSubmit,
     onCancel,

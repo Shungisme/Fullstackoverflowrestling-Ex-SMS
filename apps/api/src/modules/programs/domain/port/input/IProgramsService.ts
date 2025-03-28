@@ -12,7 +12,11 @@ export interface IProgramsService {
 
   findById(programId: string): Promise<ProgramsDto>;
 
-  findAll(page: number, limit: number): Promise<PaginatedResponse<ProgramsDto>>;
+  findAll(
+    page: number,
+    limit: number,
+    status: string,
+  ): Promise<PaginatedResponse<ProgramsDto>>;
 
-  count(): Promise<number>;
+  count(whereOptions: any): Promise<number>;
 }

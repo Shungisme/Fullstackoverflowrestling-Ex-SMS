@@ -9,8 +9,10 @@ import { UpdateStatusDTO } from '../../domain/dto/update-status.dto';
 export class StatusesRepository implements IStatusesRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async count(): Promise<number> {
-    return await this.prismaService.status.count();
+  async count(whereOptions: any): Promise<number> {
+    return await this.prismaService.status.count({
+      where: whereOptions,
+    });
   }
 
   async create(status: CreateStatusDTO): Promise<StatusesDto> {
@@ -33,11 +35,25 @@ export class StatusesRepository implements IStatusesRepository {
     };
   }
 
-  async findAll(page: number, limit: number): Promise<StatusesDto[]> {
+  async findAll(
+    page: number,
+    limit: number,
+    status: string,
+  ): Promise<StatusesDto[]> {
+    const whereOptions = {
+      status: status
+        ? {
+            equals: status as 'active' | 'inactive',
+          }
+        : undefined,
+    };
+
     const statuses = await this.prismaService.status.findMany({
       skip: (page - 1) * limit,
       take: limit,
+      where: whereOptions,
     });
+
     return statuses.map((status) => ({
       ...status,
       status: status.status as 'active' | 'inactive',

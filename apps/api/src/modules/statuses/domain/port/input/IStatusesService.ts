@@ -12,7 +12,11 @@ export interface IStatusesService {
 
   findById(statusId: string): Promise<StatusesDto>;
 
-  findAll(page: number, limit: number): Promise<PaginatedResponse<StatusesDto>>;
+  findAll(
+    page: number,
+    limit: number,
+    status: string,
+  ): Promise<PaginatedResponse<StatusesDto>>;
 
-  count(): Promise<number>;
+  count(whereOptions: any): Promise<number>;
 }

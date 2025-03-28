@@ -13,9 +13,9 @@ export interface IStatusesRepository {
 
   findByName(statusName: string): Promise<StatusesDto>;
 
-  findAll(page: number, limit: number): Promise<StatusesDto[]>;
+  findAll(page: number, limit: number, status: string): Promise<StatusesDto[]>;
 
-  count(): Promise<number>;
+  count(whereOptions: any): Promise<number>;
 }
 
 export const STATUS_REPOSITORY = Symbol('IStatusesRepository');

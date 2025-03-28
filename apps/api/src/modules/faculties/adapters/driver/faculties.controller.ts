@@ -29,7 +29,6 @@ import {
 import { ZodSerializerDto } from 'nestjs-zod';
 
 @ApiTags('Faculties')
-
 @Controller({ path: 'faculties', version: '1' })
 export class FacultiesController {
   constructor(private readonly facultiesService: FacultiesService) {}
@@ -43,7 +42,6 @@ export class FacultiesController {
     description: 'Create a faculty',
     type: FacultyResponseWrapperDTO,
   })
-
   create(@Body() createFacultyDto: CreateFacultyDTO) {
     return this.facultiesService.create(createFacultyDto);
   }
@@ -67,11 +65,22 @@ export class FacultiesController {
     type: Number,
     description: 'Results per page, defaults to 10',
   })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    type: String,
+    description: 'Status to filter by',
+  })
   async findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Query('status') status: string = '',
   ): Promise<PaginatedResponse<FacultiesDto>> {
-    return await this.facultiesService.findAll(Number(page), Number(limit));
+    return await this.facultiesService.findAll(
+      Number(page),
+      Number(limit),
+      status,
+    );
   }
 
   @Get(':id')
@@ -87,7 +96,6 @@ export class FacultiesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Faculty not found',
   })
-
   findById(@Param('id') id: string) {
     return this.facultiesService.findById(id);
   }
@@ -106,7 +114,6 @@ export class FacultiesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Faculty not found',
   })
-
   update(@Param('id') id: string, @Body() updateFacultyDto: UpdateFacultyDTO) {
     return this.facultiesService.update(id, updateFacultyDto);
   }
@@ -124,7 +131,6 @@ export class FacultiesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Faculty not found',
   })
-
   delete(@Param('id') id: string) {
     return this.facultiesService.delete(id);
   }

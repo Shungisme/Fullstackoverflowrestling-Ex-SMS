@@ -21,10 +21,10 @@ interface OverviewTabProps {
 }
 
 const OverviewTab = ({ student, openAddressDialog }: OverviewTabProps) => {
+  if (!student) return <div></div>;
   return (
-    <TabsContent value="overview" className="mt-6">
       <div className="grid gap-6 md:grid-cols-2">
-        <InfoCard student={student} />
+        {student && <InfoCard student={student} />}
 
         <Card>
           <CardHeader>
@@ -69,7 +69,6 @@ const OverviewTab = ({ student, openAddressDialog }: OverviewTabProps) => {
           </CardContent>
         </Card>
       </div>
-    </TabsContent>
   );
 };
 

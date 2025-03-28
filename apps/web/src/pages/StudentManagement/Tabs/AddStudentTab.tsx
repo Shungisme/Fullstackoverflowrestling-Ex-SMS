@@ -7,7 +7,7 @@ type AddStudentTabProps = {
     onCancel: () => void;
 };
 
-export default async function AddStudentTab({ onSubmit, onCancel }: AddStudentTabProps) {
+export default function AddStudentTab({ onSubmit, onCancel }: AddStudentTabProps) {
     const { faculties, statuses, programs } = useSchoolConfigContext();
     return (
         <StudentForm

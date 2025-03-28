@@ -13,9 +13,9 @@ export interface IProgramsRepository {
 
   findByName(programName: string): Promise<ProgramsDto>;
 
-  findAll(page: number, limit: number): Promise<ProgramsDto[]>;
+  findAll(page: number, limit: number, status: string): Promise<ProgramsDto[]>;
 
-  count(): Promise<number>;
+  count(whereOptions: any): Promise<number>;
 }
 
 export const PROGRAM_REPOSITORY = Symbol('IProgramsRepository');

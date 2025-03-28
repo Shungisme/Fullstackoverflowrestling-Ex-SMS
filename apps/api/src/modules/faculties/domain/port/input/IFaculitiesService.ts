@@ -15,7 +15,8 @@ export interface IFacultiesService {
   findAll(
     page: number,
     limit: number,
+    status: string,
   ): Promise<PaginatedResponse<FacultiesDto>>;
 
-  count(): Promise<number>;
+  count(whereOptions: any): Promise<number>;
 }

@@ -125,7 +125,7 @@ export default function StudentTable({
   const paginatedStudents = sortedStudents;
 
   const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) return null;
+    if (sortField !== field) return <div></div>;
     return sortDirection === "asc" ? (
       <ChevronUp className="ml-1 h-4 w-4" />
     ) : (
@@ -166,7 +166,7 @@ export default function StudentTable({
     await confirmDelete(onDelete);
   };
 
-  if (!data || !Array.isArray(data.students)) return null;
+  if (!data || !Array.isArray(data.students)) return <div></div>;
   return (
     <>
       <div className="flex justify-between items-center p-4">

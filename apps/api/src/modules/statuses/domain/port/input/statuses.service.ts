@@ -16,9 +16,9 @@ export class StatusesService implements IStatusesService {
     private statusesRepository: IStatusesRepository,
   ) {}
 
-  async count(): Promise<number> {
+  async count(whereOptions: any): Promise<number> {
     try {
-      return await this.statusesRepository.count();
+      return await this.statusesRepository.count(whereOptions);
     } catch (error) {
       throw new Error(`Error counting statuses: ${error.message}`);
     }
@@ -45,10 +45,15 @@ export class StatusesService implements IStatusesService {
   async findAll(
     page: number,
     limit: number,
+    status: string,
   ): Promise<PaginatedResponse<StatusesDto>> {
     try {
-      const statuses = await this.statusesRepository.findAll(page, limit);
-      const totalStatuses = await this.statusesRepository.count();
+      const statuses = await this.statusesRepository.findAll(
+        page,
+        limit,
+        status,
+      );
+      const totalStatuses = statuses.length;
 
       return {
         data: statuses,

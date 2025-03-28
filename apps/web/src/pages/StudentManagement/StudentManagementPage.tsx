@@ -1,10 +1,10 @@
+"use client";
 import React, { Suspense } from "react";
 import PageHeader from "./PageHeader";
 import LoadingSpinner from "@/src/components/LoadingSpinner";
 import ErrorBoundary from "@/src/components/molecules/ErrorBoundary";
 import StudentStats from "../Home/Stats/StudentStats";
 import StudentManagementClient from "./StudentManagementClient";
-import { StudentProvider } from "@/src/context/StudentContext";
 
 const StudentManagementPage = () => {
   return (
