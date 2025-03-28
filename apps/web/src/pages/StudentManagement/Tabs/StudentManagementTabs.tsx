@@ -78,7 +78,6 @@ const StudentManagementTabs = () => {
                             student={editingStudent}
                             onSubmit={async (student) => {
                                 const success = await updateStudent(student);
-                                console.log(success);
                                 if (success) {
                                     setEditingStudent(null);
                                     setCurrentTab("list");
