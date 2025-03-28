@@ -55,8 +55,9 @@ export const StudentSchema = z.object({
 export class StudentRequestDTO extends createZodDto(
   StudentSchema.omit({ id: true }),
 ) {}
+
 export class UpdateStudentRequestDTO extends createZodDto(
-  StudentSchema.omit({ studentId: true }).partial(),
+  StudentSchema.partial(),
 ) {}
 
 export type StudentRequestType = z.infer<typeof StudentSchema>;
