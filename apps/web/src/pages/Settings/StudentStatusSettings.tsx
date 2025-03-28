@@ -15,7 +15,7 @@ export default function StudentStatusSettings() {
 
   const fetchData = async () => {
     try {
-      const res = await StudentStatusService.getAll();
+      const res = await StudentStatusService.getAll([]);
       if (res.statusCode !== 200) {
         toast.error(res.message);
       } else {

@@ -15,7 +15,7 @@ export default function FacultySettings() {
 
   const fetchData = async () => {
     try {
-      const res = await FacultyService.getAll();
+      const res = await FacultyService.getAll([]);
       if (res.statusCode !== 200) {
         toast.error(res.message);
       } else {
