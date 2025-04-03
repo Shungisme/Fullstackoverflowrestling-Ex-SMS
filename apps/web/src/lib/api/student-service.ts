@@ -8,6 +8,7 @@ import {
 import { BASE_URL, ListConfig } from "@/src/constants/constants";
 import { stripEmptyValues } from "@/src/utils/cleaner";
 import { toQueryString } from "@/src/utils/helper";
+import { StudentSearchParams } from "@/src/types/search";
 
 const studentURL = BASE_URL + "/students";
 
@@ -39,12 +40,9 @@ export async function getStudent(id: string): Promise<IAPIResponse<Student>> {
 }
 
 export async function searchStudents(
-  searchTerm: string
+  searchTerm: StudentSearchParams
 ): Promise<IAPIResponse<StudentList>> {
-  const queryString = toQueryString({
-    key: searchTerm,
-  });
-
+  const queryString = toQueryString(searchTerm);
   const res = await fetch(`${studentURL}?${queryString}`, {
     headers: { "Content-Type": "application/json" },
   });

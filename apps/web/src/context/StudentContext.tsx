@@ -3,6 +3,7 @@
 import { createContext, useContext, ReactNode, useMemo } from "react";
 import { Student, StudentList } from "../types";
 import { useStudents } from "../hooks/useStudents";
+import { StudentSearchParams } from "../types/search";
 
 type StudentContextType = {
   students: StudentList;
@@ -11,7 +12,7 @@ type StudentContextType = {
   addStudent: (student: Student) => Promise<boolean>;
   updateStudent: (student: Student) => Promise<boolean>;
   deleteStudent: (studentId: string) => Promise<void>;
-  searchStudents: (searchTerm: string) => Promise<void>;
+  searchStudents: (searchTerm: StudentSearchParams) => Promise<void>;
   handlePageChange: (page: number) => boolean;
 };
 
