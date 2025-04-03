@@ -11,6 +11,7 @@ import {
   deleteStudent as deleteStudentApi,
 } from "../lib/api/student-service";
 import { ListConfig } from "../constants/constants";
+import { StudentSearchParams } from "../types/search";
 
 export function useStudents() {
   const [students, setStudents] = useState<StudentList>({
@@ -99,7 +100,7 @@ export function useStudents() {
     }
   };
 
-  const searchStudents = async (searchTerm: string): Promise<void> => {
+  const searchStudents = async (searchTerm: StudentSearchParams): Promise<void> => {
     try {
       setIsLoading(true);
       const data = await searchStudentsApi(searchTerm);
