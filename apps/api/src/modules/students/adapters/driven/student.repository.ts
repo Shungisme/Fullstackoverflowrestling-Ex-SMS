@@ -198,24 +198,18 @@ export class StudentRepository implements IStudentRepository {
 
     const whereCondition: any = {};
 
-    whereCondition.OR = [
-      { name: { contains: key, mode: 'insensitive' } },
-      { studentId: { contains: key, mode: 'insensitive' } },
-      {
-        faculty: {
-          title: {
-            contains: key,
-            mode: 'insensitive',
-          },
-        },
-      },
-    ];
+    if (key) {
+      whereCondition.OR = [
+        { name: { contains: key, mode: 'insensitive' } },
+        { studentId: { contains: key, mode: 'insensitive' } },
+      ];
+    }
 
-    // if (faculty) {
-    //   whereCondition.faculty = {
-    //     title: { contains: faculty, mode: 'insensitive' },
-    //   };
-    // }
+    if (faculty) {
+      whereCondition.faculty = {
+        title: { contains: faculty, mode: 'insensitive' },
+      };
+    }
 
     return this.prismaService.student.findMany({
       select: studentSelect,
