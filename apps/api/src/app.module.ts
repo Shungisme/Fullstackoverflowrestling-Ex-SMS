@@ -1,8 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { LoggerModule } from './shared/logger/logger.module';
 import { HttpLoggerMiddleware } from './shared/middlewares/http-logger.middleware';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { StudentsModule } from './modules/students/students.module';
 import { SharedModule } from './shared/services/shared.module';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -25,9 +23,8 @@ import { IdentityPapersModule } from './modules/identity-papers/identity-papers.
     StatusesModule,
     IdentityPapersModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [
-    AppService,
     {
       provide: APP_PIPE,
       useClass: ZodValidationPipe,
