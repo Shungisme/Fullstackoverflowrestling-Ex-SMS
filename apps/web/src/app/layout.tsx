@@ -12,6 +12,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Hệ thống Quản lý Sinh viên",
   description: "Ứng dụng quản lý thông tin sinh viên",
+  icons: {
+      icon: '/favicon.png',
+  }
 };
 
 export default function RootLayout({

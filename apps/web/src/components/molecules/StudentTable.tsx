@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui";
+} from "../atoms/Table";
 import { Button } from "../atoms/Button";
 import {
   ChevronDown,
