@@ -20,6 +20,7 @@ export interface IStudentRepository {
   search(query: SearchStudent): Promise<StudentResponse[]>;
   count(): Promise<number>;
   getAll(): Promise<StudentResponse[] | null>;
+  getStudentResults(studentId: string): Promise<any[]>;
 }
 
 export const STUDENT_REPOSITORY = Symbol('IStudentRepository');

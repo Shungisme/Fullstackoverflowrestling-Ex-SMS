@@ -18,4 +18,5 @@ export interface IStudentService {
     file: Express.Multer.File,
   ): Promise<{ isCreated: boolean; message: string }>;
   exportFile(type: string, res: Response): Promise<any>;
+  exportTranscript(studentId: string, res: Response): Promise<void>;
 }

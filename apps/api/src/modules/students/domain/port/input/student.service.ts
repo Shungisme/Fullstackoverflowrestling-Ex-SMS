@@ -56,6 +56,7 @@ import { writeFileSync } from 'fs';
 import * as XLSX from 'xlsx';
 import { Response } from 'express';
 import { CreateStudentWithAddressDTO } from '../../dto/create-student-dto';
+import { calculateGPA } from 'src/shared/utils/calculate-gpa';
 
 @Injectable()
 export class StudentService implements IStudentService {
@@ -73,6 +74,84 @@ export class StudentService implements IStudentService {
     @Inject(IDENTITY_REPOSITORY)
     private readonly identityRepository: IIdentityPapersRepository,
   ) {}
+
+  async exportTranscript(studentId: string, res: Response): Promise<void> {
+    const student = await this.studentRepository.findById(studentId);
+    if (!student) {
+      throw new Error(`Sinh viên với mã ${studentId} không tồn tại`);
+    }
+
+    const results = await this.studentRepository.getStudentResults(studentId);
+
+    const gpa = calculateGPA(results);
+
+    const workbook = XLSX.utils.book_new();
+    const worksheetData: (string | number)[][] = [];
+
+    worksheetData.push(['BẢNG ĐIỂM CHÍNH THỨC']);
+    worksheetData.push([]);
+
+    worksheetData.push(['Mã Sinh Viên:', student.studentId]);
+    worksheetData.push(['Họ Tên:', student.name]);
+    worksheetData.push(['Khoa:', student.faculty.title]);
+    worksheetData.push(['Chương Trình:', student.program.title]);
+    worksheetData.push([]);
+
+    worksheetData.push(['Mã Môn', 'Tên Môn', 'Số Tín Chỉ', 'Điểm', 'Kết Quả']);
+
+    results.forEach((result) => {
+      const score = parseFloat(result.score);
+      worksheetData.push([
+        result.class.subject.code,
+        result.class.subject.title,
+        result.class.subject.credit,
+        score,
+        score >= 5 ? 'Đạt' : 'Không Đạt',
+      ]);
+    });
+
+    // Thêm GPA
+    worksheetData.push([]); // Dòng trống
+    worksheetData.push(['GPA:', gpa.toFixed(2)]);
+
+    // Tạo worksheet từ dữ liệu
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+    // Merge cell cho tiêu đề
+    worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }];
+
+    // Định dạng tiêu đề
+    worksheet['A1'].s = {
+      font: { bold: true, sz: 16 },
+      alignment: { horizontal: 'center' },
+    };
+
+    worksheet['!cols'] = [
+      { wch: 15 }, // Mã Môn
+      { wch: 30 }, // Tên Môn
+      { wch: 15 }, // Số Tín Chỉ
+      { wch: 10 }, // Điểm
+      { wch: 15 }, // Kết Quả
+    ];
+
+    // Thêm worksheet vào workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Bảng Điểm');
+
+    // Tạo buffer cho file Excel
+    const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+
+    // Thiết lập header để tải file
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=transcript-${studentId}.xlsx`,
+    );
+
+    res.end(buffer);
+  }
 
   async exportFile(type: string, res: Response): Promise<any> {
     try {
