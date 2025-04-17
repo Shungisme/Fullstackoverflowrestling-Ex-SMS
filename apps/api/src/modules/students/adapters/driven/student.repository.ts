@@ -218,4 +218,49 @@ export class StudentRepository implements IStudentRepository {
       take: limit,
     });
   }
+
+  async getStudentResults(studentId: string): Promise<any[]> {
+    // Lấy tất cả kết quả của sinh viên
+    const rawResults = await this.prismaService.studentClassResult.findMany({
+      where: { studentId },
+      include: {
+        class: {
+          include: {
+            subject: true,
+          },
+        },
+      },
+    });
+
+    // Nhóm kết quả theo classCode và tính điểm tổng kết
+    const groupedResults: { [key: string]: any } = {};
+
+    rawResults.forEach((result) => {
+      const classCode = result.classCode;
+      if (!groupedResults[classCode]) {
+        groupedResults[classCode] = {
+          class: result.class,
+          scores: [],
+          totalScore: 0,
+          totalFactor: 0,
+        };
+      }
+      groupedResults[classCode].scores.push({
+        type: result.type,
+        score: result.score,
+        factor: result.factor,
+      });
+      groupedResults[classCode].totalScore += result.score * result.factor;
+      groupedResults[classCode].totalFactor += result.factor;
+    });
+
+    // Chuyển đổi dữ liệu thành mảng kết quả
+    return Object.values(groupedResults).map((group) => ({
+      class: group.class,
+      score:
+        group.totalFactor > 0
+          ? (group.totalScore / group.totalFactor).toFixed(2)
+          : 0, // Điểm tổng kết
+    }));
+  }
 }

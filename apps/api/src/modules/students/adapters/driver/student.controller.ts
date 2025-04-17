@@ -130,6 +130,23 @@ export class StudentController {
     return await this.studentService.exportFile(type, res);
   }
 
+  @Get(':studentId/transcript')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Export a student transcript',
+    schema: {
+      type: 'string',
+      format: 'binary',
+    },
+  })
+  async exportTranscript(
+    @Param('studentId') studentId: string,
+    @Res() res: Response,
+  ) {
+    await this.studentService.exportTranscript(studentId, res);
+  }
+
   @Get(':studentId')
   @HttpCode(HttpStatus?.OK)
   @ZodSerializerDto(StudentResponseDTO)
