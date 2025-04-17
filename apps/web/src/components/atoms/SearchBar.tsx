@@ -6,23 +6,18 @@ import { Button } from "./Button";
 import LoadingSpinner from "../LoadingSpinner";
 
 type SearchBarProps = {
-    onSearch: (searchTerm: string) => void;
-    isLoading: boolean;
     placeholder?: string;
-    value?: string;
 };
 
 const SearchBar = ({
-    onSearch,
-    value = "",
-    isLoading,
     placeholder = "Tìm kiếm...",
 }: SearchBarProps) => {
-    const [searchTerm, setSearchTerm] = React.useState<string>(value);
+    const [searchTerm, setSearchTerm] = React.useState<string>("");
+    const [isLoading, _] = React.useState<boolean>(false);
 
     const handleSearch = () => {
         if (searchTerm.trim() !== "") {
-            onSearch(searchTerm);
+            console.log(searchTerm);
         }
     };
 
@@ -31,7 +26,6 @@ const SearchBar = ({
             <div className="flex-1">
                 <Input
                     type="text"
-                    disabled={isLoading}
                     placeholder={placeholder}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}

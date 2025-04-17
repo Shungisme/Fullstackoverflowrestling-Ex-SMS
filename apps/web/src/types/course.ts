@@ -1,4 +1,4 @@
-import { Faculty } from ".";
+import { Faculty, Student } from ".";
 
 export type Course = {
     id?: string;
@@ -6,6 +6,7 @@ export type Course = {
     title: string;
     credit: number;
     faculty: Faculty;
+    facultyId: string;
     description: string;
     status: CourseStatus;
     prerequisite?: Course[];
@@ -14,19 +15,31 @@ export type Course = {
 }
 
 export enum CourseStatus {
-    ACTIVE = "activated",
-    INACTIVE = "deactivated",
+    ACTIVE = "ACTIVATED",
+    INACTIVE = "DEACTIVATED",
 }
 
 export type Class = {
     id?: string;
     code: string;
-    subjectCourse: string;
-    semester: string;
+    subjectCode: string;
+    subject: Course;
+    semester: Semester;
     maximumQuantity: number;
     classroom: string;
     classSchedule: string;
     teacher: string;
+}
+
+export type ClassResult = {
+    id?: string;
+    student: Student;
+    class: Class;
+    type: "MIDTERM" | "FINALTERM" | "OTHER";
+    factor: number;
+    score: number;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export type Semester = {

@@ -6,17 +6,27 @@ import { EnrollmentForm } from "@/src/components/organisms/EnrollmentForm";
 import { EnrollmentManagement } from "@/src/components/organisms/EnrollmentManagement"; 
 import { TranscriptPrinter } from "@/src/components/organisms/TranscriptPrinter";
 import { useSearchParams } from "next/navigation";
-import { SchoolConfigProvider } from "@/src/context/SchoolConfigContext";
+import { getStudent } from "@/src/lib/api/student-service";
+import { Student } from "@/src/types";
 
 export default function EnrollmentPage() {
   const searchParams = useSearchParams();
   const studentId = searchParams ? searchParams.get('student') : null;
-  
+  const [student, setStudent] = React.useState<Student | null>(null);
   // If there's a student ID in URL, open the management tab by default
   const defaultTab = studentId ? "manage" : "enroll";
+  React.useEffect(() => {
+    const fetchStudent = async () => {
+      if (studentId) {
+        const res = await getStudent(studentId);
+        setStudent(res.data);
+      }
+    };
+    fetchStudent();
+  }, [studentId]);
 
   return (
-    <SchoolConfigProvider>
+
       <div className="container mx-auto py-8">
         <h1 className="text-3xl font-bold mb-8">Quản lý đăng ký khóa học</h1>
         
@@ -46,7 +56,7 @@ export default function EnrollmentPage() {
               </div>
               
               <div className="bg-card shadow-sm rounded-lg border p-6">
-                <EnrollmentForm initialStudentId={studentId || ""} />
+                <EnrollmentForm initialStudentId={student?.studentId || ""} />
               </div>
             </div>
           </TabsContent>
@@ -81,6 +91,5 @@ export default function EnrollmentPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </SchoolConfigProvider>
   );
 }

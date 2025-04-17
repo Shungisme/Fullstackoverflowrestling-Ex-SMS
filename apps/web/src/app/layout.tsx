@@ -7,6 +7,7 @@ import { Toaster } from "../components/atoms/Sonner";
 import Navbar from "../components/atoms/Navbar";
 import { ThemeProvider } from "../theme/ThemeProvider";
 import { StudentProvider } from "../context/StudentContext";
+import { SchoolConfigProvider } from "../context/SchoolConfigContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -28,6 +29,7 @@ export default function RootLayout({
         <ToastProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <StudentProvider>
+              <SchoolConfigProvider>
               <Navbar />
               <main className="flex-1 bg-background scroll-auto">
                 <div className="container mx-auto py-6 px-4 max-w-6xl">
@@ -42,6 +44,7 @@ export default function RootLayout({
                   </p>
                 </div>
               </footer>
+              </SchoolConfigProvider>
             </StudentProvider>
           </ThemeProvider>
           <Toaster richColors />

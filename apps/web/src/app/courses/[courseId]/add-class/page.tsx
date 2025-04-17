@@ -5,9 +5,7 @@ import React from "react";
 
 const AddClassPage = ({ params }: { params: { courseId: string } }) => {
   return (
-    <SchoolConfigProvider>
       <AddClass courseId={params.courseId} />
-    </SchoolConfigProvider>
   );
 };
 

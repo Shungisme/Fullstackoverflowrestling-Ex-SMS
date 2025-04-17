@@ -17,7 +17,6 @@ import NumberInputField from "@/src/components/atoms/NumberInputField";
 import { useSchoolConfigContext } from "@/src/context/SchoolConfigContext";
 import TextareaInputField from "@/src/components/atoms/TextareaInputField";
 import { Button } from "@/src/components/atoms/Button";
-import { Course, CourseStatus } from "@/src/types/course";
 import { MultiSelectInputField } from "@/src/components/atoms/MultiSelectInputField";
 import { toast } from "sonner";
 import LoadingSpinner from "@/src/components/LoadingSpinner";
@@ -31,6 +30,7 @@ import {
 } from "@/src/components/atoms/Select";
 
 export const formSchema = z.object({
+    id: z.string().optional(),
     code: z.string().min(1, { message: "Mã môn học không được để trống" }),
     title: z.string().min(1, { message: "Tên môn học không được để trống" }),
     credit: z.number().min(2, { message: "Số tín chỉ phải lớn hơn 1" }),
@@ -74,38 +74,8 @@ const CourseForm = ({
         }
     };
 
-    const { faculties } = useSchoolConfigContext();
-    const courses: Course[] = [
-        {
-            id: "1",
-            code: "CS101",
-            title: "Introduction to Computer Science",
-            credit: 3,
-            faculty: {
-                id: "1",
-                title: "Computer Science",
-                description: "This is the Computer Science faculty.",
-                status: "active",
-            },
-            description: "This course covers the basics of computer science.",
-            status: CourseStatus.ACTIVE,
-        },
-        {
-            id: "2",
-            code: "CS102",
-            title: "Data Structures and Algorithms",
-            credit: 3,
-            faculty: {
-                id: "1",
-                title: "Computer Science",
-                description: "This is the Computer Science faculty.",
-                status: "active",
-            },
-            description:
-                "This course covers the basics of data structures and algorithms.",
-            status: CourseStatus.ACTIVE,
-        },
-    ];
+    const { faculties, courses } = useSchoolConfigContext();
+    const coursesList = courses.filter(course => course.code !== defaultValues?.code);
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -205,7 +175,7 @@ const CourseForm = ({
                             <MultiSelectInputField
                                 label="Môn học tiên quyết"
                                 placeholder="Chọn môn học tiên quyết"
-                                contents={courses.map((course) => ({
+                                contents={coursesList.map((course) => ({
                                     value: course.id || "",
                                     displayValue: course.title,
                                 }))}

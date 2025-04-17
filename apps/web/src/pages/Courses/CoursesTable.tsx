@@ -5,7 +5,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/src/components/atoms/DropDownMenu";
 import LoadingSpinner from "@/src/components/LoadingSpinner";
@@ -42,9 +41,9 @@ const columns: ColumnDef<Course>[] = [
             const status = row.getValue("status");
             return (
                 <span
-                    className={`text-${status === "activated" ? "green" : "red"}-500`}
+                    className={`text-${status === "ACTIVATED" ? "green" : "red"}-500`}
                 >
-                    {status === "activated" ? "Đang mở" : "Ngừng hoạt động"}
+                    {status === "ACTIVATED" ? "Đang mở" : "Ngừng hoạt động"}
                 </span>
             );
         },

@@ -17,13 +17,23 @@ import { Textarea } from "@/src/components/atoms/Textarea";
 import { toast } from "sonner";
 import LoadingSpinner from "@/src/components/LoadingSpinner";
 import { Enrollment, EnrollmentStatus } from "@/src/types/enrollment";
-import { cancelEnrollment, checkCancellationEligibility } from "@/src/lib/api/enrollment-service";
-import { Alert, AlertDescription, AlertTitle } from "@/src/components/atoms/Alert";
+import {
+  cancelEnrollment,
+  checkCancellationEligibility,
+} from "@/src/lib/api/enrollment-service";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/src/components/atoms/Alert";
 import { AlertCircle, Clock } from "lucide-react";
 import { formatDate } from "date-fns";
 
 const cancelFormSchema = z.object({
-  reason: z.string().min(1, { message: "Lý do không được để trống" }).max(500, { message: "Lý do không quá 500 ký tự" }),
+  reason: z
+    .string()
+    .min(1, { message: "Lý do không được để trống" })
+    .max(500, { message: "Lý do không quá 500 ký tự" }),
 });
 
 type CancelEnrollmentFormProps = {
@@ -32,9 +42,16 @@ type CancelEnrollmentFormProps = {
   onCancel: () => void;
 };
 
-export function CancelEnrollmentForm({ enrollment, onSuccess, onCancel }: CancelEnrollmentFormProps) {
+export function CancelEnrollmentForm({
+  enrollment,
+  onSuccess,
+  onCancel,
+}: CancelEnrollmentFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [eligibilityStatus, setEligibilityStatus] = useState<{eligible: boolean; message: string} | null>(null);
+  const [eligibilityStatus, setEligibilityStatus] = useState<{
+    eligible: boolean;
+    message: string;
+  } | null>(null);
 
   const form = useForm<z.infer<typeof cancelFormSchema>>({
     resolver: zodResolver(cancelFormSchema),
@@ -47,18 +64,18 @@ export function CancelEnrollmentForm({ enrollment, onSuccess, onCancel }: Cancel
   React.useEffect(() => {
     async function checkEligibility() {
       try {
-        if (enrollment.status === EnrollmentStatus.CANCELLED) {
+        if (enrollment.type === EnrollmentStatus.DROP) {
           setEligibilityStatus({
             eligible: false,
             message: "Đăng ký khóa học này đã bị hủy trước đó.",
           });
           return;
         }
-        
-        if (enrollment.status === EnrollmentStatus.COMPLETED) {
+
+        if (enrollment.type === EnrollmentStatus.FAIL) {
           setEligibilityStatus({
             eligible: false,
-            message: "Không thể hủy khóa học đã hoàn thành.",
+            message: "Đăng ký khóa học này đã bị thất bại trước đó.",
           });
           return;
         }
@@ -81,11 +98,11 @@ export function CancelEnrollmentForm({ enrollment, onSuccess, onCancel }: Cancel
       toast.error("Không thể hủy đăng ký khóa học này");
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
-      await cancelEnrollment(enrollment.id!, values.reason);
+      await cancelEnrollment(enrollment.id!);
       toast.success("Hủy đăng ký khóa học thành công");
       onSuccess();
     } catch (error) {
@@ -116,23 +133,25 @@ export function CancelEnrollmentForm({ enrollment, onSuccess, onCancel }: Cancel
           </div>
           <div className="grid grid-cols-3">
             <span className="text-sm font-medium">Tên sinh viên:</span>
-            <span className="text-sm col-span-2">{enrollment.student?.name}</span>
+            <span className="text-sm col-span-2">
+              {enrollment.student?.name}
+            </span>
           </div>
           <div className="grid grid-cols-3">
             <span className="text-sm font-medium">Khóa học:</span>
-            <span className="text-sm col-span-2">{enrollment.course?.code} - {enrollment.course?.title}</span>
+            <span className="text-sm col-span-2">
+              {enrollment.class?.subjectCode}
+            </span>
           </div>
           <div className="grid grid-cols-3">
             <span className="text-sm font-medium">Lớp học:</span>
             <span className="text-sm col-span-2">{enrollment.class?.code}</span>
           </div>
           <div className="grid grid-cols-3">
-            <span className="text-sm font-medium">Học kỳ:</span>
-            <span className="text-sm col-span-2">{enrollment.semester}</span>
-          </div>
-          <div className="grid grid-cols-3">
             <span className="text-sm font-medium">Ngày đăng ký:</span>
-            <span className="text-sm col-span-2">{formatDate(new Date(enrollment.enrollmentDate), "dd/MM/yyyy")}</span>
+            <span className="text-sm col-span-2">
+              {formatDate(new Date(enrollment.createdAt), "dd/MM/yyyy")}
+            </span>
           </div>
         </div>
       </div>
@@ -178,16 +197,16 @@ export function CancelEnrollmentForm({ enrollment, onSuccess, onCancel }: Cancel
           />
 
           <div className="flex justify-end gap-2">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={onCancel}
               disabled={isLoading}
             >
               Hủy bỏ
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading || !eligibilityStatus?.eligible}
             >
               {isLoading ? <LoadingSpinner /> : "Xác nhận hủy đăng ký"}

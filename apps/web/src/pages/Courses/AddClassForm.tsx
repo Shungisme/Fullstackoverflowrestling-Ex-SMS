@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/src/components/atoms/Select";
 import { useSchoolConfigContext } from "@/src/context/SchoolConfigContext";
+import { Course } from "@/src/types/course";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import React from "react";
@@ -26,14 +27,14 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 type AddClassFormProps = {
-  onSubmit: (value: any) => Promise<void>;
-  subjectCourse: string;
+  onSubmit: (value: z.infer<typeof formSchema>) => Promise<void>;
+  subjectCourse: Course;
 };
 
 const formSchema = z.object({
   code: z.string().min(1, { message: "Mã lớp không được để trống" }),
-  subjectCourse: z.string().min(1, { message: "Môn học không được để trống" }),
-  semester: z.string().min(1, { message: "Học kỳ không được để trống" }),
+  courseId: z.string().min(1, { message: "Môn học không được để trống" }),
+  semesterId: z.string().min(1, { message: "Học kỳ không được để trống" }),
   maximumQuantity: z
     .number()
     .min(1, { message: "Số lượng tối đa không được để trống" }),
@@ -41,7 +42,7 @@ const formSchema = z.object({
   classSchedule: z
     .string()
     .min(1, { message: "Thời gian học không được để trống" }),
-  teacher: z.string().min(1, { message: "Giảng viên không được để trống" }),
+  teacherName: z.string().min(1, { message: "Giảng viên không được để trống" }),
 });
 
 const AddClassForm = ({ onSubmit, subjectCourse }: AddClassFormProps) => {
@@ -49,12 +50,12 @@ const AddClassForm = ({ onSubmit, subjectCourse }: AddClassFormProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       code: "",
-      subjectCourse: subjectCourse,
-      semester: "",
+      courseId: subjectCourse.id!,
+      semesterId: "",
       maximumQuantity: 1,
       classroom: "",
       classSchedule: "",
-      teacher: "",
+      teacherName: "",
     },
   });
 
@@ -86,16 +87,25 @@ const AddClassForm = ({ onSubmit, subjectCourse }: AddClassFormProps) => {
           />
           <FormField
             control={form.control}
-            name="subjectCourse"
-            render={({ field }) => (
-              <InputField label="Môn học" disabled required {...field} />
-            )}
+            name="courseId"
+            render={({ field }) => {
+              const { value, ...rest } = field;
+              return (
+                <InputField
+                  label="Môn học"
+                  value={subjectCourse.title}
+                  disabled
+                  required
+                  {...rest}
+                />
+              );
+            }}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="semester"
+            name="semesterId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Học kỳ</FormLabel>
@@ -163,7 +173,7 @@ const AddClassForm = ({ onSubmit, subjectCourse }: AddClassFormProps) => {
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="teacher"
+            name="teacherName"
             render={({ field }) => (
               <InputField
                 label="Giảng viên"
@@ -175,8 +185,8 @@ const AddClassForm = ({ onSubmit, subjectCourse }: AddClassFormProps) => {
           />
         </div>
         <Button type="submit" className="w-full">
-            <Plus className="mr-2 h-4 w-4" />
-            Thêm lớp học
+          <Plus className="mr-2 h-4 w-4" />
+          Thêm lớp học
         </Button>
       </form>
     </Form>

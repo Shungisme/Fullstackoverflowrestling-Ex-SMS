@@ -11,6 +11,7 @@ type SchoolConfigContextType = {
   programs: Program[];
   courses: Course[];
   semesters?: Semester[];
+  isLoading?: boolean;
 };
 
 const contextValue = {
@@ -28,7 +29,7 @@ type SchoolConfigProviderProps = {
 };
 
 export function SchoolConfigProvider({ children }: SchoolConfigProviderProps) {
-  const { faculties, statuses, programs, courses, semesters } = useSchoolConfig();
+  const { faculties, statuses, programs, courses, semesters, isLoading } = useSchoolConfig();
 
   const value = useMemo(
     () => ({
@@ -37,8 +38,9 @@ export function SchoolConfigProvider({ children }: SchoolConfigProviderProps) {
       programs,
       courses,
       semesters,
+      isLoading,
     }),
-    [faculties, statuses, programs, courses, semesters]
+    [faculties, statuses, programs, courses, semesters, isLoading]
   );
 
   return (

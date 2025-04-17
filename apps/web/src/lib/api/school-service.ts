@@ -1,15 +1,8 @@
-import { toQueryString } from "@/src/utils/helper";
-import {
-  APIError,
-  Faculty,
-  IAPIResponse,
-  Program,
-  StudentStatus,
-} from "@/src/types";
+import { Faculty, IAPIResponse, Program, StudentStatus } from "@/src/types";
 import { BASE_URL } from "@/src/constants/constants";
-import { Course, CourseStatus } from "@/src/types/course";
+import { Class, ClassResult, Course, Semester } from "@/src/types/course";
 
-interface PaginatedResponse<T> {
+export interface PaginatedResponse<T> {
   data: T[];
   page: number;
   totalPage: number;
@@ -70,110 +63,37 @@ export const StudentStatusService = new CRUDService<StudentStatus>(
 );
 export const ProgramService = new CRUDService<Program>(`${BASE_URL}/programs`);
 // Will use this later. Currently, we will use mock for this Course Service
-// export const CourseService = new CRUDService<any>(`${BASE_URL}/courses`);
-export const CourseService = {
-  getAll: async (
-    query?: string[],
-  ): Promise<IAPIResponse<PaginatedResponse<Course>>> => {
-    return Promise.resolve({
-      data: {
-        data: [
-          {
-            id: "1",
-            code: "CS101",
-            title: "Introduction to Computer Science",
-            credit: 3,
-            faculty: {
-              id: "1",
-              title: "Computer Science",
-              description: "This is the Computer Science faculty.",
-              status: "active",
-            },
-            description: "This course covers the basics of computer science.",
-            status: CourseStatus.ACTIVE,
-          },
-          {
-            id: "2",
-            code: "CS102",
-            title: "Data Structures and Algorithms",
-            credit: 3,
-            faculty: {
-              id: "1",
-              title: "Computer Science",
-              description: "This is the Computer Science faculty.",
-              status: "active",
-            },
-            description:
-              "This course covers the basics of data structures and algorithms.",
-            status: CourseStatus.INACTIVE,
-          },
-        ],
-        page: 1,
-        totalPage: 1,
-        limit: 10,
-        total: 2,
-      },
-      statusCode: 200,
-      message: "Success",
-    });
-  },
-  getById: async (id: number | string): Promise<IAPIResponse<Course>> => {
-    return Promise.resolve({
-      data: {
-        id: id.toString(),
-        code: "CS101",
-        title: "Introduction to Computer Science",
-        credit: 3,
-        faculty: {
-          id: "1",
-          title: "Computer Science",
-          description: "This is the Computer Science faculty.",
-          status: "active",
-        },
-        description: "This course covers the basics of computer science.",
-        status: CourseStatus.ACTIVE,
-      },
-      statusCode: 200,
-      message: "Success",
-    });
-  },
-  create: async (data: Course): Promise<IAPIResponse<Course>> => {
-    return Promise.resolve({
-      data: data,
-      statusCode: 200,
-      message: "Success",
-    });
-  },
-  update: async (
-    id: number | string,
-    data: Course,
-  ): Promise<IAPIResponse<Course>> => {
-    return Promise.resolve({
-      data: { ...data, id: id.toString() },
-      statusCode: 200,
-      message: "Success",
-    });
-  },
-  delete: async (id: number | string): Promise<IAPIResponse<Course>> => {
-    return Promise.resolve({
-      data: {
-        id: id.toString(),
-        code: "CS101",
-        title: "Introduction to Computer Science",
-        credit: 3,
-        faculty: {
-          id: "1",
-          title: "Computer Science",
-          description: "This is the Computer Science faculty.",
-          status: "active",
-        },
-        description: "This course covers the basics of computer science.",
-        status: CourseStatus.ACTIVE,
-      },
-      statusCode: 200,
-      message: "Success",
-    });
-  },
-};
+export const CourseService = new CRUDService<Course>(`${BASE_URL}/subjects`);
+export const SemesterService = new CRUDService<Semester>(
+  `${BASE_URL}/semesters`,
+);
+export class ClassService extends CRUDService<Class> {
+  constructor() {
+    super(`${BASE_URL}/classes`);
+  }
 
+  async getClassResultsOfStudent(
+    studentId: string,
+    classCode: string,
+  ): Promise<IAPIResponse<ClassResult[]>> {
+    const response = await fetch(
+      `${BASE_URL}/student-class-results/student/${studentId}/class/${classCode}`,
+    );
+    return response.json();
+  }
+  async getAllClassesByCourseCode(
+    courseCode: string,
+    semesterId?: string,
+  ): Promise<IAPIResponse<Class[]>> {
+    const response = await this.getAll([
+      `subjectCode=${courseCode}`,
+      `semesterCode=${semesterId}`,
+    ]);
 
+    return {
+      data: response.data.data,
+      statusCode: response.statusCode,
+      message: response.message,
+    };
+  }
+}

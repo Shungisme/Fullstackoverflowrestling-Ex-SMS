@@ -1,11 +1,10 @@
 import React from "react";
-import { SchoolConfigProvider } from "@/src/context/SchoolConfigContext";
 import { ArrowLeft } from "lucide-react";
 import AddCourseForm from "./AddCourseForm";
 
 const AddCoursePage = () => {
   return (
-    <SchoolConfigProvider>
+    <>
       <div>
         <div className="flex items-center mb-4 gap-4">
           <a href="/courses">
@@ -15,7 +14,7 @@ const AddCoursePage = () => {
         </div>
       </div>
       <AddCourseForm />
-    </SchoolConfigProvider>
+      </>
   );
 };
 

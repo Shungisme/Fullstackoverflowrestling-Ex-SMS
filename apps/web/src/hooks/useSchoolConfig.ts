@@ -6,6 +6,7 @@ import {
   CourseService,
   FacultyService,
   ProgramService,
+  SemesterService,
   StudentStatusService,
 } from "../lib/api/school-service";
 import { toast } from "sonner";
@@ -23,34 +24,20 @@ export default function useSchoolConfig() {
       try {
         setIsLoading(true);
         const query = ["status=active"];
-        const [facultyRes, programRes, statusRes, coursesRes] =
+        const [facultyRes, programRes, statusRes, coursesRes, semesterRes] =
           await Promise.all([
             FacultyService.getAll(query),
             ProgramService.getAll(query),
             StudentStatusService.getAll(query),
-            CourseService.getAll(query),
+            CourseService.getAll(),
+            SemesterService.getAll(),
           ]);
 
         setFaculties(facultyRes.data.data);
         setPrograms(programRes.data.data);
         setStatuses(statusRes.data.data);
         setCourses(coursesRes.data.data);
-        setSemesters([
-          {
-            id: "1",
-            academicYear: "2023-2024",
-            semester: 1,
-            startDate: new Date("2023-09-01"),
-            endDate: new Date("2024-01-31"),
-          },
-          {
-            id: "2",
-            academicYear: "2023-2024",
-            semester: 2,
-            startDate: new Date("2024-02-01"),
-            endDate: new Date("2024-06-30"),
-          },
-        ]);
+        setSemesters(semesterRes.data.data);
       } catch {
         toast.error("Internal Server Error!");
       } finally {

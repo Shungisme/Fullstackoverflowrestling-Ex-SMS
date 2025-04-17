@@ -1,63 +1,27 @@
 import { IAPIResponse, Student } from ".";
+import { PaginatedResponse } from "../lib/api/school-service";
+import { Class } from "./course";
 
 export enum EnrollmentStatus {
-  PENDING = "pending",
-  ACTIVE = "active",
-  COMPLETED = "completed",
-  CANCELLED = "cancelled"
-}
-
-export interface Grade {
-  midTerm?: number;
-  final?: number;
-  other?: number;
-  total: number;
-  letterGrade?: string;
-}
-
-export interface CourseClass {
-  id?: string;
-  code: string;
-  subjectCourse: string;
-  semester: string;
-  maximumQuantity: number;
-  classroom: string;
-  classSchedule: string;
-  teacher: string;
+  DROP = "DROP",
+  COMPLETE = "COMPLETE",
+  FAIL = "FAIL",
 }
 
 export interface Enrollment {
   id?: string;
   studentId: string;
-  student?: {
-    id?: string;
-    studentId: string;
-    name: string;
-  };
-  courseId: string;
-  course?: {
-    id?: string;
-    code: string;
-    title: string;
-    credit: number;
-    faculty: { id?: string; title: string; description: string; status: string };
-    description: string;
-    status: string;
-  };
-  classId: string;
-  class?: CourseClass;
-  enrollmentDate: string;
-  status: EnrollmentStatus;
-  semester: string;
-  grade?: Grade;
-  cancellationDate?: string;
-  cancellationReason?: string;
+  student?: Student;
+  classCode: string;
+  class?: Class;
+  createdAt: string;
+  type: EnrollmentStatus;
 }
 
 export interface EnrollmentFormData {
   studentId: string;
   courseId: string;
-  classId: string;
+  classCode: string;
   semester: string;
 }
 
@@ -83,7 +47,8 @@ export interface PrintTranscriptParams {
   semesterId?: string;
 }
 
-export interface EnrollmentResponse extends IAPIResponse<Enrollment[]> {}
+export interface EnrollmentResponse
+  extends IAPIResponse<PaginatedResponse<Enrollment>> {}
 export interface SingleEnrollmentResponse extends IAPIResponse<Enrollment> {}
 
 export interface PrerequisiteCheckResult {

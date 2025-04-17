@@ -21,6 +21,7 @@ import {
   Download,
   FileDown,
   FileSpreadsheet,
+  BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 import { StudentList } from "../../types";
@@ -304,6 +305,11 @@ export default function StudentTable({
                       <Button variant="outline" size="icon" asChild>
                         <Link href={`/students/${student.studentId}`}>
                           <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button variant="outline" size="icon" asChild>
+                        <Link href={`/enrollment?student=${student.studentId}`}>
+                          <BookOpen className="h-4 w-4" />
                         </Link>
                       </Button>
                       <Button

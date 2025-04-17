@@ -1,5 +1,4 @@
 import { Alert, AlertTitle } from "@/src/components/atoms/Alert";
-import { SchoolConfigProvider } from "@/src/context/SchoolConfigContext";
 import { CourseService } from "@/src/lib/api/school-service";
 import EditCourseForm from "@/src/pages/Courses/EditCourseForm";
 import { ArrowLeft } from "lucide-react";
@@ -7,6 +6,7 @@ import React from "react";
 
 const EditCoursePage = async ({ params }: { params: { courseId: string } }) => {
     const course = await CourseService.getById(params.courseId);
+    console.log(course);
     if (course.statusCode !== 200) {
         return (
             <div className="max-w-2xl mx-auto mt-8">
@@ -18,7 +18,6 @@ const EditCoursePage = async ({ params }: { params: { courseId: string } }) => {
     }
     const courseData = course.data;
     return (
-        <SchoolConfigProvider>
             <div>
                 <div className="flex items-center mb-4 gap-4">
                     <a href="/courses">
@@ -28,7 +27,6 @@ const EditCoursePage = async ({ params }: { params: { courseId: string } }) => {
                 </div>
                 <EditCourseForm courseData={courseData} />
             </div>
-        </SchoolConfigProvider>
     );
 };
 

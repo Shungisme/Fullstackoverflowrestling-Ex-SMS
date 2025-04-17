@@ -10,6 +10,7 @@ import {
 import { Separator } from "@/src/components/atoms/Separator";
 import { CourseService } from "@/src/lib/api/school-service";
 import { Course, CourseStatus } from "@/src/types/course";
+import { formatDate } from "date-fns";
 import {
   BookOpenText,
   CalendarCheck,
@@ -111,13 +112,7 @@ const CoursePage = async ({ params }: { params: { courseId: string } }) => {
               <div>
                 <h3 className="text-sm font-medium text-slate-500">Ngày tạo</h3>
                 <p className="text-slate-700">
-                  {courseData.createdAt?.toLocaleDateString("vi-VN", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {courseData.createdAt && formatDate(courseData.createdAt, "dd/MM/yyyy HH:mm")}
                 </p>
               </div>
             </div>
@@ -129,13 +124,7 @@ const CoursePage = async ({ params }: { params: { courseId: string } }) => {
                   Cập nhật lần cuối
                 </h3>
                 <p className="text-slate-700">
-                  {courseData.updatedAt?.toLocaleDateString("vi-VN", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {courseData.updatedAt && formatDate(courseData.updatedAt, "dd/MM/yyyy HH:mm")}
                 </p>
               </div>
             </div>

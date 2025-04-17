@@ -1,27 +1,27 @@
 import { BASE_URL } from "@/src/constants/constants";
-import { 
-  CancelEnrollmentData, 
-  Enrollment, 
-  EnrollmentFilter, 
-  EnrollmentFormData, 
-  EnrollmentResponse, 
-  PrintTranscriptParams, 
-  SingleEnrollmentResponse 
+import {
+  EnrollmentFormData,
+  EnrollmentResponse,
+  EnrollmentStatus,
+  PrintTranscriptParams,
+  SingleEnrollmentResponse,
 } from "@/src/types/enrollment";
 import { IAPIResponse } from "@/src/types";
+import { ClassService } from "./school-service";
+import { ClassResult } from "@/src/types/course";
 
 export async function getStudentEnrollments(
-  studentId: string
+  studentId: string,
 ): Promise<EnrollmentResponse> {
   try {
     const response = await fetch(
-      `${BASE_URL}/enrollments?studentId=${studentId}`,
+      `${BASE_URL}/student-class-enrolls/student/${studentId}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -36,15 +36,19 @@ export async function getStudentEnrollments(
 }
 
 export async function addEnrollment(
-  data: EnrollmentFormData
+  data: EnrollmentFormData,
 ): Promise<SingleEnrollmentResponse> {
   try {
-    const response = await fetch(`${BASE_URL}/enrollments`, {
+    const response = await fetch(`${BASE_URL}/student-class-enrolls`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        studentId: data.studentId,
+        classCode: data.classCode,
+        type: EnrollmentStatus.COMPLETE,
+      }),
     });
 
     if (!response.ok) {
@@ -54,23 +58,27 @@ export async function addEnrollment(
 
     return await response.json();
   } catch (error) {
-    console.error("Error adding enrollment:", error);
+    console.log("Error adding enrollment:", error);
     throw error;
   }
 }
 
 export async function cancelEnrollment(
   enrollmentId: string,
-  reason: string
 ): Promise<SingleEnrollmentResponse> {
   try {
-    const response = await fetch(`${BASE_URL}/enrollments/${enrollmentId}/cancel`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${BASE_URL}/student-class-enrolls/${enrollmentId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: EnrollmentStatus.DROP,
+        }),
       },
-      body: JSON.stringify({ reason }),
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -86,85 +94,132 @@ export async function cancelEnrollment(
 
 export async function checkPrerequisites(
   studentId: string,
-  courseId: string
-): Promise<IAPIResponse<{valid: boolean; message?: string}>> {
+  courseCode: string,
+): Promise<IAPIResponse<{ valid: boolean; message?: string }>> {
+  // Check by get all the prerequisites of the course and check if the student has passed them
+  // by getting all the results of the student and checking if the student has passed the prerequisites
+  // This should be done in the backend but for now we will do it in the frontend
   try {
-    const response = await fetch(`${BASE_URL}/enrollments/check-prerequisites`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ studentId, courseId }),
-    });
+    const classService = new ClassService();
+    const res = await classService.getClassResultsOfStudent(
+      studentId,
+      courseCode,
+    );
 
-    if (!response.ok) {
-      const errorData = await response.json();
+    if (res.statusCode !== 200 && res.statusCode !== 304) {
       return {
-        statusCode: response.status,
-        message: errorData.message || "Không thể kiểm tra điều kiện tiên quyết",
-        data: { valid: false, message: errorData.message }
+        statusCode: res.statusCode,
+        message: res.message,
+        data: { valid: false, message: res.message },
+      };
+    }
+    // Asume that the results are calculated by (other * 0.2 + midterm * 0.3 + final * 0.5) / 100
+    // and the student passed the course if the result is greater than 5
+    // Yes, this should be done in the backend but for now we will do it in the frontend
+
+    const results = res.data;
+    // Have to do this because some how the data returned is an object and not an array
+    // TODO: Fix this in the backend
+    const temp: any = results;
+    if (Object.keys(temp).length === 0) {
+      return {
+        statusCode: 200,
+        message: "Đủ điều kiện tiên quyết",
+        data: { valid: true },
+      };
+    }
+    if (!results) {
+      return {
+        statusCode: 200,
+        message: "Đủ điều kiện tiên quyết",
+        data: { valid: true },
       };
     }
 
-    return await response.json();
+    if (results.length === 0) {
+      return {
+        statusCode: 400,
+        message: "Không có kết quả nào",
+        data: { valid: false, message: "Không có kết quả nào" },
+      };
+    }
+
+    const groupedCourses = results.reduce(
+      (acc: { [key: string]: ClassResult[] }, result: ClassResult) => {
+        const courseCode = result.class.subjectCode;
+        if (!acc[courseCode]) {
+          acc[courseCode] = [];
+        }
+        acc[courseCode].push(result);
+        return acc;
+      },
+      {},
+    );
+    console.log(groupedCourses);
+    const passedCourses = Object.keys(groupedCourses).filter((courseCode) => {
+      const courseResults = groupedCourses[courseCode];
+      const totalScore = courseResults.reduce((acc, result) => {
+        switch (result.type) {
+          case "OTHER":
+            return acc + result.score * 0.2;
+          case "MIDTERM":
+            return acc + result.score * 0.3;
+          case "FINALTERM":
+            return acc + result.score * 0.5;
+          default:
+            return acc;
+        }
+      }, 0);
+      return totalScore / courseResults.length >= 5;
+    });
+
+    const valid = Object.keys(groupedCourses).length === passedCourses.length;
+    if (valid) {
+      return {
+        statusCode: 200,
+        message: "Đủ điều kiện tiên quyết",
+        data: { valid: true },
+      };
+    } else {
+      return {
+        statusCode: 400,
+        message: "Không đủ điều kiện tiên quyết",
+        data: { valid: false, message: "Không đủ điều kiện tiên quyết" },
+      };
+    }
   } catch (error) {
-    console.error("Error checking prerequisites:", error);
+    console.log("Error checking prerequisites:", error);
     return {
       statusCode: 500,
       message: "Lỗi khi kiểm tra điều kiện tiên quyết",
-      data: { valid: false, message: "Lỗi khi kiểm tra điều kiện tiên quyết" }
-    };
-  }
-}
-
-export async function checkClassCapacity(
-  classId: string
-): Promise<IAPIResponse<{available: boolean; currentCount: number; maxCount: number}>> {
-  try {
-    const response = await fetch(`${BASE_URL}/enrollments/check-capacity/${classId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      return {
-        statusCode: response.status,
-        message: errorData.message || "Không thể kiểm tra số lượng lớp học",
-        data: { available: false, currentCount: 0, maxCount: 0 }
-      };
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error checking class capacity:", error);
-    return {
-      statusCode: 500,
-      message: "Lỗi khi kiểm tra số lượng lớp học",
-      data: { available: false, currentCount: 0, maxCount: 0 }
+      data: { valid: false, message: "Lỗi khi kiểm tra điều kiện tiên quyết" },
     };
   }
 }
 
 export async function checkCancellationEligibility(
-  enrollmentId: string
-): Promise<IAPIResponse<{eligible: boolean; message: string}>> {
+  enrollmentId: string,
+): Promise<IAPIResponse<{ eligible: boolean; message: string }>> {
   try {
-    const response = await fetch(`${BASE_URL}/enrollments/${enrollmentId}/check-cancellation`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${BASE_URL}/enrollments/${enrollmentId}/check-cancellation`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
       return {
         statusCode: response.status,
         message: errorData.message || "Không thể kiểm tra khả năng hủy đăng ký",
-        data: { eligible: false, message: errorData.message || "Không thể hủy đăng ký khóa học này" }
+        data: {
+          eligible: false,
+          message: errorData.message || "Không thể hủy đăng ký khóa học này",
+        },
       };
     }
 
@@ -174,26 +229,34 @@ export async function checkCancellationEligibility(
     return {
       statusCode: 500,
       message: "Lỗi khi kiểm tra khả năng hủy đăng ký",
-      data: { eligible: false, message: "Lỗi khi kiểm tra khả năng hủy đăng ký" }
+      data: {
+        eligible: false,
+        message: "Lỗi khi kiểm tra khả năng hủy đăng ký",
+      },
     };
   }
 }
 
-export async function printTranscript(params: PrintTranscriptParams): Promise<Blob> {
+export async function printTranscript(
+  params: PrintTranscriptParams,
+): Promise<Blob> {
   try {
     const queryParams = new URLSearchParams();
-    queryParams.append('studentId', params.studentId);
-    
+    queryParams.append("studentId", params.studentId);
+
     if (params.semesterId) {
-      queryParams.append('semesterId', params.semesterId);
+      queryParams.append("semesterId", params.semesterId);
     }
-    
-    const response = await fetch(`${BASE_URL}/enrollments/transcript?${queryParams.toString()}`, {
-      method: "GET",
-      headers: {
-        "Accept": "application/pdf",
+
+    const response = await fetch(
+      `${BASE_URL}/enrollments/transcript?${queryParams.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/pdf",
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       throw new Error("Không thể in bảng điểm");
