@@ -1,8 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { LoggerModule } from './shared/logger/logger.module';
 import { HttpLoggerMiddleware } from './shared/middlewares/http-logger.middleware';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { StudentsModule } from './modules/students/students.module';
 import { SharedModule } from './shared/services/shared.module';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -13,6 +11,12 @@ import { AddressesModule } from './modules/addresses/addresses.module';
 import { ProgramsModule } from './modules/programs/programs.module';
 import { StatusesModule } from './modules/statuses/statuses.module';
 import { IdentityPapersModule } from './modules/identity-papers/identity-papers.module';
+import { SubjectsModule } from './modules/subjects/subjects.module';
+import { SubjectPrerequisitesModule } from './modules/subject-prerequisites/subject-prerequisites.module';
+import { ClassesModule } from './modules/classes/classes.module';
+import { SemesterModule } from './modules/semesters/semester.module';
+import { StudentClassResultModule } from './modules/student-class-results/student-class-result.module';
+import { StudentClassEnrollModule } from './modules/student-class-enrolls/student-class-enroll.module';
 
 @Module({
   imports: [
@@ -24,10 +28,15 @@ import { IdentityPapersModule } from './modules/identity-papers/identity-papers.
     ProgramsModule,
     StatusesModule,
     IdentityPapersModule,
+    SubjectsModule,
+    SubjectPrerequisitesModule,
+    ClassesModule,
+    SemesterModule,
+    StudentClassResultModule,
+    StudentClassEnrollModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [
-    AppService,
     {
       provide: APP_PIPE,
       useClass: ZodValidationPipe,

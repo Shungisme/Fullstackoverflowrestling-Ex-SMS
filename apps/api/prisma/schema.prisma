@@ -39,8 +39,10 @@ model Student {
   statusId String @db.ObjectId
   status   Status @relation(fields: [statusId], references: [id])
 
-  identityPaperId String        @unique @db.ObjectId
-  identityPaper   IdentityPaper @relation(fields: [identityPaperId], references: [id])
+  identityPaperId    String               @unique @db.ObjectId
+  identityPaper      IdentityPaper        @relation(fields: [identityPaperId], references: [id])
+  StudentClassResult StudentClassResult[]
+  StudentClassEnroll StudentClassEnroll[]
 
   // Map model to model of table
   @@map("students")
@@ -56,6 +58,7 @@ model Faculty {
 
   // Back relation
   students Student[]
+  Subject  Subject[]
 
   // Map model to model of table
   @@map("faculties")
@@ -130,14 +133,135 @@ model IdentityPaper {
   @@map("identity_papers")
 }
 
-enum Gender {
-  MALE
-  FEMALE
+model Subject {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  code        String     @unique
+  title       String
+  credit      Int
+  facultyId   String     @db.ObjectId
+  description String
+  status      StatusEnum
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  faculty         Faculty               @relation(fields: [facultyId], references: [id])
+  prerequisiteFor SubjectPrerequisite[] @relation("SubjectPrerequisiteSubject")
+  prerequisites   SubjectPrerequisite[] @relation("SubjectPrerequisitePrerequisite")
+  classes         Class[]
+
+  // Map model to model of table
+  @@map("subjects")
+}
+
+model SubjectPrerequisite {
+  id                    String @id @default(auto()) @map("_id") @db.ObjectId
+  subjectId             String @db.ObjectId
+  prerequisiteSubjectId String @db.ObjectId
+
+  // Relations
+  subject             Subject @relation("SubjectPrerequisiteSubject", fields: [subjectId], references: [id])
+  prerequisiteSubject Subject @relation("SubjectPrerequisitePrerequisite", fields: [prerequisiteSubjectId], references: [id])
+
+  // Map model to model of table
+  @@map("subjects_prerequisites")
+}
+
+model Class {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  code            String   @unique
+  subjectCode     String
+  semesterId      String   @db.ObjectId
+  teacherName     String
+  maximumQuantity Int
+  classSchedule   String
+  classroom       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  subject  Subject              @relation(fields: [subjectCode], references: [code])
+  semester Semester             @relation(fields: [semesterId], references: [id])
+  enrolls  StudentClassEnroll[]
+  results  StudentClassResult[]
+
+  // Map model to model of table
+  @@map("classes")
+}
+
+model Semester {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  academicYear String
+  semester     Int
+  startedAt    DateTime
+  endedAt      DateTime
+
+  // Back relation
+  classes Class[]
+
+  // Map model to model of table
+  @@map("semesters")
+}
+
+model StudentClassResult {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  studentId String
+  classCode String
+  type      ResultEnum
+  factor    Float
+  score     Float
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+
+  // Relations
+  student Student @relation(fields: [studentId], references: [studentId])
+  class   Class   @relation(fields: [classCode], references: [code])
+
+  // Map model to model of table
+  @@map("students_classes_results")
+}
+
+model StudentClassEnroll {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  studentId String
+  classCode String
+  type      EnrollEnum
+  createdAt DateTime   @default(now())
+
+  // Relations
+  student Student @relation(fields: [studentId], references: [studentId])
+  class   Class   @relation(fields: [classCode], references: [code])
+
+  // Map model to model of table
+  @@map("students_classes_enrolls")
+}
+
+enum ResultEnum {
+  MIDTERM
+  FINALTERM
   OTHER
+}
+
+enum EnrollEnum {
+  COMPLETE
+  DROP
+  FAIL
+}
+
+enum StatusEnum {
+  ACTIVATED
+  DEACTIVATED
+  DELETED
 }
 
 enum IdentityPaperType {
   CMND
   CCCD
   PASSPORT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
