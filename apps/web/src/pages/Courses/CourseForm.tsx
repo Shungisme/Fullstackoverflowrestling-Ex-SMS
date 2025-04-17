@@ -15,7 +15,6 @@ import {
 import InputField from "@/src/components/atoms/InputField";
 import NumberInputField from "@/src/components/atoms/NumberInputField";
 import { useSchoolConfigContext } from "@/src/context/SchoolConfigContext";
-import SelectInputField from "@/src/components/atoms/SelectInputField";
 import TextareaInputField from "@/src/components/atoms/TextareaInputField";
 import { Button } from "@/src/components/atoms/Button";
 import { Course, CourseStatus } from "@/src/types/course";
