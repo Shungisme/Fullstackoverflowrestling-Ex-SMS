@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
 import { EnrollmentForm } from "@/src/components/organisms/EnrollmentForm";
@@ -13,20 +11,14 @@ export default async function EnrollmentPage({
 }: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-    const studentId = (await searchParams).studentId as string | undefined;
-    const [student, setStudent] = React.useState<Student | null>(null);
+    const studentId = (await searchParams).student as string | undefined;
     // If there's a student ID in URL, open the management tab by default
     const defaultTab = studentId ? "manage" : "enroll";
-    React.useEffect(() => {
-        const fetchStudent = async () => {
-            if (studentId) {
-                const res = await getStudent(studentId);
-                setStudent(res.data);
-            }
-        };
-        fetchStudent();
-    }, [studentId]);
-
+    if (!studentId) {
+        return <div>Không tìm thấy thông tin sinh viên</div>;
+    }
+    const data = await getStudent(studentId);
+    const student = data.data;
     return (
         <div className="container mx-auto py-8">
             <h1 className="text-3xl font-bold mb-8">Quản lý đăng ký khóa học</h1>

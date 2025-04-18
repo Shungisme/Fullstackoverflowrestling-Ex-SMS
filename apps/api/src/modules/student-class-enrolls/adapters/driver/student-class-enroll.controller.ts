@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
 import { CreateStudentClassEnrollDTO } from '../../domain/dto/create-student-class-enroll.dto';
 import { UpdateStudentClassEnrollDTO } from '../../domain/dto/update-student-class-enroll.dto';
@@ -28,6 +29,7 @@ import {
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { EnrollEnum } from '@prisma/client';
+import { Response } from 'express';
 
 @ApiTags('Student Class Enrollments')
 @Controller({ path: 'student-class-enrolls', version: '1' })
@@ -261,10 +263,21 @@ export class StudentClassEnrollController {
     status: HttpStatus.NOT_FOUND,
     description: 'Student class enrollment not found',
   })
-  dropAnEnrollment(
+  async dropAnEnrollment(
     @Param('studentId') studentId: string,
     @Param('classCode') classCode: string,
+    @Res() response: Response,
   ) {
-    return this.studentClassEnrollService.dropEnroll(studentId, classCode);
+    try {
+      const result = await this.studentClassEnrollService.dropEnroll(
+        studentId,
+        classCode,
+      );
+      return result;
+    } catch (error) {
+      return response.status(403).json({
+        message: error.message,
+      });
+    }
   }
 }

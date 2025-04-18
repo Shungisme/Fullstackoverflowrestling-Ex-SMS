@@ -61,7 +61,7 @@ export function EnrollmentManagement({ studentId }: { studentId?: string }) {
       const response = await getStudentEnrollments(
         filter.studentId || studentId || "",
       );
-      console.log(response);
+
       setEnrollments(response.data.data);
     } catch (error) {
       toast.error("Không thể tải danh sách đăng ký khóa học");

@@ -63,30 +63,29 @@ export async function addEnrollment(
 }
 
 export async function cancelEnrollment(
-    enrollmentId: string,
+    studentId: string,
+    classCode: string,
 ): Promise<SingleEnrollmentResponse> {
     try {
         const response = await fetch(
-            `${BASE_URL}/student-class-enrolls/${enrollmentId}`,
+            `${BASE_URL}/student-class-enrolls/student/${studentId}/class/${classCode}`,
             {
-                method: "PATCH",
+                method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    type: EnrollmentStatus.DROP,
-                }),
             },
         );
 
         if (!response.ok) {
             const errorData = await response.json();
+            console.log("Error data:", errorData);
             throw new Error(errorData.message || "Không thể hủy đăng ký khóa học");
         }
 
         return await response.json();
     } catch (error) {
-        console.error("Error canceling enrollment:", error);
+        console.log("Error canceling enrollment:", error);
         throw error;
     }
 }
