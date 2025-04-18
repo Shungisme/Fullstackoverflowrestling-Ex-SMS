@@ -1,4 +1,5 @@
 import { STUDENT_CONSTANT } from "../../../api/src/shared/constants/student.constant";
+import { ClassResult } from "../types/course";
 
 export const EngVietFalcutyMap = {
   [STUDENT_CONSTANT.FACULTY.LAW]: "Khoa Luật",
@@ -18,3 +19,17 @@ export const EngVietGenderMap = {
   [STUDENT_CONSTANT.GENDER.MALE]: "Nam",
   [STUDENT_CONSTANT.GENDER.FEMALE]: "Nữ",
 };
+
+export const mapScoreTypeToLabel = (type: ClassResult["type"]): string => {
+    switch (type) {
+        case "MIDTERM":
+            return "Giữa kỳ";
+        case "FINALTERM":
+            return "Cuối kỳ";
+        case "OTHER":
+            return "Khác";
+        default:
+            return "Không xác định";
+    }
+}
+

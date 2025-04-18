@@ -33,8 +33,10 @@ export type Class = {
 
 export type ClassResult = {
     id?: string;
-    student: Student;
-    class: Class;
+    student?: Student;
+    studentId: string;
+    classCode: string;
+    class?: Class;
     type: "MIDTERM" | "FINALTERM" | "OTHER";
     factor: number;
     score: number;

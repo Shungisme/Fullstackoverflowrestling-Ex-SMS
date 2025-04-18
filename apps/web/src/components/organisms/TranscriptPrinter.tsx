@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/atoms/Select";
-import { Switch } from "../atoms/Switch";
 import { printTranscript } from "@/src/lib/api/enrollment-service";
 import { useSchoolConfigContext } from "@/src/context/SchoolConfigContext";
 import { Card, CardContent } from "@/src/components/atoms/Card";
@@ -174,7 +173,7 @@ export function TranscriptPrinter() {
                 )}
               />
 
-              <FormField
+              {/*              <FormField
                 control={form.control}
                 name="includeInProgress"
                 render={({ field }) => (
@@ -194,13 +193,13 @@ export function TranscriptPrinter() {
                     </FormControl>
                   </FormItem>
                 )}
-              />
+              /> */}
             </div>
 
             <div className="flex justify-between items-center pt-4">
               <div className="flex items-center text-sm text-muted-foreground">
                 <FileText className="h-4 w-4 mr-2" />
-                Bảng điểm sẽ được xuất dưới dạng PDF
+                Bảng điểm sẽ được xuất dưới dạng Excel
               </div>
               <Button type="submit" disabled={isLoading} className="gap-2">
                 {isLoading ? (

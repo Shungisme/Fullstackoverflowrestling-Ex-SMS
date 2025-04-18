@@ -28,6 +28,13 @@ export default function Navbar() {
                     </Link>
 
                     <Link
+                        href="/student-results"
+                        className="text-foreground hover:text-primary transition-colors"
+                    >
+                        Bảng điểm
+                    </Link>
+
+                    <Link
                         href="/settings"
                         className="text-foreground hover:text-primary transition-colors"
                     >

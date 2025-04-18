@@ -11,7 +11,7 @@ export interface PaginatedResponse<T> {
 }
 
 export class CRUDService<T> {
-  private endpoint: string;
+  protected endpoint: string;
 
   constructor(endpoint: string) {
     this.endpoint = endpoint;
@@ -96,4 +96,23 @@ export class ClassService extends CRUDService<Class> {
       message: response.message,
     };
   }
+}
+
+export class ClassResultService extends CRUDService<ClassResult> {
+    constructor() {
+        super(`${BASE_URL}/student-class-results`);
+    }
+
+    async getStudentResults(studentId: string): Promise<IAPIResponse<PaginatedResponse<ClassResult>>> {
+        const response = await fetch(`${this.endpoint}/student/${studentId}`);
+        return response.json();
+    }
+    async getClassResults(classCode: string): Promise<IAPIResponse<PaginatedResponse<ClassResult>>> {
+        const response = await fetch(`${this.endpoint}/class/${classCode}`);
+        return response.json();
+    }
+    async getStudentClassResult(studentId: string, classCode: string): Promise<IAPIResponse<ClassResult>> {
+        const response = await fetch(`${this.endpoint}/student/${studentId}/class/${classCode}`);
+        return response.json();
+    }
 }
