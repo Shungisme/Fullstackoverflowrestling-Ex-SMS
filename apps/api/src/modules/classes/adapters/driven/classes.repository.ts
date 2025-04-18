@@ -216,6 +216,25 @@ export class ClassesRepository implements IClassesRepository {
     return classData;
   }
 
+  async findBySubjectCode(subjectCode: string): Promise<ClassResponseDto[]> {
+    const classes = await this.prismaService.class.findMany({
+      where: { subjectCode },
+      include: {
+        subject: {
+          select: {
+            id: true,
+            code: true,
+            title: true,
+            credit: true,
+          },
+        },
+        semester: true,
+      },
+    });
+
+    return classes;
+  }
+
   async getCurrentEnrollmentCount(classCode: string): Promise<number> {
     // Count students who are enrolled and have not dropped the class
     const enrollmentCount = await this.prismaService.studentClassEnroll.count({

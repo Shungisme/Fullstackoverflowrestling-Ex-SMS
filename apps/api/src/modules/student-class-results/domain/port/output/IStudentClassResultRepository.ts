@@ -31,6 +31,11 @@ export interface IStudentClassResultRepository {
     limit: number,
   ): Promise<StudentClassResultDto[]>;
 
+  // findByStudentAndSubjectCode(
+  //   studentId: string,
+  //   subjectId: string,
+  // ): Promise<StudentClassResultDto[]>;
+
   findAll(page: number, limit: number): Promise<StudentClassResultDto[]>;
 
   count(whereOptions: any): Promise<number>;

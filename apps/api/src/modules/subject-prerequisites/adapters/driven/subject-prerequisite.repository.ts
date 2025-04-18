@@ -193,6 +193,38 @@ export class SubjectPrerequisiteRepository
     });
   }
 
+  async findByClassCode(
+    classCode: string,
+  ): Promise<SubjectPrerequisiteResponseDto[]> {
+    const subject = await this.prismaService.subject.findUnique({
+      where: { code: classCode },
+      select: { id: true },
+    });
+
+    if (!subject) {
+      throw new NotFoundException(`Subject with code ${classCode} not found`);
+    }
+    return await this.prismaService.subjectPrerequisite.findMany({
+      where: { subjectId: subject.id },
+      include: {
+        subject: {
+          select: {
+            id: true,
+            code: true,
+            title: true,
+          },
+        },
+        prerequisiteSubject: {
+          select: {
+            id: true,
+            code: true,
+            title: true,
+          },
+        },
+      },
+    });
+  }
+
   async update(
     prerequisiteId: string,
     data: UpdateSubjectPrerequisiteDTO,
