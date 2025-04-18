@@ -41,6 +41,13 @@ const ScoreResultsTable: React.FC<ScoreResultsTableProps> = ({
     handleModalClose();
   };
 
+  if (!results) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-gray-500">Không có kết quả</p>
+      </div>
+    );
+  }
   // Group results by student and class
   const groupedResults = results.reduce(
     (acc, result) => {

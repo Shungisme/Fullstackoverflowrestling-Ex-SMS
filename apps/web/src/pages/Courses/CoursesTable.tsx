@@ -85,6 +85,13 @@ const columns: ColumnDef<Course>[] = [
     },
 ];
 const CoursesTable = ({ data, isLoading }: CoursesTableProps) => {
+    if (!data) {
+        return (
+            <div className="rounded-md border">
+                <LoadingSpinner />
+            </div>
+        );
+    }
     return (
         <div className="rounded-md border">
             {isLoading ? (

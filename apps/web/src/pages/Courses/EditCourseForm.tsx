@@ -6,6 +6,9 @@ import { CourseService } from "@/src/lib/api/school-service";
 import { toast } from "sonner";
 
 const EditCourseForm = ({ courseData }: { courseData: Course }) => {
+    if (!courseData) {
+        return <div>Không tìm thấy thông tin môn học</div>;
+    }
     return (
         <CourseForm
             variant="edit"

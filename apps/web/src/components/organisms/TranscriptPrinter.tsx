@@ -24,7 +24,6 @@ import {
 } from "@/src/components/atoms/Select";
 import {
     getTranscriptForStudent,
-    printTranscript,
 } from "@/src/lib/api/enrollment-service";
 import { useSchoolConfigContext } from "@/src/context/SchoolConfigContext";
 import { Card, CardContent } from "@/src/components/atoms/Card";
