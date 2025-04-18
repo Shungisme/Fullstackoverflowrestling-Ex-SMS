@@ -27,6 +27,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
+import { EnrollEnum } from '@prisma/client';
 
 @ApiTags('Student Class Enrollments')
 @Controller({ path: 'student-class-enrolls', version: '1' })
@@ -160,6 +161,34 @@ export class StudentClassEnrollController {
     );
   }
 
+  @Post('student/:studentId/class/:classCode')
+  @HttpCode(HttpStatus.OK)
+  @ApiParam({ name: 'studentId', description: 'Student ID', type: String })
+  @ApiParam({ name: 'classCode', description: 'Class Code', type: String })
+  @ApiBody({
+    description: 'Enrollment type',
+    schema: {
+      type: 'string',
+      enum: Object.values(EnrollEnum),
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Get enrollment by student ID and class code',
+    type: StudentClassEnrollResponseWrapperDTO,
+  })
+  updateTypeByStudentAndClass(
+    @Param('studentId') studentId: string,
+    @Param('classCode') classCode: string,
+    @Body('type') type: EnrollEnum,
+  ) {
+    return this.studentClassEnrollService.updateTypeByStudentAndClass(
+      studentId,
+      classCode,
+      type,
+    );
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(StudentClassEnrollDto)
@@ -216,5 +245,26 @@ export class StudentClassEnrollController {
   })
   delete(@Param('id') id: string) {
     return this.studentClassEnrollService.delete(id);
+  }
+
+  @Delete('student/:studentId/class/:classCode')
+  @HttpCode(HttpStatus.OK)
+  @ZodSerializerDto(StudentClassEnrollDto)
+  @ApiParam({ name: 'studentId', description: 'Student ID', type: String })
+  @ApiParam({ name: 'classCode', description: 'Class Code', type: String })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Delete student class enrollment by student ID and class code',
+    type: StudentClassEnrollResponseWrapperDTO,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Student class enrollment not found',
+  })
+  dropAnEnrollment(
+    @Param('studentId') studentId: string,
+    @Param('classCode') classCode: string,
+  ) {
+    return this.studentClassEnrollService.dropEnroll(studentId, classCode);
   }
 }

@@ -13,6 +13,8 @@ export interface IClassesRepository {
 
   findByCode(classCode: string): Promise<ClassResponseDto>;
 
+  findBySubjectCode(subjectCode: string): Promise<ClassResponseDto[]>;
+
   findAll(
     page: number,
     limit: number,

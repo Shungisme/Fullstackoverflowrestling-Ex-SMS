@@ -119,6 +119,26 @@ export class StudentClassResultRepository
     return results;
   }
 
+  // async findByStudentAndSubjectId(
+  //   studentId: string,
+  //   subjectId: string,
+  // ): Promise<StudentClassResultDto[]> {
+  //   const results = await this.prismaService.studentClassResult.findMany({
+  //     where: {
+  //       studentId,
+  //       class: {
+  //         subjectId: subjectId,
+  //       },
+  //     },
+  //     include: {
+  //       student: true,
+  //       class: true,
+  //     },
+  //   });
+
+  //   return results;
+  // }
+
   async update(
     resultId: string,
     data: UpdateStudentClassResultDTO,
