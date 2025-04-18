@@ -237,34 +237,6 @@ export async function checkCancellationEligibility(
   }
 }
 
-export async function printTranscript(
-  params: PrintTranscriptParams,
-): Promise<Blob> {
-  try {
-    const queryParams = new URLSearchParams();
-    queryParams.append("studentId", params.studentId);
-
-    if (params.semesterId) {
-      queryParams.append("semesterId", params.semesterId);
-    }
-
-    const response = await fetch(
-      `${BASE_URL}/enrollments/transcript?${queryParams.toString()}`,
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/pdf",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error("Không thể in bảng điểm");
-    }
-
-    return await response.blob();
-  } catch (error) {
-    console.error("Error printing transcript:", error);
-    throw error;
-  }
+export function getTranscriptForStudent(studentId: string) {
+    return `${BASE_URL}/students/${studentId}/transcript`;
 }
