@@ -135,6 +135,24 @@ export class StudentClassEnrollRepository
     return enrollments;
   }
 
+  async findBySubjectCode(
+    subjectCode: string,
+  ): Promise<StudentClassEnrollDto[]> {
+    const enrollments = await this.prismaService.studentClassEnroll.findMany({
+      where: {
+        class: {
+          subjectCode,
+        },
+      },
+      include: {
+        student: true,
+        class: true,
+      },
+    });
+
+    return enrollments;
+  }
+
   async update(
     enrollId: string,
     data: UpdateStudentClassEnrollDTO,

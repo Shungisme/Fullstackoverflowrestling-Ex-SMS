@@ -7,7 +7,7 @@ export const subjectsSchema = z.object({
   id: z.string().optional(),
   code: z.string().min(1, 'Code cannot be empty'),
   title: z.string().min(1, 'Title cannot be empty'),
-  credit: z.number().int().positive('Credit must be a positive integer'),
+  credit: z.number().int().min(2, 'Credit must be at least 2'),
   facultyId: z.string().min(1, 'Faculty ID cannot be empty'),
   description: z.string().min(1, 'Description cannot be empty'),
   status: z.nativeEnum(StatusEnum, {

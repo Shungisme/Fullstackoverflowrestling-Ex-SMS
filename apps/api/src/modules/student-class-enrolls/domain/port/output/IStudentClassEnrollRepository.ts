@@ -31,6 +31,8 @@ export interface IStudentClassEnrollRepository {
     limit: number,
   ): Promise<StudentClassEnrollDto[]>;
 
+  findBySubjectCode(subjectCode: string): Promise<StudentClassEnrollDto[]>;
+
   findAll(page: number, limit: number): Promise<StudentClassEnrollDto[]>;
 
   count(whereOptions: any): Promise<number>;
