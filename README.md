@@ -698,6 +698,40 @@ pnpm dev
   ![Dashboard](./images//dashboard.png)
   ![Statistic](./images//statistic.png)
 
+#### Kiểm thử ứng dụng (Unit Test)
+
+- Vào folder api của backend 'cd apps/api'
+- Chạy lệnh 'pnpm test'
+- Kết quả khi chạy unit-test
+  ![UNIT-TEST](./images/unit-test.png)
+
+#### Danh sách Môn học
+
+- Hình ảnh danh sách môn học bao gồm các action của từng môn học và bộ lọc filter
+  ![subject-list](./images/subject-list.png)
+
+- Giao diện thêm lớp học
+
+  ![add-subject](./images/add-subject.png)
+
+- Chỉnh sửa lớp học
+
+  ![update-subject](./images/update-list.png)
+
+#### Danh sách Bảng điểm
+
+- Hình ảnh danh sách bảng điểm và filter, action
+
+  ![score-list](./images/score.png)
+
+- Thêm điểm mới:
+
+  ![add-score-list](./images/add-score.png)
+
+- Cập nhật điểm:
+
+  ![update-score-list](./images/update-score.png)
+
 ### Xử lý sự cố
 
 1. **Lỗi khi cài đặt dependencies**
