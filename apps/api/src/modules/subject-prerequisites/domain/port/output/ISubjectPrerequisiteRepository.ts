@@ -22,6 +22,8 @@ export interface ISubjectPrerequisiteRepository {
     prerequisiteSubjectId: string,
   ): Promise<SubjectPrerequisiteResponseDto[]>;
 
+  findByClassCode(classCode: string): Promise<SubjectPrerequisiteResponseDto[]>;
+
   findAll(
     page: number,
     limit: number,
