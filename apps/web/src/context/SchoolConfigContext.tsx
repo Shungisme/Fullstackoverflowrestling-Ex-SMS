@@ -3,17 +3,22 @@
 import { createContext, useContext, ReactNode, useMemo } from "react";
 import { Faculty, Program, StudentStatus } from "../types";
 import useSchoolConfig from "../hooks/useSchoolConfig";
+import { Course, Semester } from "../types/course";
 
 type SchoolConfigContextType = {
   faculties: Faculty[];
   statuses: StudentStatus[];
   programs: Program[];
+  courses: Course[];
+  semesters?: Semester[];
+  isLoading?: boolean;
 };
 
 const contextValue = {
   faculties: [],
   statuses: [],
   programs: [],
+  courses: [],
 };
 
 const SchoolConfigContext =
@@ -24,15 +29,18 @@ type SchoolConfigProviderProps = {
 };
 
 export function SchoolConfigProvider({ children }: SchoolConfigProviderProps) {
-  const { faculties, statuses, programs } = useSchoolConfig();
+  const { faculties, statuses, programs, courses, semesters, isLoading } = useSchoolConfig();
 
   const value = useMemo(
     () => ({
       faculties,
       statuses,
       programs,
+      courses,
+      semesters,
+      isLoading,
     }),
-    [faculties, statuses, programs]
+    [faculties, statuses, programs, courses, semesters, isLoading]
   );
 
   return (

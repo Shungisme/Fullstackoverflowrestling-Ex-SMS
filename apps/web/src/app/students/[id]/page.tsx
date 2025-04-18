@@ -28,6 +28,7 @@ import LoadingPlaceholder from "@/src/pages/StudentDetail/LoadingPlaceholder";
 import ErrorNotifier from "@/src/pages/StudentDetail/ErrorNotifier";
 import HeaderSection from "@/src/pages/StudentDetail/HeaderSection";
 import OverviewTab from "@/src/pages/StudentDetail/Tabs/OverviewTab";
+import EnrollmentTab from "@/src/pages/StudentDetail/Tabs/EnrollmentTab";
 
 export default function StudentDetailPage({
   params,
@@ -196,9 +197,10 @@ export default function StudentDetailPage({
       {/* Header section with student profile */}
       <HeaderSection student={student} />
       <Tabs defaultValue="overview" className="mt-6">
-        <TabsList className="grid w-full grid-cols-3 md:w-auto md:inline-flex">
+        <TabsList className="grid w-full grid-cols-5 md:w-auto md:inline-flex">
           <TabsTrigger value="overview">Tổng quan</TabsTrigger>
           <TabsTrigger value="academic">Học vấn</TabsTrigger>
+          <TabsTrigger value="enrollment">Khóa học</TabsTrigger>
           <TabsTrigger value="contact">Liên hệ</TabsTrigger>
           <TabsTrigger value="indentity">Thẻ định danh</TabsTrigger>
         </TabsList>
@@ -207,6 +209,10 @@ export default function StudentDetailPage({
         <OverviewTab student={student} openAddressDialog={openAddressDialog} />
 
         <AcademicTab student={student} />
+
+        <TabsContent value="enrollment" className="mt-6">
+          <EnrollmentTab student={student} />
+        </TabsContent>
 
         <ContactTab student={student} />
 
