@@ -14,12 +14,19 @@ import {
 import { IClassesService } from './IClassesService';
 import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
 import { ClassResponseDto } from '../../dto/classes.dto';
+import {
+  ISubjectsRepository,
+  SUBJECTS_REPOSITORY,
+} from 'src/modules/subjects/domain/port/output/ISubjectsRepository';
 
 @Injectable()
 export class ClassesService implements IClassesService {
   constructor(
     @Inject(CLASSES_REPOSITORY)
     private classesRepository: IClassesRepository,
+
+    @Inject(SUBJECTS_REPOSITORY)
+    private subjectsRepository: ISubjectsRepository,
   ) {}
 
   async count(whereOptions: any): Promise<number> {
@@ -40,6 +47,19 @@ export class ClassesService implements IClassesService {
         if (existingClass) {
           throw new ConflictException(
             `Class with code ${classData.code} already exists`,
+          );
+        }
+        const existingSubject = await this.subjectsRepository.findByCode(
+          classData.subjectCode,
+        );
+        if (!existingSubject) {
+          throw new NotFoundException(
+            `Subject with code ${classData.subjectCode} not found`,
+          );
+        }
+        if (existingSubject.status == 'DEACTIVATED') {
+          throw new ConflictException(
+            `Cannot create class for deactivated subject ${classData.subjectCode}`,
           );
         }
       } catch (error) {
