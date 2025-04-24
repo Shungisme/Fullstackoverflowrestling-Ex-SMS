@@ -169,6 +169,38 @@ export class SubjectPrerequisiteRepository
     });
   }
 
+  async findBySubjectCode(
+    subjectCode: string,
+  ): Promise<SubjectPrerequisiteResponseDto[]> {
+    const subject = await this.prismaService.subject.findUnique({
+      where: { code: subjectCode },
+      select: { id: true },
+    });
+
+    if (!subject) {
+      throw new NotFoundException(`Subject with code ${subjectCode} not found`);
+    }
+    return await this.prismaService.subjectPrerequisite.findMany({
+      where: { subjectId: subject.id },
+      include: {
+        subject: {
+          select: {
+            id: true,
+            code: true,
+            title: true,
+          },
+        },
+        prerequisiteSubject: {
+          select: {
+            id: true,
+            code: true,
+            title: true,
+          },
+        },
+      },
+    });
+  }
+
   async findByPrerequisiteSubjectId(
     prerequisiteSubjectId: string,
   ): Promise<SubjectPrerequisiteResponseDto[]> {
