@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
 import { CreateIdentityPaperDTO } from '../../domain/dto/create-identity-paper.dto';
 import { UpdateIdentityPaperDTO } from '../../domain/dto/update-identity-paper.dto';
@@ -27,6 +28,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
+import { Response } from 'express';
 
 @ApiTags('Identity Papers')
 @Controller({ path: 'identity-papers', version: '1' })
@@ -42,8 +44,27 @@ export class IdentityPapersController {
     description: 'Create an identity paper',
     type: IdentityPaperResponseWrapperDTO,
   })
-  create(@Body() createIdentityPaperDto: CreateIdentityPaperDTO) {
-    return this.identityPapersService.create(createIdentityPaperDto);
+  async create(
+    @Res() response: Response,
+    @Body() createIdentityPaperDto: CreateIdentityPaperDTO,
+  ): Promise<Response> {
+    try {
+      const identityPapers = await this.identityPapersService.create(
+        createIdentityPaperDto,
+      );
+      return response.status(HttpStatus.CREATED).json({
+        statusCode: HttpStatus.CREATED,
+        message: 'Identity paper created successfully',
+        data: identityPapers,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get()
@@ -66,13 +87,28 @@ export class IdentityPapersController {
     description: 'Results per page, defaults to 10',
   })
   async findAll(
+    @Res() response: Response,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-  ): Promise<PaginatedResponse<IdentityPapersDto>> {
-    return await this.identityPapersService.findAll(
-      Number(page),
-      Number(limit),
-    );
+  ): Promise<Response> {
+    try {
+      const result = await this.identityPapersService.findAll(
+        Number(page),
+        Number(limit),
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Identity papers retrieved successfully',
+        data: result,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get(':id')
@@ -88,8 +124,25 @@ export class IdentityPapersController {
     status: HttpStatus.NOT_FOUND,
     description: 'Identity paper not found',
   })
-  findById(@Param('id') id: string) {
-    return this.identityPapersService.findById(id);
+  async findById(
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response> {
+    try {
+      const result = await this.identityPapersService.findById(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Identity paper retrieved successfully',
+        data: result,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Patch(':id')
@@ -106,11 +159,29 @@ export class IdentityPapersController {
     status: HttpStatus.NOT_FOUND,
     description: 'Identity paper not found',
   })
-  update(
+  async update(
+    @Res() response: Response,
     @Param('id') id: string,
     @Body() updateIdentityPaperDto: UpdateIdentityPaperDTO,
-  ) {
-    return this.identityPapersService.update(id, updateIdentityPaperDto);
+  ): Promise<Response> {
+    try {
+      const result = await this.identityPapersService.update(
+        id,
+        updateIdentityPaperDto,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Identity paper updated successfully',
+        data: result,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Delete(':id')
@@ -126,7 +197,24 @@ export class IdentityPapersController {
     status: HttpStatus.NOT_FOUND,
     description: 'Identity paper not found',
   })
-  delete(@Param('id') id: string) {
-    return this.identityPapersService.delete(id);
+  async delete(
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response> {
+    try {
+      const result = await this.identityPapersService.delete(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Identity paper deleted successfully',
+        data: result,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 }

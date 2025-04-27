@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
 import { CreateClassDTO } from '../../domain/dto/create-class.dto';
 import { UpdateClassDTO } from '../../domain/dto/update-class.dto';
@@ -28,6 +29,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
+import { Response } from 'express';
 
 @ApiTags('Classes')
 @Controller({ path: 'classes', version: '1' })
@@ -47,8 +49,25 @@ export class ClassesController {
     status: HttpStatus.CONFLICT,
     description: 'Class with the same code already exists',
   })
-  create(@Body() createClassDto: CreateClassDTO) {
-    return this.classesService.create(createClassDto);
+  async create(
+    @Res() response: Response,
+    @Body() createClassDto: CreateClassDTO,
+  ): Promise<Response> {
+    try {
+      const createdClass = await this.classesService.create(createClassDto);
+      return response.status(HttpStatus.CREATED).json({
+        statusCode: HttpStatus.CREATED,
+        message: 'Class created successfully',
+        data: createdClass,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get()
@@ -83,17 +102,32 @@ export class ClassesController {
     description: 'Filter by semester ID',
   })
   async findAll(
+    @Res() response: Response,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('subjectCode') subjectCode?: string,
     @Query('semesterId') semesterId?: string,
-  ): Promise<PaginatedResponse<ClassResponseDto>> {
-    const filters = { subjectCode, semesterId };
-    return await this.classesService.findAll(
-      Number(page),
-      Number(limit),
-      filters,
-    );
+  ): Promise<Response> {
+    try {
+      const filters = { subjectCode, semesterId };
+      const classes = await this.classesService.findAll(
+        Number(page),
+        Number(limit),
+        filters,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Classes fetched successfully',
+        data: classes,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get('subject/:subjectCode')
@@ -116,16 +150,31 @@ export class ClassesController {
     description: 'Get classes for a specific subject',
     type: ClassesResponseWrapperDTO,
   })
-  findBySubject(
+  async findBySubject(
+    @Res() response: Response,
     @Param('subjectCode') subjectCode: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-  ) {
-    return this.classesService.findBySubject(
-      subjectCode,
-      Number(page),
-      Number(limit),
-    );
+  ): Promise<Response> {
+    try {
+      const classes = await this.classesService.findBySubject(
+        subjectCode,
+        Number(page),
+        Number(limit),
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Classes fetched successfully',
+        data: classes,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get('semester/:semesterId')
@@ -148,16 +197,31 @@ export class ClassesController {
     description: 'Get classes for a specific semester',
     type: ClassesResponseWrapperDTO,
   })
-  findBySemester(
+  async findBySemester(
+    @Res() response: Response,
     @Param('semesterId') semesterId: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-  ) {
-    return this.classesService.findBySemester(
-      semesterId,
-      Number(page),
-      Number(limit),
-    );
+  ): Promise<Response> {
+    try {
+      const classes = await this.classesService.findBySemester(
+        semesterId,
+        Number(page),
+        Number(limit),
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Classes fetched successfully',
+        data: classes,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get('academic-year/:academicYear/semester/:semester')
@@ -185,18 +249,33 @@ export class ClassesController {
     description: 'Get classes for a specific academic year and semester',
     type: ClassesResponseWrapperDTO,
   })
-  findByAcademicYear(
+  async findByAcademicYear(
+    @Res() response: Response,
     @Param('academicYear') academicYear: string,
     @Param('semester') semester: number,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-  ) {
-    return this.classesService.findByAcademicYear(
-      academicYear,
-      Number(semester),
-      Number(page),
-      Number(limit),
-    );
+  ): Promise<Response> {
+    try {
+      const classes = await this.classesService.findByAcademicYear(
+        academicYear,
+        Number(semester),
+        Number(page),
+        Number(limit),
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Classes fetched successfully',
+        data: classes,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get('code/:code')
@@ -212,8 +291,25 @@ export class ClassesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Class not found',
   })
-  findByCode(@Param('code') code: string) {
-    return this.classesService.findByCode(code);
+  async findByCode(
+    @Res() response: Response,
+    @Param('code') code: string,
+  ): Promise<Response> {
+    try {
+      const classData = await this.classesService.findByCode(code);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Class fetched successfully',
+        data: classData,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get(':id')
@@ -229,8 +325,25 @@ export class ClassesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Class not found',
   })
-  findById(@Param('id') id: string) {
-    return this.classesService.findById(id);
+  async findById(
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response> {
+    try {
+      const classData = await this.classesService.findById(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Class fetched successfully',
+        data: classData,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Patch(':id')
@@ -247,8 +360,26 @@ export class ClassesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Class not found',
   })
-  update(@Param('id') id: string, @Body() updateClassDto: UpdateClassDTO) {
-    return this.classesService.update(id, updateClassDto);
+  async update(
+    @Res() response: Response,
+    @Param('id') id: string,
+    @Body() updateClassDto: UpdateClassDTO,
+  ): Promise<Response> {
+    try {
+      const updatedClass = await this.classesService.update(id, updateClassDto);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Class updated successfully',
+        data: updatedClass,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Delete(':id')
@@ -268,7 +399,24 @@ export class ClassesController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Cannot delete class with existing enrollments or results',
   })
-  delete(@Param('id') id: string) {
-    return this.classesService.delete(id);
+  async delete(
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response> {
+    try {
+      const deletedClass = await this.classesService.delete(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Class deleted successfully',
+        data: deletedClass,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 }

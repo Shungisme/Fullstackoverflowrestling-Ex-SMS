@@ -52,9 +52,24 @@ export class StudentController {
     type: StudentResponseWrapperDTO,
   })
   async create(
+    @Res() response: Response,
     @Body() studentDto: CreateStudentWithAddressDTO,
-  ): Promise<StudentResponseDTO> {
-    return await this.studentService.create(studentDto);
+  ): Promise<Response> {
+    try {
+      const result = await this.studentService.create(studentDto);
+      return response.status(HttpStatus.CREATED).json({
+        statusCode: HttpStatus.CREATED,
+        message: 'Student created successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Patch(':studentId')
@@ -67,10 +82,28 @@ export class StudentController {
     type: StudentResponseWrapperDTO,
   })
   async update(
+    @Res() response: Response,
     @Param('studentId') studentId: string,
     @Body() studentDto: UpdateStudentRequestDTO,
-  ): Promise<StudentResponseDTO> {
-    return await this.studentService.update({ ...studentDto, studentId });
+  ): Promise<Response> {
+    try {
+      const result = await this.studentService.update({
+        ...studentDto,
+        studentId,
+      });
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Student updated successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Delete(':studentId')
@@ -82,9 +115,24 @@ export class StudentController {
     type: DeleteStudentWrapperResponseDTO,
   })
   async delete(
+    @Res() response: Response,
     @Param('studentId') studentId: string,
-  ): Promise<DeleteStudentResponseDTO> {
-    return await this.studentService.delete(studentId);
+  ): Promise<Response> {
+    try {
+      const result = await this.studentService.delete(studentId);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Student deleted successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get()
@@ -108,17 +156,48 @@ export class StudentController {
     required: false,
     type: String,
   })
-  async search(@Query() query: SearchRequestDTO): Promise<StudentsResponseDTO> {
-    return await this.studentService.search(query);
+  async search(
+    @Res() response: Response,
+    @Query() query: SearchRequestDTO,
+  ): Promise<Response> {
+    try {
+      const result = await this.studentService.search(query);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Students searched successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Post('import')
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(HttpStatus.CREATED)
   async uploadFile(
+    @Res() response: Response,
     @UploadedFile() file: Express.Multer.File,
-  ): Promise<{ isCreated: boolean; message: string }> {
-    return await this.studentService.upload(file);
+  ): Promise<Response> {
+    try {
+      const result = await this.studentService.upload(file);
+      return response.status(HttpStatus.CREATED).json({
+        statusCode: HttpStatus.OK,
+        message: 'Students uploaded successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get('export')
@@ -127,7 +206,15 @@ export class StudentController {
     @Query('type') type: string,
     @Res() res: Response,
   ): Promise<any> {
-    return await this.studentService.exportFile(type, res);
+    try {
+      return await this.studentService.exportFile(type, res);
+    } catch (error) {
+      return res
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get(':studentId/transcript')
@@ -144,7 +231,16 @@ export class StudentController {
     @Param('studentId') studentId: string,
     @Res() res: Response,
   ) {
-    await this.studentService.exportTranscript(studentId, res);
+    try {
+      await this.studentService.exportTranscript(studentId, res);
+      return res;
+    } catch (error) {
+      return res
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get(':studentId')
@@ -156,8 +252,22 @@ export class StudentController {
     type: StudentResponseWrapperDTO,
   })
   async findById(
+    @Res() response: Response,
     @Param('studentId') studentId: string,
-  ): Promise<StudentResponseDTO> {
-    return await this.studentService.findById(studentId);
+  ): Promise<Response> {
+    try {
+      const result = await this.studentService.findById(studentId);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Student finded successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 }
