@@ -47,8 +47,27 @@ export class StudentClassEnrollController {
     description: 'Create a student class enrollment',
     type: StudentClassEnrollResponseWrapperDTO,
   })
-  create(@Body() createStudentClassEnrollDto: CreateStudentClassEnrollDTO) {
-    return this.studentClassEnrollService.create(createStudentClassEnrollDto);
+  async create(
+    @Res() response: Response,
+    @Body() createStudentClassEnrollDto: CreateStudentClassEnrollDTO,
+  ) {
+    try {
+      const studentClassEnrol = await this.studentClassEnrollService.create(
+        createStudentClassEnrollDto,
+      );
+      return response.status(HttpStatus.CREATED).json({
+        statusCode: HttpStatus.CREATED,
+        message: 'Student class enrollment created successfully',
+        data: studentClassEnrol,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get()
@@ -71,13 +90,28 @@ export class StudentClassEnrollController {
     description: 'Results per page, defaults to 10',
   })
   async findAll(
+    @Res() response: Response,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-  ): Promise<PaginatedResponse<StudentClassEnrollDto>> {
-    return await this.studentClassEnrollService.findAll(
-      Number(page),
-      Number(limit),
-    );
+  ) {
+    try {
+      const result = await this.studentClassEnrollService.findAll(
+        Number(page),
+        Number(limit),
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Student class enrollments fetched successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get('student/:studentId')
@@ -100,16 +134,31 @@ export class StudentClassEnrollController {
     description: 'Get enrollments by student ID',
     type: StudentClassEnrollsResponseWrapperDTO,
   })
-  findByStudent(
+  async findByStudent(
+    @Res() response: Response,
     @Param('studentId') studentId: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ) {
-    return this.studentClassEnrollService.findByStudent(
-      studentId,
-      Number(page),
-      Number(limit),
-    );
+    try {
+      const result = await this.studentClassEnrollService.findByStudent(
+        studentId,
+        Number(page),
+        Number(limit),
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Student enrollments fetched successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get('class/:classCode')
@@ -132,16 +181,31 @@ export class StudentClassEnrollController {
     description: 'Get enrollments by class code',
     type: StudentClassEnrollsResponseWrapperDTO,
   })
-  findByClass(
+  async findByClass(
+    @Res() response: Response,
     @Param('classCode') classCode: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ) {
-    return this.studentClassEnrollService.findByClass(
-      classCode,
-      Number(page),
-      Number(limit),
-    );
+    try {
+      const result = await this.studentClassEnrollService.findByClass(
+        classCode,
+        Number(page),
+        Number(limit),
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Class enrollments fetched successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get('student/:studentId/class/:classCode')
@@ -153,14 +217,29 @@ export class StudentClassEnrollController {
     description: 'Get enrollment by student ID and class code',
     type: StudentClassEnrollResponseWrapperDTO,
   })
-  findByStudentAndClass(
+  async findByStudentAndClass(
+    @Res() response: Response,
     @Param('studentId') studentId: string,
     @Param('classCode') classCode: string,
   ) {
-    return this.studentClassEnrollService.findByStudentAndClass(
-      studentId,
-      classCode,
-    );
+    try {
+      const result = await this.studentClassEnrollService.findByStudentAndClass(
+        studentId,
+        classCode,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Enrollment fetched successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Post('student/:studentId/class/:classCode')
@@ -179,16 +258,32 @@ export class StudentClassEnrollController {
     description: 'Get enrollment by student ID and class code',
     type: StudentClassEnrollResponseWrapperDTO,
   })
-  updateTypeByStudentAndClass(
+  async updateTypeByStudentAndClass(
+    @Res() response: Response,
     @Param('studentId') studentId: string,
     @Param('classCode') classCode: string,
     @Body('type') type: EnrollEnum,
   ) {
-    return this.studentClassEnrollService.updateTypeByStudentAndClass(
-      studentId,
-      classCode,
-      type,
-    );
+    try {
+      const result =
+        await this.studentClassEnrollService.updateTypeByStudentAndClass(
+          studentId,
+          classCode,
+          type,
+        );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Enrollment type updated successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get(':id')
@@ -204,8 +299,22 @@ export class StudentClassEnrollController {
     status: HttpStatus.NOT_FOUND,
     description: 'Student class enrollment not found',
   })
-  findById(@Param('id') id: string) {
-    return this.studentClassEnrollService.findById(id);
+  async findById(@Res() response: Response, @Param('id') id: string) {
+    try {
+      const result = await this.studentClassEnrollService.findById(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Student class enrollment fetched successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Patch(':id')
@@ -222,14 +331,29 @@ export class StudentClassEnrollController {
     status: HttpStatus.NOT_FOUND,
     description: 'Student class enrollment not found',
   })
-  update(
+  async update(
+    @Res() response: Response,
     @Param('id') id: string,
     @Body() updateStudentClassEnrollDto: UpdateStudentClassEnrollDTO,
   ) {
-    return this.studentClassEnrollService.update(
-      id,
-      updateStudentClassEnrollDto,
-    );
+    try {
+      const result = await this.studentClassEnrollService.update(
+        id,
+        updateStudentClassEnrollDto,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Student class enrollment updated successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Delete(':id')
@@ -245,8 +369,22 @@ export class StudentClassEnrollController {
     status: HttpStatus.NOT_FOUND,
     description: 'Student class enrollment not found',
   })
-  delete(@Param('id') id: string) {
-    return this.studentClassEnrollService.delete(id);
+  async delete(@Res() response: Response, @Param('id') id: string) {
+    try {
+      const result = await this.studentClassEnrollService.delete(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Student class enrollment deleted successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Delete('student/:studentId/class/:classCode')
@@ -264,20 +402,27 @@ export class StudentClassEnrollController {
     description: 'Student class enrollment not found',
   })
   async dropAnEnrollment(
+    @Res() response: Response,
     @Param('studentId') studentId: string,
     @Param('classCode') classCode: string,
-    @Res() response: Response,
   ) {
     try {
       const result = await this.studentClassEnrollService.dropEnroll(
         studentId,
         classCode,
       );
-      return result;
-    } catch (error) {
-      return response.status(403).json({
-        message: error.message,
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Student class enrollment dropped successfully',
+        data: result,
       });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
     }
   }
 }

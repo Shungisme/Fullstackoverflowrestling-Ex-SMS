@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
 import { CreateProgramDTO } from '../../domain/dto/create-program.dto';
 import { UpdateProgramDTO } from '../../domain/dto/update-program.dto';
@@ -27,6 +28,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
+import { Response } from 'express';
 
 @ApiTags('Programs')
 @Controller({ path: 'programs', version: '1' })
@@ -42,8 +44,25 @@ export class ProgramsController {
     description: 'Create a program',
     type: ProgramResponseWrapperDTO,
   })
-  create(@Body() createProgramDto: CreateProgramDTO) {
-    return this.programsService.create(createProgramDto);
+  async create(
+    @Res() response: Response,
+    @Body() createProgramDto: CreateProgramDTO,
+  ): Promise<Response> {
+    try {
+      const program = await this.programsService.create(createProgramDto);
+      return response.status(HttpStatus.CREATED).json({
+        statusCode: HttpStatus.CREATED,
+        message: 'Program created successfully',
+        data: program,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get()
@@ -72,15 +91,30 @@ export class ProgramsController {
     description: 'Filter by status',
   })
   async findAll(
+    @Res() response: Response,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('status') status: string = '',
-  ): Promise<PaginatedResponse<ProgramsDto>> {
-    return await this.programsService.findAll(
-      Number(page),
-      Number(limit),
-      status,
-    );
+  ): Promise<Response> {
+    try {
+      const programs = await this.programsService.findAll(
+        Number(page),
+        Number(limit),
+        status,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Programs fetched successfully',
+        data: programs,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get(':id')
@@ -96,8 +130,25 @@ export class ProgramsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Program not found',
   })
-  findById(@Param('id') id: string) {
-    return this.programsService.findById(id);
+  async findById(
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response> {
+    try {
+      const program = await this.programsService.findById(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Program fetched successfully',
+        data: program,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Patch(':id')
@@ -114,8 +165,29 @@ export class ProgramsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Program not found',
   })
-  update(@Param('id') id: string, @Body() updateProgramDto: UpdateProgramDTO) {
-    return this.programsService.update(id, updateProgramDto);
+  async update(
+    @Res() response: Response,
+    @Param('id') id: string,
+    @Body() updateProgramDto: UpdateProgramDTO,
+  ): Promise<Response> {
+    try {
+      const updatedProgram = await this.programsService.update(
+        id,
+        updateProgramDto,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Program updated successfully',
+        data: updatedProgram,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Delete(':id')
@@ -131,7 +203,24 @@ export class ProgramsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Program not found',
   })
-  delete(@Param('id') id: string) {
-    return this.programsService.delete(id);
+  async delete(
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response> {
+    try {
+      const deletedProgram = await this.programsService.delete(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Program deleted successfully',
+        data: deletedProgram,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 }
