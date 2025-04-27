@@ -18,6 +18,10 @@ export interface ISubjectPrerequisiteRepository {
 
   findBySubjectId(subjectId: string): Promise<SubjectPrerequisiteResponseDto[]>;
 
+  findBySubjectCode(
+    subjectCode: string,
+  ): Promise<SubjectPrerequisiteResponseDto[]>;
+
   findByPrerequisiteSubjectId(
     prerequisiteSubjectId: string,
   ): Promise<SubjectPrerequisiteResponseDto[]>;

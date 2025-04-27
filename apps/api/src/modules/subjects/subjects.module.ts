@@ -7,6 +7,7 @@ import { StudentClassEnrollRepository } from '../student-class-enrolls/adapters/
 import { ClassesRepository } from '../classes/adapters/driven/classes.repository';
 import { CLASSES_REPOSITORY } from '../classes/domain/port/output/IClassesRepository';
 import { STUDENT_CLASS_ENROLL_REPOSITORY } from '../student-class-enrolls/domain/port/output/IStudentClassEnrollRepository';
+import { SubjectPrerequisiteRepository } from '../subject-prerequisites/adapters/driven/subject-prerequisite.repository';
 
 @Module({
   exports: [SubjectsService],
@@ -24,6 +25,10 @@ import { STUDENT_CLASS_ENROLL_REPOSITORY } from '../student-class-enrolls/domain
     {
       provide: CLASSES_REPOSITORY,
       useClass: ClassesRepository,
+    },
+    {
+      provide: 'SUBJECT_PREREQUISITE_REPOSITORY',
+      useClass: SubjectPrerequisiteRepository,
     },
   ],
 })

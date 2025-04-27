@@ -16,6 +16,10 @@ import {
   CLASSES_REPOSITORY,
   IClassesRepository,
 } from 'src/modules/classes/domain/port/output/IClassesRepository';
+import {
+  ISubjectPrerequisiteRepository,
+  SUBJECT_PREREQUISITE_REPOSITORY,
+} from 'src/modules/subject-prerequisites/domain/port/output/ISubjectPrerequisiteRepository';
 
 @Injectable()
 export class SubjectsService implements ISubjectsService {
@@ -28,6 +32,9 @@ export class SubjectsService implements ISubjectsService {
 
     @Inject(CLASSES_REPOSITORY)
     private classesRepository: IClassesRepository,
+
+    @Inject(SUBJECT_PREREQUISITE_REPOSITORY)
+    private subjectPrerequisiteRepository: ISubjectPrerequisiteRepository,
   ) {}
 
   async count(whereOptions: any): Promise<number> {
@@ -40,6 +47,25 @@ export class SubjectsService implements ISubjectsService {
 
   async create(subject: CreateSubjectDTO) {
     try {
+      const existPrerequisiteSubjects =
+        await this.subjectPrerequisiteRepository.findBySubjectCode(
+          subject.code,
+        );
+
+      if (existPrerequisiteSubjects.length > 0) {
+        existPrerequisiteSubjects.forEach((prerequisite) => {
+          const prerequisiteSubject = this.subjectsRepository.findById(
+            prerequisite.prerequisiteSubjectId,
+          );
+
+          if (!prerequisiteSubject) {
+            throw new Error(
+              `Prerequisite subject with ID ${prerequisite.prerequisiteSubjectId} does not exist`,
+            );
+          }
+        });
+      }
+
       return await this.subjectsRepository.create(subject);
     } catch (error) {
       throw new Error(`Error creating subject: ${error.message}`);
