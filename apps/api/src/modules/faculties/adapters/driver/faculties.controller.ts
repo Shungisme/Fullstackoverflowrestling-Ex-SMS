@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
 import { CreateFacultyDTO } from '../../domain/dto/create-faculty.dto';
 import { UpdateFacultyDTO } from '../../domain/dto/update-faculty.dto';
@@ -27,6 +28,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
+import { response, Response } from 'express';
 
 @ApiTags('Faculties')
 @Controller({ path: 'faculties', version: '1' })
@@ -42,8 +44,25 @@ export class FacultiesController {
     description: 'Create a faculty',
     type: FacultyResponseWrapperDTO,
   })
-  create(@Body() createFacultyDto: CreateFacultyDTO) {
-    return this.facultiesService.create(createFacultyDto);
+  async create(
+    @Res() response: Response,
+    @Body() createFacultyDto: CreateFacultyDTO,
+  ): Promise<Response> {
+    try {
+      const faculty = await this.facultiesService.create(createFacultyDto);
+      return response.status(HttpStatus.CREATED).json({
+        statusCode: HttpStatus.CREATED,
+        message: 'Faculty created successfully',
+        data: faculty,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get()
@@ -72,15 +91,30 @@ export class FacultiesController {
     description: 'Status to filter by',
   })
   async findAll(
+    @Res() response: Response,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('status') status: string = '',
-  ): Promise<PaginatedResponse<FacultiesDto>> {
-    return await this.facultiesService.findAll(
-      Number(page),
-      Number(limit),
-      status,
-    );
+  ): Promise<Response> {
+    try {
+      const faculties = await this.facultiesService.findAll(
+        Number(page),
+        Number(limit),
+        status,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Faculties fetched successfully',
+        data: faculties,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get(':id')
@@ -96,8 +130,22 @@ export class FacultiesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Faculty not found',
   })
-  findById(@Param('id') id: string) {
-    return this.facultiesService.findById(id);
+  async findById(@Param('id') id: string, @Res() response: Response) {
+    try {
+      const faculty = await this.facultiesService.findById(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Faculty fetched successfully',
+        data: faculty,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Patch(':id')
@@ -114,8 +162,29 @@ export class FacultiesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Faculty not found',
   })
-  update(@Param('id') id: string, @Body() updateFacultyDto: UpdateFacultyDTO) {
-    return this.facultiesService.update(id, updateFacultyDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateFacultyDto: UpdateFacultyDTO,
+    @Res() response: Response,
+  ) {
+    try {
+      const updatedFaculty = await this.facultiesService.update(
+        id,
+        updateFacultyDto,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Faculty updated successfully',
+        data: updatedFaculty,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Delete(':id')
@@ -131,7 +200,21 @@ export class FacultiesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Faculty not found',
   })
-  delete(@Param('id') id: string) {
-    return this.facultiesService.delete(id);
+  async delete(@Param('id') id: string, @Res() response: Response) {
+    try {
+      const deletedFaculty = await this.facultiesService.delete(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Faculty deleted successfully',
+        data: deletedFaculty,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 }

@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
 import { CreateSubjectDTO } from '../../domain/dto/create-subject.dto';
 import { UpdateSubjectDTO } from '../../domain/dto/update-subject.dto';
@@ -27,6 +28,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
+import { response, Response } from 'express';
 
 @ApiTags('Subjects')
 @Controller({ path: 'subjects', version: '1' })
@@ -42,8 +44,25 @@ export class SubjectsController {
     description: 'Create a subject',
     type: SubjectResponseWrapperDTO,
   })
-  create(@Body() createSubjectDto: CreateSubjectDTO) {
-    return this.subjectsService.create(createSubjectDto);
+  async create(
+    @Res() response: Response,
+    @Body() createSubjectDto: CreateSubjectDTO,
+  ): Promise<Response> {
+    try {
+      const result = await this.subjectsService.create(createSubjectDto);
+      return response.status(HttpStatus.CREATED).json({
+        statusCode: HttpStatus.CREATED,
+        message: 'Subject created successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get()
@@ -78,17 +97,32 @@ export class SubjectsController {
     description: 'Faculty ID to filter by',
   })
   async findAll(
+    @Res() response: Response,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('status') status: string = '',
     @Query('facultyId') facultyId?: string,
-  ): Promise<PaginatedResponse<SubjectsDto>> {
-    return await this.subjectsService.findAll(
-      Number(page),
-      Number(limit),
-      status,
-      facultyId,
-    );
+  ): Promise<Response> {
+    try {
+      const result = await this.subjectsService.findAll(
+        Number(page),
+        Number(limit),
+        status,
+        facultyId,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Subjects fetched successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get('code/:code')
@@ -104,8 +138,25 @@ export class SubjectsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Subject not found',
   })
-  findByCode(@Param('code') code: string) {
-    return this.subjectsService.findByCode(code);
+  async findByCode(
+    @Res() response: Response,
+    @Param('code') code: string,
+  ): Promise<Response> {
+    try {
+      const result = await this.subjectsService.findByCode(code);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Subject fetched successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get(':id')
@@ -121,8 +172,25 @@ export class SubjectsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Subject not found',
   })
-  findById(@Param('id') id: string) {
-    return this.subjectsService.findById(id);
+  async findById(
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response> {
+    try {
+      const result = await this.subjectsService.findById(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Subject fetched successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Patch(':id')
@@ -139,8 +207,26 @@ export class SubjectsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Subject not found',
   })
-  update(@Param('id') id: string, @Body() updateSubjectDto: UpdateSubjectDTO) {
-    return this.subjectsService.update(id, updateSubjectDto);
+  async update(
+    @Res() response: Response,
+    @Param('id') id: string,
+    @Body() updateSubjectDto: UpdateSubjectDTO,
+  ): Promise<Response> {
+    try {
+      const result = await this.subjectsService.update(id, updateSubjectDto);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Subject updated successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Delete(':id')
@@ -156,7 +242,24 @@ export class SubjectsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Subject not found',
   })
-  delete(@Param('id') id: string) {
-    return this.subjectsService.delete(id);
+  async delete(
+    @Res() response: Response,
+    @Param('id') id: string,
+  ): Promise<Response> {
+    try {
+      const result = await this.subjectsService.delete(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Subject deleted successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 }

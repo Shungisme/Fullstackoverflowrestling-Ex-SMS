@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
 import { CreateSemesterDTO } from '../../domain/dto/create-semester.dto';
 import { UpdateSemesterDTO } from '../../domain/dto/update-semester.dto';
@@ -27,6 +28,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
+import { Response } from 'express';
 
 @ApiTags('Semesters')
 @Controller({ path: 'semesters', version: '1' })
@@ -42,8 +44,25 @@ export class SemesterController {
     description: 'Create a semester',
     type: SemesterResponseWrapperDTO,
   })
-  create(@Body() createSemesterDto: CreateSemesterDTO) {
-    return this.semesterService.create(createSemesterDto);
+  async create(
+    @Res() response: Response,
+    @Body() createSemesterDto: CreateSemesterDTO,
+  ) {
+    try {
+      const semester = await this.semesterService.create(createSemesterDto);
+      return response.status(HttpStatus.CREATED).json({
+        statusCode: HttpStatus.CREATED,
+        message: 'Semester created successfully',
+        data: semester,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get()
@@ -66,10 +85,28 @@ export class SemesterController {
     description: 'Results per page, defaults to 10',
   })
   async findAll(
+    @Res() response: Response,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-  ): Promise<PaginatedResponse<SemesterDto>> {
-    return await this.semesterService.findAll(Number(page), Number(limit));
+  ) {
+    try {
+      const semesters = await this.semesterService.findAll(
+        Number(page),
+        Number(limit),
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Semesters fetched successfully',
+        data: semesters,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get(':id')
@@ -85,8 +122,22 @@ export class SemesterController {
     status: HttpStatus.NOT_FOUND,
     description: 'Semester not found',
   })
-  findById(@Param('id') id: string) {
-    return this.semesterService.findById(id);
+  async findById(@Res() response: Response, @Param('id') id: string) {
+    try {
+      const semester = await this.semesterService.findById(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Semester fetched successfully',
+        data: semester,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Patch(':id')
@@ -103,11 +154,29 @@ export class SemesterController {
     status: HttpStatus.NOT_FOUND,
     description: 'Semester not found',
   })
-  update(
+  async update(
+    @Res() response: Response,
     @Param('id') id: string,
     @Body() updateSemesterDto: UpdateSemesterDTO,
   ) {
-    return this.semesterService.update(id, updateSemesterDto);
+    try {
+      const updatedSemester = await this.semesterService.update(
+        id,
+        updateSemesterDto,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Semester updated successfully',
+        data: updatedSemester,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Delete(':id')
@@ -123,7 +192,21 @@ export class SemesterController {
     status: HttpStatus.NOT_FOUND,
     description: 'Semester not found',
   })
-  delete(@Param('id') id: string) {
-    return this.semesterService.delete(id);
+  async delete(@Res() response: Response, @Param('id') id: string) {
+    try {
+      const deletedSemester = await this.semesterService.delete(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Semester deleted successfully',
+        data: deletedSemester,
+      });
+    } catch (error: any) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 }

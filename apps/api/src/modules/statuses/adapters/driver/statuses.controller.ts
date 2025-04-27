@@ -9,6 +9,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
 import { CreateStatusDTO } from '../../domain/dto/create-status.dto';
 import { UpdateStatusDTO } from '../../domain/dto/update-status.dto';
@@ -27,6 +28,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
+import { Response } from 'express';
 
 @ApiTags('Statuses')
 @Controller({ path: 'statuses', version: '1' })
@@ -42,8 +44,25 @@ export class StatusesController {
     description: 'Create a status',
     type: StatusResponseWrapperDTO,
   })
-  create(@Body() createStatusDto: CreateStatusDTO) {
-    return this.statusesService.create(createStatusDto);
+  async create(
+    @Res() response: Response,
+    @Body() createStatusDto: CreateStatusDTO,
+  ) {
+    try {
+      const status = await this.statusesService.create(createStatusDto);
+      return response.status(HttpStatus.CREATED).json({
+        statusCode: HttpStatus.CREATED,
+        message: 'Status created successfully',
+        data: { status },
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get()
@@ -72,15 +91,30 @@ export class StatusesController {
     description: 'Status to filter by',
   })
   async findAll(
+    @Res() response: Response,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('status') status: string = '',
-  ): Promise<PaginatedResponse<StatusesDto>> {
-    return await this.statusesService.findAll(
-      Number(page),
-      Number(limit),
-      status,
-    );
+  ) {
+    try {
+      const result = await this.statusesService.findAll(
+        Number(page),
+        Number(limit),
+        status,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Statuses fetched successfully',
+        data: result,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Get(':id')
@@ -96,8 +130,22 @@ export class StatusesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Status not found',
   })
-  findById(@Param('id') id: string) {
-    return this.statusesService.findById(id);
+  async findById(@Res() response: Response, @Param('id') id: string) {
+    try {
+      const status = await this.statusesService.findById(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Status fetched successfully',
+        data: status,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Patch(':id')
@@ -114,8 +162,29 @@ export class StatusesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Status not found',
   })
-  update(@Param('id') id: string, @Body() updateStatusDto: UpdateStatusDTO) {
-    return this.statusesService.update(id, updateStatusDto);
+  async update(
+    @Res() response: Response,
+    @Param('id') id: string,
+    @Body() updateStatusDto: UpdateStatusDTO,
+  ) {
+    try {
+      const updatedStatus = await this.statusesService.update(
+        id,
+        updateStatusDto,
+      );
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Status updated successfully',
+        data: updatedStatus,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 
   @Delete(':id')
@@ -131,7 +200,21 @@ export class StatusesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Status not found',
   })
-  delete(@Param('id') id: string) {
-    return this.statusesService.delete(id);
+  async delete(@Res() response: Response, @Param('id') id: string) {
+    try {
+      const deletedStatus = await this.statusesService.delete(id);
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Status deleted successfully',
+        data: deletedStatus,
+      });
+    } catch (error) {
+      return response
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({
+          statusCode: error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          message: error.message || 'Internal Server Error',
+        });
+    }
   }
 }
