@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import LoadingSpinner from "@/src/components/LoadingSpinner";
 import { ClassService } from "@/src/lib/api/school-service";
 import { toast } from "sonner";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 const AddClass = ({ courseId }: { courseId: string }) => {
   const { courses, isLoading } = useSchoolConfigContext();
@@ -22,6 +23,7 @@ const AddClass = ({ courseId }: { courseId: string }) => {
   if (!course) {
     return <div>Course not found</div>;
   }
+  const { t } = useLanguage();
   return (
     <>
       <div className="text-2xl font-bold mb-4">
@@ -30,9 +32,11 @@ const AddClass = ({ courseId }: { courseId: string }) => {
           className="text-base hover:scale-150"
         >
           <ArrowLeft className="inline mr-2 h-4" />
-          Quay lại
+          {t("AddClass_GoBack")}
         </Link>
-        <h1>Thêm lớp học cho môn học {course.title}</h1>
+        <h1>
+          {t("AddClassForm_Title")} {course.title}
+        </h1>
       </div>
       <AddClassForm
         onSubmit={async (value) => {
@@ -42,13 +46,13 @@ const AddClass = ({ courseId }: { courseId: string }) => {
             subjectCode: value.courseId,
           });
           if (res.statusCode === 201) {
-            toast.success("Thêm lớp học thành công");
+            toast.success(t("AddClassForm_notiSuccess"));
             setTimeout(() => {
               window.location.href = `/courses/${courseId}`;
             }, 1000);
           } else {
             const errorMessage = res.message;
-            toast.error("Thêm lớp học thất bại" + errorMessage);
+            toast.error(t("AddClassForm_notiError") + errorMessage);
           }
         }}
         subjectCourse={course}

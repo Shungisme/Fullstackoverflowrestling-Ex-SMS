@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Student } from "../../types";
+import { useLanguage } from "@/src/context/LanguageContext";
 interface DashboardProps {
   students: Student[];
 }
@@ -17,8 +18,7 @@ export default function Dashboard({ students }: DashboardProps) {
   if (!students) return <div></div>;
   const statusCounts = students.reduce(
     (acc: Record<string, number>, student) => {
-      acc[student.status.title] =
-        (acc[student.status.title] || 0) + 1;
+      acc[student.status.title] = (acc[student.status.title] || 0) + 1;
       return acc;
     },
     {},
@@ -33,8 +33,7 @@ export default function Dashboard({ students }: DashboardProps) {
   // Count students by faculty
   const facultyCounts = students.reduce(
     (acc: Record<string, number>, student) => {
-      acc[student.faculty.title] =
-        (acc[student.faculty.title] || 0) + 1;
+      acc[student.faculty.title] = (acc[student.faculty.title] || 0) + 1;
       return acc;
     },
     {},
@@ -44,12 +43,12 @@ export default function Dashboard({ students }: DashboardProps) {
     name,
     value,
   }));
-
+  const { t } = useLanguage();
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Phân bố sinh viên theo tình trạng</CardTitle>
+          <CardTitle>{t("Dashboard_StatusChartTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           {students.length > 0 ? (
@@ -68,7 +67,7 @@ export default function Dashboard({ students }: DashboardProps) {
             </div>
           ) : (
             <div className="flex justify-center items-center h-[300px] text-muted-foreground">
-              Không có dữ liệu
+              {t("notiNodata")}
             </div>
           )}
         </CardContent>
@@ -76,7 +75,7 @@ export default function Dashboard({ students }: DashboardProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Phân bố sinh viên theo khoa</CardTitle>
+          <CardTitle>{t("Dashboard_FacultyChartTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           {students.length > 0 ? (
@@ -95,7 +94,7 @@ export default function Dashboard({ students }: DashboardProps) {
             </div>
           ) : (
             <div className="flex justify-center items-center h-[300px] text-muted-foreground">
-              Không có dữ liệu
+              {t("notiNodata")}
             </div>
           )}
         </CardContent>

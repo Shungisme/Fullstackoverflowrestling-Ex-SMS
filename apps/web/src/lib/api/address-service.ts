@@ -43,12 +43,4 @@ export const AddressService = {
     }
   },
 
-  getAddressTypeName(type: string): string {
-    const typeMap: Record<string, string> = {
-      mailingAddress: "Địa chỉ nhận thư",
-      permanentAddress: "Địa chỉ thường trú",
-      temporaryAddress: "Địa chỉ tạm trú",
-    };
-    return typeMap[type] || type;
-  },
 };

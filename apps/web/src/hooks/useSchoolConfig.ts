@@ -19,31 +19,32 @@ export default function useSchoolConfig() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const query = ["status=active"];
-        const [facultyRes, programRes, statusRes, coursesRes, semesterRes] =
-          await Promise.all([
-            FacultyService.getAll(query),
-            ProgramService.getAll(query),
-            StudentStatusService.getAll(query),
-            CourseService.getAll(),
-            SemesterService.getAll(),
-          ]);
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const query = ["status=active"];
+      const [facultyRes, programRes, statusRes, coursesRes, semesterRes] =
+        await Promise.all([
+          FacultyService.getAll(query),
+          ProgramService.getAll(query),
+          StudentStatusService.getAll(query),
+          CourseService.getAll(),
+          SemesterService.getAll(),
+        ]);
 
-        setFaculties(facultyRes.data.data);
-        setPrograms(programRes.data.data);
-        setStatuses(statusRes.data.data);
-        setCourses(coursesRes.data.data);
-        setSemesters(semesterRes.data.data);
-      } catch {
-        toast.error("Internal Server Error!");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      setFaculties(facultyRes.data.data);
+      setPrograms(programRes.data.data);
+      setStatuses(statusRes.data.data);
+      setCourses(coursesRes.data.data);
+      setSemesters(semesterRes.data.data);
+    } catch {
+      toast.error("Internal Server Error!");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -54,5 +55,6 @@ export default function useSchoolConfig() {
     statuses,
     courses,
     semesters,
+    fetchData,
   };
 }

@@ -33,10 +33,10 @@ export function DataTable<TData, TValue>({
             <Table>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
+                        <TableRow key={headerGroup.id} className="bg-muted">
                             {headerGroup.headers.map((header) => {
                                 return (
-                                    <TableHead key={header.id}>
+                                    <TableHead key={header.id} className="p-3 text-left">
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const TOAST_LIMIT = 3;
 const TOAST_REMOVE_DELAY = 1000;
@@ -60,8 +60,8 @@ export function useToast() {
   function dismissToast(id: string) {
     setToasts((toasts) =>
       toasts.map((toast) =>
-        toast.id === id ? { ...toast, open: false } : toast
-      )
+        toast.id === id ? { ...toast, open: false } : toast,
+      ),
     );
 
     setTimeout(() => {
@@ -71,7 +71,7 @@ export function useToast() {
 
   function updateToast(id: string, props: Omit<ToastProps, "id" | "open">) {
     setToasts((toasts) =>
-      toasts.map((toast) => (toast.id === id ? { ...toast, ...props } : toast))
+      toasts.map((toast) => (toast.id === id ? { ...toast, ...props } : toast)),
     );
   }
 

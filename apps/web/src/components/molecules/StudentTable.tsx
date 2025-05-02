@@ -38,6 +38,7 @@ import {
 } from "../atoms/DropDownMenu";
 import FileUploadDialog from "./FileUploadDialog";
 import LoadingSpinner from "../LoadingSpinner";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 interface StudentTableProps {
   data: StudentList;
@@ -168,17 +169,18 @@ export default function StudentTable({
   };
 
   if (!data || !Array.isArray(data.students)) return <div></div>;
+  const { t } = useLanguage();
   return (
     <>
       <div className="flex justify-between items-center p-4">
-        <h2 className="text-xl font-semibold">Danh sách sinh viên</h2>
+        <h2 className="text-xl font-semibold">{t("tabStudentList")}</h2>
         <div className="flex items-center gap-2">
           <FileUploadDialog onUpload={handleImportData} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <Download className="h-4 w-4" />
-                {exporting ? "Đang xuất..." : "Xuất dữ liệu"}
+                {exporting ? t("exportButton_exporting") : t("exportButton")}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -190,8 +192,8 @@ export default function StudentTable({
                 <FileDown className="mr-2 h-4 w-4" />
                 <span>
                   {exporting === "excel"
-                    ? "Đang xuất Excel..."
-                    : "Xuất ra Excel"}
+                    ? t("exportButtonExcel_exporting")
+                    : t("exportButtonExcel")}
                 </span>
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -201,7 +203,9 @@ export default function StudentTable({
               >
                 <FileSpreadsheet className="mr-2 h-4 w-4" />
                 <span>
-                  {exporting === "json" ? "Đang xuất Json..." : "Xuất ra Json"}
+                  {exporting === "json"
+                    ? t("exportButtonJson_exporting")
+                    : t("exportButtonJson_exporting")}
                 </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -210,7 +214,7 @@ export default function StudentTable({
       </div>
       <div className="rounded-md border">
         <Table>
-          <TableCaption className="sr-only">Danh sách sinh viên</TableCaption>
+          <TableCaption className="sr-only">{t("tabStudentList")}</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead
@@ -218,7 +222,7 @@ export default function StudentTable({
                 onClick={() => handleSort("studentId")}
               >
                 <div className="flex items-center">
-                  MSSV
+                  {t("studentId")}
                   <SortIcon field="studentId" />
                 </div>
               </TableHead>
@@ -227,7 +231,7 @@ export default function StudentTable({
                 onClick={() => handleSort("name")}
               >
                 <div className="flex items-center">
-                  Họ tên
+                  {t("studentName")}
                   <SortIcon field="name" />
                 </div>
               </TableHead>
@@ -236,7 +240,7 @@ export default function StudentTable({
                 onClick={() => handleSort("dateOfBirth")}
               >
                 <div className="flex items-center">
-                  Ngày sinh
+                  {t("studentDOB")}
                   <SortIcon field="dateOfBirth" />
                 </div>
               </TableHead>
@@ -245,7 +249,7 @@ export default function StudentTable({
                 onClick={() => handleSort("faculty")}
               >
                 <div className="flex items-center">
-                  Khoa
+                  {t("studentFaculty")}
                   <SortIcon field="faculty" />
                 </div>
               </TableHead>
@@ -254,12 +258,12 @@ export default function StudentTable({
                 onClick={() => handleSort("course")}
               >
                 <div className="flex items-center">
-                  Khóa
+                  {t("studentYear")}
                   <SortIcon field="course" />
                 </div>
               </TableHead>
-              <TableHead>Tình trạng</TableHead>
-              <TableHead className="text-right">Thao tác</TableHead>
+              <TableHead>{t("studentStatus")}</TableHead>
+              <TableHead className="text-right">{t("action")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -276,8 +280,8 @@ export default function StudentTable({
                 <TableCell colSpan={7} className="text-center py-8">
                   <div className="flex flex-col items-center justify-center text-muted-foreground">
                     <AlertCircle className="h-12 w-12 mb-2" />
-                    <h3 className="font-medium text-lg">Không có dữ liệu</h3>
-                    <p>Chưa có sinh viên nào trong hệ thống</p>
+                    <h3 className="font-medium text-lg">{t("notiNodata")}</h3>
+                    <p>{t("notiNodataStudent")}</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -340,7 +344,8 @@ export default function StudentTable({
       {data.students.length > 0 && (
         <div className="flex items-center justify-between space-x-2 p-4">
           <div className="text-sm text-muted-foreground">
-            Hiển thị {data.students.length} trên {data.total} sinh viên
+            {t("show")} {data.students.length} {t("on")} {data.total}{" "}
+            {t("student")}
           </div>
           <div className="flex items-center space-x-1">
             <Button
@@ -380,10 +385,10 @@ export default function StudentTable({
         isOpen={isOpen}
         onClose={closeConfirmDialog}
         onConfirm={handleConfirmDelete}
-        title="Xóa sinh viên"
-        description="Bạn có chắc chắn muốn xóa sinh viên này không? Hành động này không thể hoàn tác."
-        confirmText="Xóa"
-        cancelText="Hủy"
+        title={t("confirmDeleteTitle")}
+        description={t("confirmDeleteDesc")}
+        confirmText={t("confirmDeleteButton")}
+        cancelText={t("confirmDeleteCancel")}
         variant="destructive"
       />
     </>

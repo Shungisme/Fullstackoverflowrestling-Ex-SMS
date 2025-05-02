@@ -1,8 +1,8 @@
-import { AddressService } from "@/src/lib/api/address-service";
 import { MapPin, Pencil } from "lucide-react";
 import { Address, AddressType } from "@/src/types";
 import React from "react";
 import { Button } from "@/src/components/atoms/Button";
+import { getAddressTypeName } from "@/src/utils/helper";
 
 interface AddressInfoProps {
   type: AddressType;
@@ -20,7 +20,7 @@ const AddressInfo = ({
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-semibold flex items-center gap-2">
           <MapPin size={16} className="text-muted-foreground" />
-          {AddressService.getAddressTypeName(type)}
+          {getAddressTypeName(type)}
         </h4>
         <Button
           variant="outline"

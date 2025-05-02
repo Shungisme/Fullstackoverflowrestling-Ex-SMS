@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Student, StudentDataRespose, StudentList } from "../types";
+import { Student, StudentList } from "../types";
 import { toast } from "sonner";
 import {
   getStudents,

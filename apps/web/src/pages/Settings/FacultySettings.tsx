@@ -9,6 +9,15 @@ import EditItemDialog from "@/src/components/molecules/EditItemDialog";
 import { toast } from "sonner";
 import { Faculty, IAPIResponse } from "@/src/types";
 import { FacultyService } from "@/src/lib/api/school-service";
+import { useLanguage } from "@/src/context/LanguageContext";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/src/components/atoms/Table";
 
 export default function FacultySettings() {
   const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -78,7 +87,9 @@ export default function FacultySettings() {
         toast.error("Gặp lỗi khi cập nhật khoa!");
         return;
       }
-      setFaculties(faculties.map((f) => (f.id === edited.data.id ? edited.data : f)));
+      setFaculties(
+        faculties.map((f) => (f.id === edited.data.id ? edited.data : f)),
+      );
       toast.info("Thông tin khoa đã được cập nhật thành công");
     } else {
       // Thêm mới
@@ -94,34 +105,42 @@ export default function FacultySettings() {
     setIsEditDialogOpen(false);
   };
 
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Danh sách khoa</h3>
+        <h3 className="text-lg font-medium">{t("FacultySettings_Title")}</h3>
         <Button onClick={handleAddNew} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Thêm khoa mới
+          <Plus className="h-4 w-4" /> {t("FacultySettings_AddFacultyBtn")}
         </Button>
       </div>
 
       <div className="border rounded-md">
-        <table className="w-full">
-          <thead className="bg-muted">
-            <tr>
-              <th className="text-left p-3 text-sm font-medium">Tên khoa</th>
-              <th className="text-left p-3 text-sm font-medium">Mô tả Khoa</th>
-              <th className="text-left p-3 text-sm font-medium">
-                Trạng thái khoa
+        <Table className="w-full">
+          <TableHeader className="bg-muted">
+            <TableRow>
+              <TableHead className="text-left p-3 text-sm font-medium">
+                {t("FacultySettings_Table_Header_Title")}
+              </TableHead>
+              <TableHead className="text-left p-3 text-sm font-medium">
+                {t("FacultySettings_Table_Header_Desc")}
+              </TableHead>
+              <TableHead className="text-left p-3 text-sm font-medium">
+                {t("FacultySettings_Table_Header_Status")}
+              </TableHead>
+              <th className="text-right p-3 text-sm font-medium">
+                {t("FacultySettings_Table_Header_Status")}
               </th>
-              <th className="text-right p-3 text-sm font-medium">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {faculties.map((faculty) => (
-              <tr key={faculty.id} className="border-t">
-                <td className="p-3">{faculty.title}</td>
-                <td className="p-3">{faculty.description}</td>
-                <td className="p-3">{faculty.status}</td>
-                <td className="p-3 text-right">
+              <TableRow key={faculty.id} className="border-t">
+                <TableCell className="p-3">{faculty.title}</TableCell>
+                <TableCell className="p-3">{faculty.description}</TableCell>
+                <TableCell className="p-3">{faculty.status}</TableCell>
+                <TableCell className="p-3 text-right">
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="ghost"
@@ -138,19 +157,19 @@ export default function FacultySettings() {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <ConfirmDialog
         isOpen={isConfirmOpen}
         onClose={closeConfirm}
         onConfirm={confirmDelete}
-        title="Xóa khoa"
-        description="Bạn có chắc chắn muốn xóa khoa này? Hành động này không thể hoàn tác."
+        title={t("FacultySettings_ConfirmDelete_Title")}
+        description={t("FacultySettings_ConfirmDelete_Desc")}
         variant="destructive"
       />
 
@@ -159,10 +178,22 @@ export default function FacultySettings() {
         onClose={() => setIsEditDialogOpen(false)}
         onSave={handleSave}
         item={currentItem}
-        title={currentItem ? "Chỉnh sửa thông tin khoa" : "Thêm khoa mới"}
+        title={
+          currentItem
+            ? t("FacultySettings_EditItem_Title")
+            : t("FacultySettings_AddItem_Title")
+        }
         fields={[
-          { name: "title", label: "Tên khoa", type: "text" },
-          { name: "description", label: "Mô tả Khoa", type: "text" },
+          {
+            name: "title",
+            label: t("FacultySettings_EditItem_Label_Title"),
+            type: "text",
+          },
+          {
+            name: "description",
+            label: t("FacultySettings_EditItem_Label_Desc"),
+            type: "text",
+          },
         ]}
       />
     </div>

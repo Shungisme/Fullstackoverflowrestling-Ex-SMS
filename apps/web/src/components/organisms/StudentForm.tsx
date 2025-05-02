@@ -31,6 +31,7 @@ import { formatDate, parseISO } from "date-fns";
 import AddressForm from "../molecules/AddressForm";
 import IdentityPaperFormV2 from "../molecules/IdentityPaperFormV2";
 import { toast } from "sonner";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 const allowedEmailDomains = ["student.university.edu.vn"];
 const allowedPhoneNumber = /^(0|\+84)([3|5|7|8|9])([0-9]{8})$/;
@@ -148,7 +149,7 @@ export default function StudentForm({
 
     if (formData.email && !validateEmail(formData.email)) {
       newErrors.email = `Email không hợp lệ. Hãy kiểm tra và chắc chắn rằng email của bạn là hợp lệ. Chỉ chấp nhận email của miền trường đại học: ${allowedEmailDomains.join(
-        ", "
+        ", ",
       )}`;
     }
 
@@ -179,15 +180,19 @@ export default function StudentForm({
       }
     }
   };
-
+  const { t } = useLanguage();
   return (
     <Card className="border-none shadow-none sm:border sm:shadow-sm">
       <FormHeader
-        title={!student ? "Thêm Sinh viên mới" : "Sửa thông tin sinh viên"}
+        title={
+          !student
+            ? t("StudentForm_FormHeaderTitle_Add")
+            : t("StudentForm_FormHeaderTitle_Edit")
+        }
         description={
           !student
-            ? "Nhập thông tin sinh viên mới vào hệ thống"
-            : `Cập nhật thông tin của sinh viên ${formData.name}`
+            ? t("StudentForm_FormHeaderDesc")
+            : `${t("StudentForm_FormHeaderTitle_Add")} ${formData.name}`
         }
         onCancel={onCancel}
       />
@@ -197,7 +202,7 @@ export default function StudentForm({
             <InputField
               value={formData.studentId}
               name="studentId"
-              label="MSSV"
+              label={t("StudentForm_StudentId")}
               isRequired={true}
               handleChange={handleChange}
               errors={errors}
@@ -206,17 +211,17 @@ export default function StudentForm({
             <InputField
               value={formData.name}
               name="name"
-              label="Họ tên"
+              label={t("StudentForm_StudentName")}
               isRequired
               handleChange={handleChange}
               errors={errors}
-              placeholder="Nhập họ tên"
+              placeholder={t("StudentForm_StudentNamePlaceholder")}
             />
             <InputField
               value={formData.dateOfBirth}
               name="dateOfBirth"
               type="date"
-              label="Ngày sinh"
+              label={t("StudentForm_DateOfBirth")}
               isRequired
               handleChange={handleChange}
               errors={errors}
@@ -225,18 +230,18 @@ export default function StudentForm({
             <SelectInput
               name="gender"
               value={formData.gender}
-              placeholder="Giới tính"
-              label="Giới tính"
+              placeholder={t("StudentForm_GenderPlaceholder")}
+              label={t("StudentForm_Gender")}
               errors={errors}
               onValueChange={(value) => handleSelectChange("gender", value)}
               data={[
                 {
                   id: "MALE",
-                  title: "Nam",
+                  title: t("StudentForm_Gender_MaleTitle"),
                 },
                 {
                   id: "FEMALE",
-                  title: "Nữ",
+                  title: t("StudentForm_Gender_FemaleTitle"),
                 },
               ]}
             />
@@ -245,17 +250,17 @@ export default function StudentForm({
               name="facultyId"
               value={formData.facultyId ?? formData.faculty.id}
               onValueChange={(value) => handleSelectChange("facultyId", value)}
-              placeholder="Chọn khoa"
-              label="Khoa"
+              placeholder={t("StudentForm_FacultyPlaceholder")}
+              label={t("StudentForm_Faculty")}
               errors={errors}
               data={facultyOptions}
             />
             <InputField
-              label="Khóa"
+              label={t("StudentForm_Year")}
               name="course"
               value={formData.course}
               handleChange={handleChange}
-              placeholder="Ví dụ: 22"
+              placeholder={t("StudentForm_YearPlaceholder")}
               errors={errors}
               isRequired
             />
@@ -264,9 +269,9 @@ export default function StudentForm({
               name="programId"
               value={formData.programId ?? formData.program.id}
               onValueChange={(value) => handleSelectChange("programId", value)}
-              placeholder="Nhập chương trình đào tạo"
+              placeholder={t("StudentForm_ProgramPlaceholder")}
               isRequired
-              label="Chương trình"
+              label={t("StudentForm_Program")}
               errors={errors}
               data={programOptions}
             />
@@ -275,45 +280,46 @@ export default function StudentForm({
               name="statusId"
               value={formData.statusId ?? formData.status.id}
               onValueChange={(value) => handleSelectChange("statusId", value)}
-              placeholder="Chọn tình trạng"
+              placeholder={t("StudentForm_StatusPlaceholder")}
               isRequired
-              label="Tình trạng"
+              label={t("StudentForm_Status")}
               errors={errors}
               data={statusOptions}
             />
             <InputField
-              label="Email"
+              label={t("StudentForm_Email")}
               name="email"
               type="email"
               value={formData.email}
               handleChange={handleChange}
-              placeholder="example@email.com"
+              placeholder={t("StudentForm_EmailPlaceholder")}
               errors={errors}
               isRequired
             />
             <InputField
               name="phone"
-              label="Số điện thoại"
+              label={t("StudentForm_Phone")}
               value={formData.phone}
               handleChange={handleChange}
               errors={errors}
               isRequired
-              placeholder="Nhập số điện thoại"
+              placeholder={t("StudentForm_PhonePlaceholder")}
             />
 
             <InputField
               name="nationality"
-              label="Quốc tịch"
+              label={t("StudentForm_Nationality")}
               value={formData.nationality}
               handleChange={handleChange}
               errors={errors}
               isRequired
-              placeholder="Nhập quốc tịch"
+              placeholder={t("StudentForm_NationalityPlaceholder")}
             />
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="mailingAddress">
-                Địa chỉ nhận thư <span className="text-destructive">*</span>
+                {t("StudentForm_MailingAddress")}{" "}
+                <span className="text-destructive">*</span>
               </Label>
               <AddressForm
                 address={formData.mailingAddress}
@@ -332,13 +338,14 @@ export default function StudentForm({
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="identityPaper">
-                Giấy tờ cá nhân <span className="text-destructive">*</span>
+                {t("StudentForm_IdentityPaper")}{" "}
+                <span className="text-destructive">*</span>
               </Label>
               <IdentityPaperFormV2
                 identityPaper={formData.identityPaper}
                 onChange={(
                   field: keyof IdentityPapers,
-                  value: string | boolean
+                  value: string | boolean,
                 ) => {
                   setFormData({
                     ...formData,
@@ -363,7 +370,9 @@ export default function StudentForm({
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {!student ? "Đang thêm..." : "Đang chỉnh sửa"}
+                  {!student
+                    ? t("StudentForm_SubmitButton_Adding")
+                    : t("StudentForm_SubmitButton_Editing")}
                 </>
               ) : (
                 <>
@@ -372,7 +381,9 @@ export default function StudentForm({
                   ) : (
                     <Pencil className="w-4 h-4" />
                   )}
-                  {!student ? "Thêm Sinh viên" : "Chỉnh sửa"}
+                  {!student
+                    ? t("StudentForm_SubmitButton_Add")
+                    : t("StudentForm_SubmitButton_Edit")}
                 </>
               )}
             </Button>
