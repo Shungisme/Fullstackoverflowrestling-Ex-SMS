@@ -7,28 +7,28 @@ import {
   Param,
   Delete,
   Query,
-  HttpCode,
-  HttpStatus,
   Res,
+  HttpStatus,
+  HttpCode,
+  Headers,
 } from '@nestjs/common';
-import { CreateProgramDTO } from '../../domain/dto/create-program.dto';
-import { UpdateProgramDTO } from '../../domain/dto/update-program.dto';
-import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
+import { Response } from 'express';
 import {
-  ProgramsDto,
-  ProgramsResponseWrapperDTO,
-  ProgramResponseWrapperDTO,
-} from '../../domain/dto/programs.dto';
-import { ProgramsService } from '../../domain/port/input/programs.service';
-import {
-  ApiBody,
+  ApiTags,
   ApiParam,
   ApiQuery,
   ApiResponse,
-  ApiTags,
+  ApiBody,
+  ApiHeader,
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { Response } from 'express';
+import { ProgramsService } from '../../domain/port/input/programs.service';
+import { CreateProgramDTO } from '../../domain/dto/create-program.dto';
+import { UpdateProgramDTO } from '../../domain/dto/update-program.dto';
+import {
+  ProgramResponseWrapperDTO,
+  ProgramsDto,
+} from '../../domain/dto/programs.dto';
 
 @ApiTags('Programs')
 @Controller({ path: 'programs', version: '1' })
@@ -41,7 +41,7 @@ export class ProgramsController {
   @ApiBody({ type: CreateProgramDTO })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Create a program',
+    description: 'Create program',
     type: ProgramResponseWrapperDTO,
   })
   async create(
@@ -67,22 +67,18 @@ export class ProgramsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Get all programs with pagination',
-    type: ProgramsResponseWrapperDTO,
-  })
+  @ZodSerializerDto(ProgramsDto)
   @ApiQuery({
     name: 'page',
     required: false,
     type: Number,
-    description: 'Page number, defaults to 1',
+    description: 'Page number',
   })
   @ApiQuery({
     name: 'limit',
     required: false,
     type: Number,
-    description: 'Results per page, defaults to 10',
+    description: 'Items per page',
   })
   @ApiQuery({
     name: 'status',
@@ -90,22 +86,53 @@ export class ProgramsController {
     type: String,
     description: 'Filter by status',
   })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    type: String,
+    description: 'Language code for translations',
+  })
+  @ApiHeader({
+    name: 'Accept-Language',
+    required: false,
+    description: 'Language preference',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Get all programs',
+    type: ProgramResponseWrapperDTO,
+  })
   async findAll(
     @Res() response: Response,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-    @Query('status') status: string = '',
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('status') status = '',
+    @Query('lang') queryLang?: string,
+    @Headers('accept-language') acceptLanguage?: string,
   ): Promise<Response> {
     try {
-      const programs = await this.programsService.findAll(
-        Number(page),
-        Number(limit),
+      // Ưu tiên query param, sau đó dùng header
+      const lang =
+        queryLang ||
+        (acceptLanguage
+          ? acceptLanguage.split(',')[0].split(';')[0]
+          : undefined);
+
+      const paginatedPrograms = await this.programsService.findAll(
+        +page,
+        +limit,
         status,
+        lang,
       );
+
       return response.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: 'Programs fetched successfully',
-        data: programs,
+        data: paginatedPrograms.data,
+        page: paginatedPrograms.page,
+        totalPage: paginatedPrograms.totalPage,
+        limit: paginatedPrograms.limit,
+        total: paginatedPrograms.total,
       });
     } catch (error: any) {
       return response
@@ -121,6 +148,17 @@ export class ProgramsController {
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(ProgramsDto)
   @ApiParam({ name: 'id', description: 'Program ID', type: String })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    type: String,
+    description: 'Language code for translations',
+  })
+  @ApiHeader({
+    name: 'Accept-Language',
+    required: false,
+    description: 'Language preference',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Get program by id',
@@ -131,11 +169,20 @@ export class ProgramsController {
     description: 'Program not found',
   })
   async findById(
-    @Res() response: Response,
     @Param('id') id: string,
-  ): Promise<Response> {
+    @Res() response: Response,
+    @Query('lang') queryLang?: string,
+    @Headers('accept-language') acceptLanguage?: string,
+  ) {
     try {
-      const program = await this.programsService.findById(id);
+      // Ưu tiên query param, sau đó dùng header
+      const lang =
+        queryLang ||
+        (acceptLanguage
+          ? acceptLanguage.split(',')[0].split(';')[0]
+          : undefined);
+
+      const program = await this.programsService.findById(id, lang);
       return response.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: 'Program fetched successfully',
@@ -166,10 +213,10 @@ export class ProgramsController {
     description: 'Program not found',
   })
   async update(
-    @Res() response: Response,
     @Param('id') id: string,
     @Body() updateProgramDto: UpdateProgramDTO,
-  ): Promise<Response> {
+    @Res() response: Response,
+  ) {
     try {
       const updatedProgram = await this.programsService.update(
         id,
@@ -203,10 +250,7 @@ export class ProgramsController {
     status: HttpStatus.NOT_FOUND,
     description: 'Program not found',
   })
-  async delete(
-    @Res() response: Response,
-    @Param('id') id: string,
-  ): Promise<Response> {
+  async delete(@Param('id') id: string, @Res() response: Response) {
     try {
       const deletedProgram = await this.programsService.delete(id);
       return response.status(HttpStatus.OK).json({

@@ -10,15 +10,16 @@ export interface ISubjectsService {
 
   delete(subjectId: string): Promise<SubjectsDto>;
 
-  findById(subjectId: string): Promise<SubjectsDto>;
+  findById(subjectId: string, lang?: string): Promise<SubjectsDto>;
 
-  findByCode(subjectCode: string): Promise<SubjectsDto>;
+  findByCode(subjectCode: string, lang?: string): Promise<SubjectsDto>;
 
   findAll(
     page: number,
     limit: number,
     status: string,
     facultyId?: string,
+    lang?: string,
   ): Promise<PaginatedResponse<SubjectsDto>>;
 
   count(whereOptions: any): Promise<number>;

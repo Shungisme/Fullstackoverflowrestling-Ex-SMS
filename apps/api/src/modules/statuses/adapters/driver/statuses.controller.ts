@@ -10,10 +10,10 @@ import {
   HttpCode,
   HttpStatus,
   Res,
+  Headers,
 } from '@nestjs/common';
 import { CreateStatusDTO } from '../../domain/dto/create-status.dto';
 import { UpdateStatusDTO } from '../../domain/dto/update-status.dto';
-import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
 import {
   StatusesDto,
   StatusesResponseWrapperDTO,
@@ -26,6 +26,7 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
+  ApiHeader,
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { Response } from 'express';
@@ -53,7 +54,7 @@ export class StatusesController {
       return response.status(HttpStatus.CREATED).json({
         statusCode: HttpStatus.CREATED,
         message: 'Status created successfully',
-        data: { status },
+        data: status,
       });
     } catch (error) {
       return response
@@ -90,17 +91,38 @@ export class StatusesController {
     type: String,
     description: 'Status to filter by',
   })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    type: String,
+    description: 'Language code for translations',
+  })
+  @ApiHeader({
+    name: 'Accept-Language',
+    required: false,
+    description: 'Language preference',
+  })
   async findAll(
     @Res() response: Response,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('status') status: string = '',
+    @Query('lang') queryLang?: string,
+    @Headers('accept-language') acceptLanguage?: string,
   ) {
     try {
+      // Ưu tiên query param, sau đó dùng header
+      const lang =
+        queryLang ||
+        (acceptLanguage
+          ? acceptLanguage.split(',')[0].split(';')[0]
+          : undefined);
+
       const result = await this.statusesService.findAll(
         Number(page),
         Number(limit),
         status,
+        lang,
       );
       return response.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
@@ -121,6 +143,17 @@ export class StatusesController {
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(StatusesDto)
   @ApiParam({ name: 'id', description: 'Status ID', type: String })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    type: String,
+    description: 'Language code for translations',
+  })
+  @ApiHeader({
+    name: 'Accept-Language',
+    required: false,
+    description: 'Language preference',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Get status by id',
@@ -130,9 +163,21 @@ export class StatusesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Status not found',
   })
-  async findById(@Res() response: Response, @Param('id') id: string) {
+  async findById(
+    @Res() response: Response,
+    @Param('id') id: string,
+    @Query('lang') queryLang?: string,
+    @Headers('accept-language') acceptLanguage?: string,
+  ) {
     try {
-      const status = await this.statusesService.findById(id);
+      // Ưu tiên query param, sau đó dùng header
+      const lang =
+        queryLang ||
+        (acceptLanguage
+          ? acceptLanguage.split(',')[0].split(';')[0]
+          : undefined);
+
+      const status = await this.statusesService.findById(id, lang);
       return response.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: 'Status fetched successfully',

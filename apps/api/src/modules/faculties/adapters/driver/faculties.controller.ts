@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   Res,
+  Headers,
 } from '@nestjs/common';
 import { CreateFacultyDTO } from '../../domain/dto/create-faculty.dto';
 import { UpdateFacultyDTO } from '../../domain/dto/update-faculty.dto';
@@ -26,9 +27,10 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
+  ApiHeader,
 } from '@nestjs/swagger';
 import { ZodSerializerDto } from 'nestjs-zod';
-import { response, Response } from 'express';
+import { Response } from 'express';
 
 @ApiTags('Faculties')
 @Controller({ path: 'faculties', version: '1' })
@@ -90,17 +92,38 @@ export class FacultiesController {
     type: String,
     description: 'Status to filter by',
   })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    type: String,
+    description: 'Language code for translations',
+  })
+  @ApiHeader({
+    name: 'Accept-Language',
+    required: false,
+    description: 'Language preference',
+  })
   async findAll(
     @Res() response: Response,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('status') status: string = '',
+    @Query('lang') queryLang?: string,
+    @Headers('accept-language') acceptLanguage?: string,
   ): Promise<Response> {
     try {
+      // Ưu tiên query param, sau đó dùng header
+      const lang =
+        queryLang ||
+        (acceptLanguage
+          ? acceptLanguage.split(',')[0].split(';')[0]
+          : undefined);
+
       const faculties = await this.facultiesService.findAll(
         Number(page),
         Number(limit),
         status,
+        lang,
       );
       return response.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
@@ -121,6 +144,17 @@ export class FacultiesController {
   @HttpCode(HttpStatus.OK)
   @ZodSerializerDto(FacultiesDto)
   @ApiParam({ name: 'id', description: 'Faculty ID', type: String })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    type: String,
+    description: 'Language code for translations',
+  })
+  @ApiHeader({
+    name: 'Accept-Language',
+    required: false,
+    description: 'Language preference',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Get faculty by id',
@@ -130,9 +164,21 @@ export class FacultiesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Faculty not found',
   })
-  async findById(@Param('id') id: string, @Res() response: Response) {
+  async findById(
+    @Param('id') id: string,
+    @Res() response: Response,
+    @Query('lang') queryLang?: string,
+    @Headers('accept-language') acceptLanguage?: string,
+  ) {
     try {
-      const faculty = await this.facultiesService.findById(id);
+      // Ưu tiên query param, sau đó dùng header
+      const lang =
+        queryLang ||
+        (acceptLanguage
+          ? acceptLanguage.split(',')[0].split(';')[0]
+          : undefined);
+
+      const faculty = await this.facultiesService.findById(id, lang);
       return response.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: 'Faculty fetched successfully',

@@ -1,19 +1,26 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateProgramDTO } from '../../dto/create-program.dto';
 import { UpdateProgramDTO } from '../../dto/update-program.dto';
 import {
-  IProgramsRepository,
   PROGRAM_REPOSITORY,
+  IProgramsRepository,
 } from '../output/IProgramsRepository';
 import { IProgramsService } from './IProgramsService';
 import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
 import { ProgramsDto } from '../../dto/programs.dto';
+import { TranslationService } from '../../../../translations/domain/port/input/translation.service';
+
+// Các trường có thể dịch
+const TRANSLATABLE_FIELDS = ['title', 'description'];
 
 @Injectable()
 export class ProgramsService implements IProgramsService {
+  private readonly logger = new Logger(ProgramsService.name);
+
   constructor(
     @Inject(PROGRAM_REPOSITORY)
     private programsRepository: IProgramsRepository,
+    private translationService: TranslationService, // Thêm TranslationService
   ) {}
 
   async count(whereOptions: any): Promise<number> {
@@ -26,7 +33,37 @@ export class ProgramsService implements IProgramsService {
 
   async create(program: CreateProgramDTO) {
     try {
-      return await this.programsRepository.create(program);
+      // Tạo program trong database
+      const createdProgram = await this.programsRepository.create(program);
+      this.logger.log(`Created program with ID: ${createdProgram.id}`);
+
+      // Lưu bản dịch
+      const fieldsToTranslate: Record<string, string> = {};
+      for (const field of TRANSLATABLE_FIELDS) {
+        if (program[field]) {
+          fieldsToTranslate[field] = program[field];
+        }
+      }
+
+      if (Object.keys(fieldsToTranslate).length > 0) {
+        try {
+          await this.translationService.translateAndSave({
+            entity: 'Program',
+            entityId: createdProgram.id!,
+            fields: fieldsToTranslate,
+          });
+          this.logger.log(
+            `Translations created for program ${createdProgram.id}`,
+          );
+        } catch (translationError) {
+          this.logger.error(
+            `Failed to create translations: ${translationError.message}`,
+          );
+          // Không fail tạo program nếu dịch bị lỗi
+        }
+      }
+
+      return createdProgram;
     } catch (error) {
       throw new Error(`Error creating program: ${error.message}`);
     }
@@ -35,6 +72,7 @@ export class ProgramsService implements IProgramsService {
   async delete(programId: string) {
     try {
       return await this.programsRepository.delete(programId);
+      // Translation data không cần xóa (giữ lại lịch sử)
     } catch (error) {
       throw new Error(
         `Error deleting program with ID ${programId}: ${error.message}`,
@@ -46,6 +84,7 @@ export class ProgramsService implements IProgramsService {
     page: number,
     limit: number,
     status: string,
+    lang?: string,
   ): Promise<PaginatedResponse<ProgramsDto>> {
     try {
       const programs = await this.programsRepository.findAll(
@@ -53,23 +92,35 @@ export class ProgramsService implements IProgramsService {
         limit,
         status,
       );
-      const totalPrograms = programs.length;
+      const totalCount = await this.count({ status });
+
+      // Nếu có yêu cầu ngôn ngữ, áp dụng bản dịch
+      if (lang) {
+        await this.applyTranslationsToList(programs, lang);
+      }
 
       return {
         data: programs,
         page,
-        totalPage: Math.ceil(totalPrograms / limit),
+        totalPage: Math.ceil(totalCount / limit),
         limit,
-        total: totalPrograms,
+        total: totalCount,
       };
     } catch (error) {
       throw new Error(`Error finding all programs: ${error.message}`);
     }
   }
 
-  async findById(programId: string) {
+  async findById(programId: string, lang?: string) {
     try {
-      return await this.programsRepository.findById(programId);
+      const program = await this.programsRepository.findById(programId);
+
+      // Nếu có yêu cầu ngôn ngữ, áp dụng bản dịch
+      if (lang) {
+        await this.applyTranslation(program, lang);
+      }
+
+      return program;
     } catch (error) {
       throw new Error(
         `Error finding program with ID ${programId}: ${error.message}`,
@@ -79,11 +130,77 @@ export class ProgramsService implements IProgramsService {
 
   async update(programId: string, data: UpdateProgramDTO) {
     try {
-      return await this.programsRepository.update(programId, data);
+      // Cập nhật program
+      const updatedProgram = await this.programsRepository.update(
+        programId,
+        data,
+      );
+
+      // Cập nhật bản dịch nếu các trường có thể dịch được thay đổi
+      const fieldsToTranslate: Record<string, string> = {};
+      for (const field of TRANSLATABLE_FIELDS) {
+        if (data[field] !== undefined) {
+          fieldsToTranslate[field] = data[field];
+        }
+      }
+
+      if (Object.keys(fieldsToTranslate).length > 0) {
+        try {
+          await this.translationService.translateAndSave({
+            entity: 'Program',
+            entityId: programId,
+            fields: fieldsToTranslate,
+          });
+          this.logger.log(`Updated translations for program ${programId}`);
+        } catch (translationError) {
+          this.logger.error(
+            `Failed to update translations: ${translationError.message}`,
+          );
+          // Không fail update nếu dịch bị lỗi
+        }
+      }
+
+      return updatedProgram;
     } catch (error) {
       throw new Error(
         `Error updating program with ID ${programId}: ${error.message}`,
       );
+    }
+  }
+
+  // Helper method để áp dụng bản dịch cho một program
+  private async applyTranslation(
+    program: ProgramsDto,
+    lang: string,
+  ): Promise<void> {
+    try {
+      const translations = await this.translationService.getAllTranslations(
+        'Program',
+        program.id!,
+        undefined,
+        lang,
+      );
+
+      if (translations.length === 0) {
+        return;
+      }
+
+      // Áp dụng các bản dịch vào đối tượng program
+      for (const translation of translations) {
+        program[translation.field] = translation.value;
+      }
+    } catch (error) {
+      this.logger.error(`Error applying translations: ${error.message}`);
+    }
+  }
+
+  // Helper method để áp dụng bản dịch cho một danh sách programs
+  private async applyTranslationsToList(
+    programs: ProgramsDto[],
+    lang: string,
+  ): Promise<void> {
+    for (const program of programs) {
+      await this.applyTranslation(program, lang);
     }
   }
 }
