@@ -7,6 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Translation {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  entity    String
+  entityId  String   @db.ObjectId
+  field     String
+  lang      String
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([entity, entityId, field, lang], name: "unique_translation")
+  @@map("translations")
+}
+
 model Student {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   studentId   String   @unique

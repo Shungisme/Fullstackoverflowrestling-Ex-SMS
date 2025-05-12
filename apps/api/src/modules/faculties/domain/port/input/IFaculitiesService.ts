@@ -10,12 +10,13 @@ export interface IFacultiesService {
 
   delete(facultyId: string): Promise<FacultiesDto>;
 
-  findById(facultyId: string): Promise<FacultiesDto>;
+  findById(facultyId: string, lang?: string): Promise<FacultiesDto>;
 
   findAll(
     page: number,
     limit: number,
     status: string,
+    lang?: string,
   ): Promise<PaginatedResponse<FacultiesDto>>;
 
   count(whereOptions: any): Promise<number>;

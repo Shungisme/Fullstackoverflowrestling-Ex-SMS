@@ -9,12 +9,16 @@ import { CLASSES_REPOSITORY } from '../classes/domain/port/output/IClassesReposi
 import { STUDENT_CLASS_ENROLL_REPOSITORY } from '../student-class-enrolls/domain/port/output/IStudentClassEnrollRepository';
 import { SubjectPrerequisiteRepository } from '../subject-prerequisites/adapters/driven/subject-prerequisite.repository';
 import { SUBJECT_PREREQUISITE_REPOSITORY } from '../subject-prerequisites/domain/port/output/ISubjectPrerequisiteRepository';
+import { TranslationsModule } from '../translations/translation.module';
+import { PrismaService } from 'src/shared/services/database/prisma.service';
 
 @Module({
+  imports: [TranslationsModule], // Import TranslationsModule
   exports: [SubjectsService],
   controllers: [SubjectsController],
   providers: [
     SubjectsService,
+    PrismaService,
     {
       provide: SUBJECTS_REPOSITORY,
       useClass: SubjectsRepository,
