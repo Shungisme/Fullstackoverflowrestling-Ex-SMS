@@ -10,12 +10,13 @@ export interface IStatusesService {
 
   delete(statusId: string): Promise<StatusesDto>;
 
-  findById(statusId: string): Promise<StatusesDto>;
+  findById(statusId: string, lang?: string): Promise<StatusesDto>;
 
   findAll(
     page: number,
     limit: number,
     status: string,
+    lang?: string,
   ): Promise<PaginatedResponse<StatusesDto>>;
 
   count(whereOptions: any): Promise<number>;

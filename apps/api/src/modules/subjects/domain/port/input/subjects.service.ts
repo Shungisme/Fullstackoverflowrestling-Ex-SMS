@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateSubjectDTO } from '../../dto/create-subject.dto';
 import { UpdateSubjectDTO } from '../../dto/update-subject.dto';
 import {
@@ -6,23 +6,29 @@ import {
   ISubjectsRepository,
 } from '../output/ISubjectsRepository';
 import { ISubjectsService } from './ISubjectsService';
-import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
+import { PaginatedResponse } from '../../../../../shared/types/PaginatedResponse';
 import { SubjectsDto } from '../../dto/subjects.dto';
 import {
   IStudentClassEnrollRepository,
   STUDENT_CLASS_ENROLL_REPOSITORY,
-} from 'src/modules/student-class-enrolls/domain/port/output/IStudentClassEnrollRepository';
+} from '../../../../student-class-enrolls/domain/port/output/IStudentClassEnrollRepository';
 import {
   CLASSES_REPOSITORY,
   IClassesRepository,
-} from 'src/modules/classes/domain/port/output/IClassesRepository';
+} from '../../../../classes/domain/port/output/IClassesRepository';
 import {
   ISubjectPrerequisiteRepository,
   SUBJECT_PREREQUISITE_REPOSITORY,
-} from 'src/modules/subject-prerequisites/domain/port/output/ISubjectPrerequisiteRepository';
+} from '../../../../subject-prerequisites/domain/port/output/ISubjectPrerequisiteRepository';
+import { TranslationService } from '../../../../translations/domain/port/input/translation.service';
+
+// Các trường có thể dịch
+const TRANSLATABLE_FIELDS = ['title', 'description'];
 
 @Injectable()
 export class SubjectsService implements ISubjectsService {
+  private readonly logger = new Logger(SubjectsService.name);
+
   constructor(
     @Inject(SUBJECTS_REPOSITORY)
     private subjectsRepository: ISubjectsRepository,
@@ -35,6 +41,8 @@ export class SubjectsService implements ISubjectsService {
 
     @Inject(SUBJECT_PREREQUISITE_REPOSITORY)
     private subjectPrerequisiteRepository: ISubjectPrerequisiteRepository,
+
+    private translationService: TranslationService,
   ) {}
 
   async count(whereOptions: any): Promise<number> {
@@ -47,26 +55,40 @@ export class SubjectsService implements ISubjectsService {
 
   async create(subject: CreateSubjectDTO) {
     try {
-      const existPrerequisiteSubjects =
-        await this.subjectPrerequisiteRepository.findBySubjectCode(
-          subject.code,
-        );
+      // Không cần kiểm tra prerequisites khi tạo mới subject
+      // vì subject chưa tồn tại nên không thể có prerequisites
 
-      if (existPrerequisiteSubjects.length > 0) {
-        existPrerequisiteSubjects.forEach((prerequisite) => {
-          const prerequisiteSubject = this.subjectsRepository.findById(
-            prerequisite.prerequisiteSubjectId,
-          );
+      // Tạo subject trong cơ sở dữ liệu
+      const createdSubject = await this.subjectsRepository.create(subject);
+      this.logger.log(`Created subject with ID: ${createdSubject.id}`);
 
-          if (!prerequisiteSubject) {
-            throw new Error(
-              `Prerequisite subject with ID ${prerequisite.prerequisiteSubjectId} does not exist`,
-            );
-          }
-        });
+      // Lưu bản dịch nếu có
+      const fieldsToTranslate: Record<string, string> = {};
+      for (const field of TRANSLATABLE_FIELDS) {
+        if (subject[field]) {
+          fieldsToTranslate[field] = subject[field];
+        }
       }
 
-      return await this.subjectsRepository.create(subject);
+      if (Object.keys(fieldsToTranslate).length > 0) {
+        try {
+          await this.translationService.translateAndSave({
+            entity: 'Subject',
+            entityId: createdSubject.id!,
+            fields: fieldsToTranslate,
+          });
+          this.logger.log(
+            `Translations created for subject ${createdSubject.id}`,
+          );
+        } catch (translationError) {
+          this.logger.error(
+            `Failed to create translations: ${translationError.message}`,
+          );
+          // Không fail subject creation nếu translation lỗi
+        }
+      }
+
+      return createdSubject;
     } catch (error) {
       throw new Error(`Error creating subject: ${error.message}`);
     }
@@ -107,6 +129,7 @@ export class SubjectsService implements ISubjectsService {
     limit: number,
     status: string,
     facultyId?: string,
+    lang?: string,
   ): Promise<PaginatedResponse<SubjectsDto>> {
     try {
       const subjects = await this.subjectsRepository.findAll(
@@ -121,6 +144,11 @@ export class SubjectsService implements ISubjectsService {
         facultyId: facultyId || undefined,
       });
 
+      // Nếu có yêu cầu ngôn ngữ, áp dụng bản dịch
+      if (lang) {
+        await this.applyTranslationsToList(subjects, lang);
+      }
+
       return {
         data: subjects,
         page,
@@ -133,9 +161,16 @@ export class SubjectsService implements ISubjectsService {
     }
   }
 
-  async findById(subjectId: string) {
+  async findById(subjectId: string, lang?: string) {
     try {
-      return await this.subjectsRepository.findById(subjectId);
+      const subject = await this.subjectsRepository.findById(subjectId);
+
+      // Nếu có yêu cầu ngôn ngữ, áp dụng bản dịch
+      if (lang) {
+        await this.applyTranslation(subject, lang);
+      }
+
+      return subject;
     } catch (error) {
       throw new Error(
         `Error finding subject with ID ${subjectId}: ${error.message}`,
@@ -143,9 +178,16 @@ export class SubjectsService implements ISubjectsService {
     }
   }
 
-  async findByCode(subjectCode: string) {
+  async findByCode(subjectCode: string, lang?: string) {
     try {
-      return await this.subjectsRepository.findByCode(subjectCode);
+      const subject = await this.subjectsRepository.findByCode(subjectCode);
+
+      // Nếu có yêu cầu ngôn ngữ, áp dụng bản dịch
+      if (lang) {
+        await this.applyTranslation(subject, lang);
+      }
+
+      return subject;
     } catch (error) {
       throw new Error(
         `Error finding subject with code ${subjectCode}: ${error.message}`,
@@ -159,17 +201,140 @@ export class SubjectsService implements ISubjectsService {
       const studentClassEnrolls =
         await this.studentClassEnrollRepository.findBySubjectCode(subject.code);
 
+      // Kiểm tra điều kiện hiện có
       if (subject.credit !== data.credit && studentClassEnrolls.length > 0) {
         throw new Error(
           `Cannot update credit of subject with ID ${subjectId} because it has student class enrollments`,
         );
       }
 
-      return await this.subjectsRepository.update(subjectId, data);
+      // Cập nhật subject
+      const updatedSubject = await this.subjectsRepository.update(
+        subjectId,
+        data,
+      );
+
+      // Cập nhật bản dịch nếu các trường có thể dịch được thay đổi
+      const fieldsToTranslate: Record<string, string> = {};
+      for (const field of TRANSLATABLE_FIELDS) {
+        if (data[field] !== undefined) {
+          fieldsToTranslate[field] = data[field];
+        }
+      }
+
+      if (Object.keys(fieldsToTranslate).length > 0) {
+        try {
+          await this.translationService.translateAndSave({
+            entity: 'Subject',
+            entityId: subjectId,
+            fields: fieldsToTranslate,
+          });
+          this.logger.log(`Updated translations for subject ${subjectId}`);
+        } catch (translationError) {
+          this.logger.error(
+            `Failed to update translations: ${translationError.message}`,
+          );
+          // Không fail update nếu dịch bị lỗi
+        }
+      }
+
+      return updatedSubject;
     } catch (error) {
       throw new Error(
         `Error updating subject with ID ${subjectId}: ${error.message}`,
       );
+    }
+  }
+  private async applyTranslation(
+    subject: SubjectsDto & { faculty?: { id: string; title: string } },
+    lang: string,
+  ): Promise<void> {
+    try {
+      // 1. Áp dụng dịch thuật cho subject chính
+      const translations = await this.translationService.getAllTranslations(
+        'Subject',
+        subject.id!,
+        undefined,
+        lang,
+      );
+
+      if (translations.length > 0) {
+        // Áp dụng các bản dịch vào đối tượng subject
+        for (const translation of translations) {
+          subject[translation.field] = translation.value;
+        }
+      }
+
+      // 2. Kiểm tra và dịch faculty
+      if (subject.faculty && subject.faculty.id) {
+        // Lấy bản dịch cho faculty
+        this.logger.debug(
+          `Getting translations for faculty ${subject.faculty.id}`,
+        );
+        const facultyTranslations =
+          await this.translationService.getAllTranslations(
+            'Faculty', // Tên entity trong database
+            subject.faculty.id,
+            undefined,
+            lang,
+          );
+
+        this.logger.debug(
+          `Found ${facultyTranslations.length} translations for faculty`,
+        );
+
+        // Áp dụng bản dịch vào faculty
+        for (const translation of facultyTranslations) {
+          if (translation.field === 'title' && subject.faculty.title) {
+            subject.faculty.title = translation.value;
+            this.logger.debug(
+              `Applied faculty title translation: ${translation.value}`,
+            );
+          }
+        }
+      } else if (subject.facultyId) {
+        // Trường hợp faculty được join dưới dạng khác
+        this.logger.debug(
+          `Getting translations for facultyId ${subject.facultyId}`,
+        );
+        const facultyTranslations =
+          await this.translationService.getAllTranslations(
+            'Faculty',
+            subject.facultyId,
+            undefined,
+            lang,
+          );
+
+        // Kiểm tra và tạo đối tượng faculty nếu cần
+        if (facultyTranslations.length > 0) {
+          if (!subject.faculty) {
+            // Tạo đối tượng faculty nếu chưa có
+            subject.faculty = { id: subject.facultyId, title: '' };
+          }
+
+          // Tìm và áp dụng bản dịch tiêu đề
+          const titleTranslation = facultyTranslations.find(
+            (t) => t.field === 'title',
+          );
+          if (titleTranslation) {
+            subject.faculty.title = titleTranslation.value;
+            this.logger.debug(
+              `Applied faculty title from facultyId: ${titleTranslation.value}`,
+            );
+          }
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Error applying translations: ${error.message}`);
+    }
+  }
+  // Helper method để áp dụng bản dịch cho một danh sách subjects
+  private async applyTranslationsToList(
+    subjects: SubjectsDto[],
+    lang: string,
+  ): Promise<void> {
+    for (const subject of subjects) {
+      await this.applyTranslation(subject, lang);
     }
   }
 }

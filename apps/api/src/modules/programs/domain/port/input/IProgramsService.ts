@@ -10,12 +10,13 @@ export interface IProgramsService {
 
   delete(programId: string): Promise<ProgramsDto>;
 
-  findById(programId: string): Promise<ProgramsDto>;
+  findById(programId: string, lang?: string): Promise<ProgramsDto>;
 
   findAll(
     page: number,
     limit: number,
     status: string,
+    lang?: string,
   ): Promise<PaginatedResponse<ProgramsDto>>;
 
   count(whereOptions: any): Promise<number>;
