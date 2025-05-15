@@ -92,7 +92,12 @@ export class FacultiesService implements IFacultiesService {
         limit,
         status,
       );
-      const totalFaculties = faculties.length;
+      const totalFaculties = await this.facultiesRepository.count({});
+
+      // Nếu có yêu cầu ngôn ngữ, áp dụng bản dịch
+      if (lang) {
+        await this.applyTranslationsToList(faculties, lang);
+      }
 
       // Nếu có yêu cầu ngôn ngữ, áp dụng bản dịch
       if (lang) {
