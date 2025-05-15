@@ -28,8 +28,9 @@ import {
 import { useSchoolConfigContext } from "@/src/context/SchoolConfigContext";
 import { Card, CardContent } from "@/src/components/atoms/Card";
 import { FileText, Printer } from "lucide-react";
-import { getStudents } from "@/src/lib/api/student-service";
 import { Student } from "@/src/types";
+import { useLanguage } from "@/src/context/LanguageContext";
+import { StudentService } from "@/src/lib/api/student-service";
 
 const transcriptSchema = z.object({
     studentId: z.string().min(1, { message: "Vui lòng chọn sinh viên" }),
@@ -42,6 +43,8 @@ export function TranscriptPrinter() {
     const [students, setStudents] = useState<Student[]>([]);
     const [isLoadingStudents, setIsLoadingStudents] = useState(false);
     const { semesters } = useSchoolConfigContext();
+    const { language } = useLanguage();
+    const studentService = new StudentService(language);
 
     const form = useForm<z.infer<typeof transcriptSchema>>({
         resolver: zodResolver(transcriptSchema),
@@ -56,8 +59,8 @@ export function TranscriptPrinter() {
         const loadStudents = async () => {
             setIsLoadingStudents(true);
             try {
-                const response = await getStudents(1, 100);
-                setStudents(response.data.students);
+                const response = await studentService.getAll(["page=1", "limit=1000"]);
+                setStudents(response.data.data);
             } catch (error) {
                 toast.error("Không thể tải danh sách sinh viên");
             } finally {

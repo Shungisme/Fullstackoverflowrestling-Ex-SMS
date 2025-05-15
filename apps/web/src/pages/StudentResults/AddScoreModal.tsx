@@ -10,12 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/atoms/Select";
-import { getStudents } from "@/src/lib/api/student-service";
 import { ClassService } from "@/src/lib/api/school-service";
 import { toast } from "sonner";
 import LoadingSpinner from "@/src/components/LoadingSpinner";
 import { useLanguage } from "@/src/context/LanguageContext";
 import RequiredStar from "@/src/components/atoms/RequiredStar";
+import { StudentService } from "@/src/lib/api/student-service";
 
 interface AddScoreModalProps {
   onClose: () => void;
@@ -46,16 +46,18 @@ const AddScoreModal: React.FC<AddScoreModalProps> = ({
     Array<{ code: string; title: string }>
   >([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { language } = useLanguage();
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
         // Load students list (first page with many items)
-        const studentsResponse = await getStudents(1, 100);
+        const studentService = new StudentService(language);
+        const studentsResponse = await studentService.getAll(["page=1", "limit=1000"]);
         if (studentsResponse.statusCode === 200) {
           setStudents(
-            studentsResponse.data.students.map((student) => ({
+            studentsResponse.data.data.map((student) => ({
               id: student.id || "",
               studentId: student.studentId,
               name: student.name,
@@ -64,7 +66,7 @@ const AddScoreModal: React.FC<AddScoreModalProps> = ({
         }
 
         // Load classes list
-        const classService = new ClassService();
+        const classService = new ClassService(language);
         const classesResponse = await classService.getAll();
         if (classesResponse.statusCode === 200) {
           setClasses(

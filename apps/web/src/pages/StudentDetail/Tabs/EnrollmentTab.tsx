@@ -19,6 +19,7 @@ import {
 import { Button } from "@/src/components/atoms/Button";
 import { Student } from "@/src/types";
 import { getStudentEnrollments } from "@/src/lib/api/enrollment-service";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 interface EnrollmentTabProps {
     student: Student;
@@ -51,8 +52,10 @@ interface EnrollmentTabProps {
 //};
 
 const EnrollmentTab: React.FC<EnrollmentTabProps> = ({ student }) => {
+    const {language, t} = useLanguage();
+
     if (!student) {
-        return <div>Không tìm thấy thông tin sinh viên</div>;
+        return <div>{t("notiNodata")}</div>;
     }
     const [enrollments, setEnrollments] = React.useState<Enrollment[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
@@ -60,7 +63,7 @@ const EnrollmentTab: React.FC<EnrollmentTabProps> = ({ student }) => {
     React.useEffect(() => {
         async function fetchStudentEnrollments() {
             try {
-                const response = await getStudentEnrollments(student.studentId);
+                const response = await getStudentEnrollments(student.studentId, language);
                 setEnrollments(response.data.data || []);
             } catch (error) {
                 console.error("Failed to load student enrollments:", error);
@@ -81,10 +84,10 @@ const EnrollmentTab: React.FC<EnrollmentTabProps> = ({ student }) => {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <GraduationCap className="h-5 w-5" />
-                    Thông tin học tập
+                    {t("EnrollmentTab_Title")}
                 </CardTitle>
                 <CardDescription>
-                    Quản lý thông tin khóa học và kết quả học tập của {student.name}
+                    {t("EnrollmentTab_HeaderDesc")} {student.name}
                 </CardDescription>
                 {/* Summary Section */}
             </CardHeader>
@@ -98,20 +101,20 @@ const EnrollmentTab: React.FC<EnrollmentTabProps> = ({ student }) => {
                         {/* Current Enrollments */}
                         <div>
                             <h3 className="text-lg font-medium mb-3">
-                                Khóa học đang theo học
+                                {t("EnrollmentTab_CurrentEnrollments")}
                             </h3>
                             {enrollments.length === 0 ? (
                                 <div className="text-muted-foreground text-sm">
-                                    Không có khóa học nào đang theo học
+                                    {t("EnrollmentTab_NoEnrollments")}
                                 </div>
                             ) : (
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>Mã lớp</TableHead>
-                                            <TableHead>Phòng học</TableHead>
-                                            <TableHead>Mã môn</TableHead>
-                                            <TableHead>Giảng viên</TableHead>
+                                            <TableHead>{t("EnrollmentTab_Table_ClassCode")}</TableHead>
+                                            <TableHead>{t("EnrollmentTab_Table_Classroom")}</TableHead>
+                                            <TableHead>{t("EnrollmentTab_Table_SubjectCode")}</TableHead>
+                                            <TableHead>{t("EnrollmentTab_Table_Teacher")}</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -129,7 +132,7 @@ const EnrollmentTab: React.FC<EnrollmentTabProps> = ({ student }) => {
                         </div>
 
                         {/* Past Enrollments */}
-                        <div>
+                        {/* <div>
                             <h3 className="text-lg font-medium mb-3">Lịch sử khóa học</h3>
                             <p> Hiện tại chưa được triển khai</p>
                         </div>
@@ -140,7 +143,7 @@ const EnrollmentTab: React.FC<EnrollmentTabProps> = ({ student }) => {
                                     Quản lý đăng ký khóa học
                                 </a>
                             </Button>
-                        </div>
+                        </div> */}
                     </>
                 )}
             </CardContent>

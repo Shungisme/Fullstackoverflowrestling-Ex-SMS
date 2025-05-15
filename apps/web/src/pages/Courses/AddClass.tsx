@@ -23,7 +23,7 @@ const AddClass = ({ courseId }: { courseId: string }) => {
   if (!course) {
     return <div>Course not found</div>;
   }
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   return (
     <>
       <div className="text-2xl font-bold mb-4">
@@ -40,7 +40,7 @@ const AddClass = ({ courseId }: { courseId: string }) => {
       </div>
       <AddClassForm
         onSubmit={async (value) => {
-          const classService = new ClassService();
+          const classService = new ClassService(language);
           const res = await classService.create({
             ...value,
             subjectCode: value.courseId,

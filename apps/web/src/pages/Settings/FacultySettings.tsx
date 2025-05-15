@@ -21,10 +21,12 @@ import {
 
 export default function FacultySettings() {
   const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const { language } = useLanguage();
+  const service = new FacultyService(language);
 
   const fetchData = async () => {
     try {
-      const res = await FacultyService.getAll([]);
+      const res = await service.getAll([]);
       if (res.statusCode !== 200) {
         toast.error(res.message);
       } else {
@@ -67,7 +69,7 @@ export default function FacultySettings() {
 
   const confirmDelete = async () => {
     if (itemToDelete) {
-      await FacultyService.delete(itemToDelete);
+      await service.delete(itemToDelete);
       setFaculties(faculties.filter((f) => f.id !== itemToDelete));
       toast.info("Đã xóa khoa");
     }
@@ -82,7 +84,7 @@ export default function FacultySettings() {
       }
       delete item.createdAt;
       delete item.updatedAt;
-      const edited = await FacultyService.update(item.id, item);
+      const edited = await service.update(item.id, item);
       if (!edited) {
         toast.error("Gặp lỗi khi cập nhật khoa!");
         return;
@@ -94,7 +96,7 @@ export default function FacultySettings() {
     } else {
       // Thêm mới
       const newFaculty: IAPIResponse<Faculty> =
-        await FacultyService.create(item);
+        await service.create(item);
       if (!newFaculty) {
         toast.error("Gặp lỗi khi thêm mới khoa!");
         return;

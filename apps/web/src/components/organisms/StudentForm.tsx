@@ -32,6 +32,7 @@ import AddressForm from "../molecules/AddressForm";
 import IdentityPaperFormV2 from "../molecules/IdentityPaperFormV2";
 import { toast } from "sonner";
 import { useLanguage } from "@/src/context/LanguageContext";
+import RequiredStar from "../atoms/RequiredStar";
 
 const allowedEmailDomains = ["student.university.edu.vn"];
 const allowedPhoneNumber = /^(0|\+84)([3|5|7|8|9])([0-9]{8})$/;
@@ -416,7 +417,7 @@ function SelectInput({
   return (
     <div className="space-y-2">
       <Label htmlFor="gender">
-        {label} {isRequired && <span className="text-destructive">*</span>}
+        {label} {isRequired && <RequiredStar />}
       </Label>
       <Select name={name} value={value} onValueChange={onValueChange}>
         <SelectTrigger className={errors[name] ? "border-destructive" : ""}>

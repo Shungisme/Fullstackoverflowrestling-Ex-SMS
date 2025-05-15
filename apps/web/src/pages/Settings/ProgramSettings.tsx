@@ -15,10 +15,13 @@ import { DataTable } from "@/src/components/molecules/DataTable";
 
 export default function ProgramSettings() {
   const [programs, setPrograms] = useState<Program[]>([]);
+  const { language } = useLanguage();
+  const service = new ProgramService(language);
 
   const fetchData = async () => {
     try {
-      const res = await ProgramService.getAll([]);
+      const res = await service.getAll([]);
+      console.log(res);
       if (res.statusCode !== 200) {
         toast.error(res.message);
       } else {
@@ -61,7 +64,7 @@ export default function ProgramSettings() {
 
   const confirmDelete = async () => {
     if (itemToDelete) {
-      const deleted = await ProgramService.delete(itemToDelete);
+      const deleted = await service.delete(itemToDelete);
       if (deleted.statusCode !== 200) {
         toast.error(deleted.message);
         return;
@@ -79,11 +82,11 @@ export default function ProgramSettings() {
       }
       delete item.updatedAt;
       delete item.createdAt;
-      const edited = await ProgramService.update(item.id, item);
+      const edited = await service.update(item.id, item);
       toast.info("Thông tin chương trình học đã được cập nhật thành công");
     } else {
       // Thêm mới
-      const newItem = await ProgramService.create(item);
+      const newItem = await service.create(item);
       toast.info("Thông tin chương trình học mới đã được thêm thành công");
     }
     fetchData();

@@ -23,10 +23,12 @@ import { DataTable } from "@/src/components/molecules/DataTable";
 
 export default function StudentStatusSettings() {
   const [statuses, setStatuses] = useState<StudentStatus[]>([]);
+  const { language } = useLanguage();
+  const service = new StudentStatusService(language);
 
   const fetchData = async () => {
     try {
-      const res = await StudentStatusService.getAll([]);
+      const res = await service.getAll([]);
       if (res.statusCode !== 200) {
         toast.error(res.message);
       } else {
@@ -69,7 +71,7 @@ export default function StudentStatusSettings() {
 
   const confirmDelete = async () => {
     if (itemToDelete) {
-      await StudentStatusService.delete(itemToDelete);
+      await service.delete(itemToDelete);
       setStatuses(statuses.filter((f) => f.id !== itemToDelete));
       toast.info("Đã xóa sinh viên");
     }
@@ -80,14 +82,14 @@ export default function StudentStatusSettings() {
       if (!item.id) return;
       delete item.createdAt;
       delete item.updatedAt;
-      const edited = await StudentStatusService.update(item.id, item);
+      const edited = await service.update(item.id, item);
       setStatuses(
         statuses.map((f) => (f.id === edited.data.id ? edited.data : f)),
       );
       toast.info("Thông tin sinh viên đã được cập nhật thành công");
     } else {
       // Thêm mới
-      const newItem = await StudentStatusService.create(item);
+      const newItem = await service.create(item);
       setStatuses([...statuses, newItem.data]);
       toast.info("Thông tin sinh viên mới đã được thêm thành công");
     }

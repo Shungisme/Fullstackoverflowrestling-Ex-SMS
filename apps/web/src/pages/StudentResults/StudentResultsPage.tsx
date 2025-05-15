@@ -17,6 +17,8 @@ const StudentResultsPage: React.FC = () => {
   const [studentId, setStudentId] = useState<string>("");
   const [classCode, setClassCode] = useState<string>("");
   const [results, setResults] = useState<ClassResult[]>([]);
+  const { language } = useLanguage();
+  const service = new ClassResultService(language);
 
   const loadStudentClassResult = async (
     studentId: string,
@@ -24,8 +26,7 @@ const StudentResultsPage: React.FC = () => {
   ) => {
     setIsLoading(true);
     try {
-      const classResultService = new ClassResultService();
-      const response = await classResultService.getStudentClassResult(
+      const response = await service.getStudentClassResult(
         studentId,
         classCode,
       );
@@ -50,8 +51,7 @@ const StudentResultsPage: React.FC = () => {
   const loadStudentResults = async (studentId: string) => {
     setIsLoading(true);
     try {
-      const classResultService = new ClassResultService();
-      const response = await classResultService.getStudentResults(studentId);
+      const response = await service.getStudentResults(studentId);
       if (response.statusCode === 200) {
         setResults(response.data.data);
         setStudentId(studentId);
@@ -70,8 +70,7 @@ const StudentResultsPage: React.FC = () => {
   const loadClassResults = async (classCode: string) => {
     setIsLoading(true);
     try {
-      const classResultService = new ClassResultService();
-      const response = await classResultService.getClassResults(classCode);
+      const response = await service.getClassResults(classCode);
       if (response.statusCode === 200) {
         setResults(response.data.data);
         setStudentId("");
@@ -92,8 +91,7 @@ const StudentResultsPage: React.FC = () => {
     updatedScore: ClassResult,
   ) => {
     try {
-      const classResultService = new ClassResultService();
-      const response = await classResultService.update(resultId, updatedScore);
+      const response = await service.update(resultId, updatedScore);
       if (response.statusCode === 200) {
         toast.success("Cập nhật điểm thành công");
 
@@ -119,8 +117,7 @@ const StudentResultsPage: React.FC = () => {
   const handleAddScore = async (newScore: Omit<ClassResult, "id">) => {
     try {
       setIsLoading(true);
-      const classResultService = new ClassResultService();
-      const response = await classResultService.create(newScore);
+      const response = await service.create(newScore);
 
       if (response.statusCode === 201) {
         toast.success("Thêm điểm thành công");
@@ -149,8 +146,7 @@ const StudentResultsPage: React.FC = () => {
   const loadAllResults = async () => {
     setIsLoading(true);
     try {
-      const classResultService = new ClassResultService();
-      const response = await classResultService.getAll();
+      const response = await service.getAll();
       if (response.statusCode === 200) {
         setResults(response.data.data);
       } else {

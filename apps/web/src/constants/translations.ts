@@ -1,7 +1,4 @@
-export enum Language {
-  ENGLISH = "en",
-  VIETNAMESE = "vi",
-}
+import { Language } from "./constants";
 
 export const TRANSLATIONS = {
   [Language.ENGLISH]: {
@@ -126,6 +123,14 @@ export const TRANSLATIONS = {
     OverviewTab_InfoCard_HeaderDesc: "Basic information about the student",
     OverviewTab_AddressInfo_Title: "Address Information",
     OverviewTab_AddressInfo_HeaderDesc: "Registered addresses of the student",
+    EnrollmentTab_Title: "Enrollment Information",
+    EnrollmentTab_HeaderDesc: "Manage course and academic results information of the student",
+    EnrollmentTab_CurrentEnrollments: "Current Enrollments",
+    EnrollmentTab_NoEnrollments: "No current enrollments",
+    EnrollmentTab_Table_ClassCode: "Class Code",
+    EnrollmentTab_Table_Classroom: "Classroom",
+    EnrollmentTab_Table_SubjectCode: "Subject Code",
+    EnrollmentTab_Table_Teacher: "Teacher",
     AddressTypeName_Mailing: "Mailing Address",
     AddressTypeName_Permanent: "Permanent Address",
     AddressTypeName_Temporary: "Temporary Address",
@@ -251,6 +256,7 @@ export const TRANSLATIONS = {
     StudentResults_AddModal_Form_ClassCode: "Class Code",
     StudentResults_AddModal_Form_ClassCodePlaceholder: "Select a class",
     StudentResults_AddModal_Form_GradeType: "Type of Grade",
+    StudentResults_AddModal_Form_GradeTypePlaceholder: "Select type of grade",
     StudentResults_AddModal_Form_GradeFactor: "Grade Factor",
     StudentResults_AddModal_Form_Grade: "Grade",
     cancelBtn: "Cancel",
@@ -381,6 +387,14 @@ export const TRANSLATIONS = {
     OverviewTab_AddressInfo_Title: "Thông tin địa chỉ",
     OverviewTab_AddressInfo_HeaderDesc:
       "Các địa chỉ được đăng ký của sinh viên",
+    EnrollmentTab_Title: "Thông tin học tập",
+    EnrollmentTab_HeaderDesc: "Quản lý thông tin khóa học và kết quả học tập của sinh viên",
+    EnrollmentTab_CurrentEnrollments: "Khóa học đang theo học",
+    EnrollmentTab_NoEnrollments: "Không có khóa học nào đang theo học",
+    EnrollmentTab_Table_ClassCode: "Mã lớp",
+    EnrollmentTab_Table_Classroom: "Phòng học",
+    EnrollmentTab_Table_SubjectCode: "Mã môn học",
+    EnrollmentTab_Table_Teacher: "Giảng viên",
     AddressTypeName_Mailing: "Địa chỉ nhận thư",
     AddressTypeName_Permanent: "Địa chỉ thường trú",
     AddressTypeName_Temporary: "Địa chỉ tạm trú",

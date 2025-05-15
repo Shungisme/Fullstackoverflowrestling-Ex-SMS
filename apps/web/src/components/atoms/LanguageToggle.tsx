@@ -3,13 +3,13 @@
 
 import { useLanguage } from "@/src/context/LanguageContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./Select";
-import { Language } from "@/src/constants/translations";
+import { Language } from "@/src/constants/constants";
 
 export function LanguageToggle() {
-    const { language, setLanguage, t } = useLanguage();
+    const { language, setLanguageHandler, t } = useLanguage();
 
     return (
-        <Select defaultValue={language} onValueChange={(value: Language) => setLanguage(value)}>
+        <Select defaultValue={language} onValueChange={(value: Language) => setLanguageHandler(value)}>
             <SelectTrigger>
                 <SelectValue placeholder={t("language")} />
             </SelectTrigger>

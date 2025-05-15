@@ -1,29 +1,39 @@
 "use client";
-import { Language, TRANSLATIONS } from "../constants/translations";
+import { TRANSLATIONS } from "../constants/translations";
+import { Language } from "../constants/constants";
 import { createContext, useContext, useMemo, useState } from "react";
 
 interface LanguageContextType {
   language: Language;
-  setLanguage: (lang: Language) => void;
+  setLanguageHandler: (lang: Language) => void;
   t: (key: keyof typeof TRANSLATIONS[Language.VIETNAMESE]) => string;
 }
 
 const contextValue = {
     language: Language.VIETNAMESE,
-    setLanguage: () => {},
+    setLanguageHandler: () => {},
     t: () => "",
 };
 
 const LanguageContext = createContext<LanguageContextType>(contextValue);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>(Language.VIETNAMESE);
+  // Get the initial language from localStorage
+  const initialLanguage = (typeof window !== "undefined" && localStorage.getItem("language")) as Language;
+  const [language, setLanguage] = useState<Language>(initialLanguage || Language.VIETNAMESE);
 
   const t = (key: keyof typeof TRANSLATIONS[Language.VIETNAMESE]) => {
     return TRANSLATIONS[language][key];
   };
 
-  const value = useMemo(() => ({ language, setLanguage, t }), [language]);
+  const setLanguageHandler = (lang: Language) => {
+    setLanguage(lang);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("language", lang);
+    }
+  };
+
+  const value = useMemo(() => ({ language, setLanguageHandler, t }), [language]);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }

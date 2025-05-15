@@ -63,7 +63,7 @@ export default function StudentTable({
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState<ExportType | null>(null);
   const rowsPerPage = ListConfig.rowsPerPage;
-
+  const students = data.students || [];
   const handlePageChange = (page: number) => {
     if (onPageChange(page)) {
       setPage(page);
@@ -113,7 +113,7 @@ export default function StudentTable({
   };
 
   // Sort students
-  const sortedStudents = [...data.students].sort((a, b) => {
+  const sortedStudents = [...students].sort((a, b) => {
     const aValue = a[sortField];
     const bValue = b[sortField];
 
@@ -168,7 +168,7 @@ export default function StudentTable({
     await confirmDelete(onDelete);
   };
 
-  if (!data || !Array.isArray(data.students)) return <div></div>;
+  if (!data) return <div></div>;
   const { t } = useLanguage();
   return (
     <>
@@ -275,7 +275,7 @@ export default function StudentTable({
                   </div>
                 </TableCell>
               </TableRow>
-            ) : data.students.length === 0 ? (
+            ) : (students.length === 0) ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8">
                   <div className="flex flex-col items-center justify-center text-muted-foreground">
@@ -341,10 +341,10 @@ export default function StudentTable({
       </div>
 
       {/* Pagination */}
-      {data.students.length > 0 && (
+      {students.length > 0 && (
         <div className="flex items-center justify-between space-x-2 p-4">
           <div className="text-sm text-muted-foreground">
-            {t("show")} {data.students.length} {t("on")} {data.total}{" "}
+            {t("show")} {students.length} {t("on")} {data.total}{" "}
             {t("student")}
           </div>
           <div className="flex items-center space-x-1">

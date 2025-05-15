@@ -28,6 +28,7 @@ const CourseListPage = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
   const { faculties } = useSchoolConfigContext();
+  const { language } = useLanguage();
 
   const fetchCourses = async () => {
     setIsLoading(true);
@@ -42,8 +43,8 @@ const CourseListPage = () => {
       if (filters.status !== "all") {
         queryParams.push(`status=${filters.status}`);
       }
-
-      const response = await CourseService.getAll(queryParams);
+      const service = new CourseService(language);
+      const response = await service.getAll(queryParams);
       setCourses(response.data.data);
     } catch (error) {
       console.error("Error fetching courses:", error);
