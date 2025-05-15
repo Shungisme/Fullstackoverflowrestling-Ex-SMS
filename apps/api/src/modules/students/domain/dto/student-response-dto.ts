@@ -58,8 +58,11 @@ export const StudentSchema = z.object({
 });
 
 export const StudentsResponseSchema = z.object({
-  students: z.array(StudentSchema),
+  data: z.array(StudentSchema),
   total: z.number(),
+  page: z.number(),
+  totalPage: z.number(),
+  limit: z.number(),
 });
 
 export type StudentsResponse = z.infer<typeof StudentsResponseSchema>;

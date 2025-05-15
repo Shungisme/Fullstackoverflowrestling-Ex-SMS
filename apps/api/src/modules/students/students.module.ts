@@ -13,8 +13,12 @@ import { IDENTITY_REPOSITORY } from '../identity-papers/domain/port/output/IIden
 import { IdentityPapersRepository } from '../identity-papers/adapters/driven/identity-papers.repository';
 import { ADDRESSES_REPOSITORY } from '../addresses/domain/port/output/IAddressesRepository';
 import { AddressesRepository } from '../addresses/adapters/driven/addresses.repository';
+import { TranslationsModule } from '../translations/translation.module';
+import { IdentityPapersModule } from '../identity-papers/identity-papers.module';
+import { AddressesModule } from '../addresses/addresses.module';
 
 @Module({
+  imports: [TranslationsModule, IdentityPapersModule, AddressesModule],
   providers: [
     StudentService,
     {
