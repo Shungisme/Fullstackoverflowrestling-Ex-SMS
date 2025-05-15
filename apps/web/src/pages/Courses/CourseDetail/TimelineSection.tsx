@@ -11,11 +11,12 @@ interface TimelineSectionProps {
 }
 
 const TimelineSection = ({ courseData }: TimelineSectionProps) => {
+  if (!courseData) return null;
   const { t } = useLanguage();
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <DataSection
-        Icon={CalendarDays}
+        icon={<CalendarDays className="w-6 h-6 text-slate-500 mt-0.5" />}
         title={t("CoursePage_CourseInfo_DayCreated")}
         description={
           courseData.createdAt
@@ -24,7 +25,7 @@ const TimelineSection = ({ courseData }: TimelineSectionProps) => {
         }
       />
       <DataSection
-        Icon={CalendarCheck}
+        icon={<CalendarCheck className="w-6 h-6 text-slate-500 mt-0.5" />}
         title={t("CoursePage_CourseInfo_LastUpdated")}
         description={
           courseData.updatedAt

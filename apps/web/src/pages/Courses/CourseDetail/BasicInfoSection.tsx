@@ -11,15 +11,17 @@ interface BasicInfoSectionProps {
 
 const BasicInfoSection = ({ courseData }: BasicInfoSectionProps) => {
   const { t } = useLanguage();
+  if (!courseData) return null;
+  const icon = <Hash />;
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <DataSection
-        Icon={Hash}
+        icon={<Hash className="w-6 h-6 text-slate-500 mt-0.5" />}
         title={t("CoursePage_CourseInfo_Code")}
         description={courseData.code}
       />
       <DataSection
-        Icon={BookOpenText}
+        icon={<BookOpenText className="w-6 h-6 text-slate-500 mt-0.5" />}
         title={t("CoursePage_CourseInfo_Credits")}
         description={courseData.credit}
       />

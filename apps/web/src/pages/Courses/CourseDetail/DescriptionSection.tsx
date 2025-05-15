@@ -13,9 +13,9 @@ const DescriptionSection = ({ courseData }: DescriptionSectionProps) => {
   const { t } = useLanguage();
   return (
     <DataSection
-      Icon={Info}
+      icon={<Info className="w-6 h-6 text-slate-500 mt-0.5" />}
       title={t("CoursePage_CourseInfo_Desc")}
-      description={courseData.description}
+      description={courseData ? courseData.description : ""}
     />
   );
 };

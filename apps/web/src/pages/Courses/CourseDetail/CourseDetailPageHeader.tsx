@@ -17,13 +17,13 @@ const CourseDetailPageHeader = ({
   courseId,
 }: CourseDetailPageHeaderProps) => {
   const { t } = useLanguage();
+  if (!courseData) return null;
   const statusVariant =
     courseData.status === CourseStatus.ACTIVE ? "default" : "destructive";
   const statusText =
     courseData.status === CourseStatus.ACTIVE
       ? t("CoursesList_CourseTable_Status_Active")
       : t("CoursesList_CourseTable_Status_Inactive");
-
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>

@@ -14,7 +14,7 @@ import { CRUDService } from "./school-service";
 const studentURL = BASE_URL + "/students";
 
 export class StudentService extends CRUDService<Student> {
-  constructor(lang?: Language) {
+  constructor(lang: Language) {
     super(studentURL, lang);
   }
 
