@@ -128,11 +128,7 @@ export class ProgramsController {
       return response.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: 'Programs fetched successfully',
-        data: paginatedPrograms.data,
-        page: paginatedPrograms.page,
-        totalPage: paginatedPrograms.totalPage,
-        limit: paginatedPrograms.limit,
-        total: paginatedPrograms.total,
+        data: paginatedPrograms,
       });
     } catch (error: any) {
       return response

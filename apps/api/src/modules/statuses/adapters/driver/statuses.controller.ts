@@ -32,7 +32,7 @@ import { ZodSerializerDto } from 'nestjs-zod';
 import { Response } from 'express';
 
 @ApiTags('Statuses')
-@Controller({ path: 'statuses', version: '1' })
+@Controller({ path: 'student-statuses', version: '1' })
 export class StatusesController {
   constructor(private readonly statusesService: StatusesService) {}
 
