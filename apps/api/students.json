@@ -1,0 +1,13 @@
+[
+  {
+    "studentId": "ST12345",
+    "name": "John Doe",
+    "faculty": "",
+    "permanentAddress": null,
+    "temporaryAddress": null,
+    "mailingAddress": null,
+    "program": "",
+    "status": "",
+    "identityPaper": null
+  }
+]

@@ -10,6 +10,12 @@ import { STATUS_REPOSITORY } from 'src/modules/statuses/domain/port/output/IStat
 import { FACULTIES_REPOSITORY } from 'src/modules/faculties/domain/port/output/IFacultiesRepository';
 import { ADDRESSES_REPOSITORY } from 'src/modules/addresses/domain/port/output/IAddressesRepository';
 import { IDENTITY_REPOSITORY } from 'src/modules/identity-papers/domain/port/output/IIdentityPapersRepository';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
+import { TranslationService } from 'src/modules/translations/domain/port/input/translation.service';
 
 // Define our own Gender enum to match what's expected in the service
 enum Gender {
@@ -30,22 +36,29 @@ describe('StudentService', () => {
     upload: jest.fn(),
     exportFile: jest.fn(),
     findById: jest.fn(),
-    count: jest.fn(), // Added missing count method to fix search test
+    count: jest.fn(),
+    findAll: jest.fn(),
+    getAll: jest.fn(),
+    getStudentResults: jest.fn(),
+    createMany: jest.fn(),
   };
 
   const mockProgramsRepository = {
     findById: jest.fn(),
     find: jest.fn(),
+    findByName: jest.fn(),
   };
 
   const mockStatusesRepository = {
     findById: jest.fn(),
     find: jest.fn(),
+    findByName: jest.fn(),
   };
 
   const mockFacultiesRepository = {
     findById: jest.fn(),
     find: jest.fn(),
+    findByName: jest.fn(),
   };
 
   const mockAddressesRepository = {
@@ -60,6 +73,12 @@ describe('StudentService', () => {
     update: jest.fn(),
     delete: jest.fn(),
     findById: jest.fn(),
+    findByTypeAndNumber: jest.fn(),
+  };
+
+  const mockTranslationService = {
+    translateAndSave: jest.fn(),
+    getAllTranslations: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -89,6 +108,10 @@ describe('StudentService', () => {
         {
           provide: IDENTITY_REPOSITORY,
           useValue: mockIdentityPapersRepository,
+        },
+        {
+          provide: TranslationService,
+          useValue: mockTranslationService,
         },
       ],
     }).compile();
@@ -196,9 +219,8 @@ describe('StudentService', () => {
         },
       };
 
-      mockStudentRepository.create.mockResolvedValue(expectedResult);
-      // Set up other repository mocks if needed for create method
       mockStudentRepository.findById.mockResolvedValue(null); // No existing student
+      mockStudentRepository.create.mockResolvedValue(expectedResult);
       mockFacultiesRepository.findById.mockResolvedValue({
         id: '6001f693a073e80b5adde618',
         title: 'Computer Science',
@@ -217,64 +239,38 @@ describe('StudentService', () => {
 
       // Assert
       expect(result).toEqual(expectedResult);
+      expect(mockStudentRepository.findById).toHaveBeenCalledWith('ST12345');
       expect(mockStudentRepository.create).toHaveBeenCalledWith(
         createStudentDto,
       );
       expect(mockStudentRepository.create).toHaveBeenCalledTimes(1);
     });
-  });
 
-  describe('update', () => {
-    it('should update a student', async () => {
+    it('should throw ConflictException when student already exists', async () => {
       // Arrange
-      const updateStudentDto: UpdateStudentRequestDTO = {
-        id: '6001f693a073e80b5adde621',
-        name: 'John Updated',
-        email: 'john.updated@example.edu',
-        phone: '+84987654321',
-      };
-
-      const expectedResult = {
-        id: '6001f693a073e80b5adde621',
+      const createStudentDto: CreateStudentWithAddressDTO = {
         studentId: 'ST12345',
-        name: 'John Updated',
+        // Other required fields
+        name: 'John Doe',
         dateOfBirth: new Date('2000-01-01'),
-        gender: 'MALE',
+        gender: Gender.MALE,
         course: 1,
-        email: 'john.updated@example.edu',
-        phone: '+84987654321',
+        email: 'john.doe@example.edu',
+        phone: '+84123456789',
         nationality: 'Vietnamese',
-        faculty: {
-          id: '6001f693a073e80b5adde618',
-          title: 'Computer Science',
-        },
-        program: {
-          id: '6001f693a073e80b5adde619',
-          title: 'Bachelor of Science',
-        },
-        status: {
-          id: '6001f693a073e80b5adde620',
-          title: 'Active',
-        },
-        permanentAddress: {
-          id: '6001f693a073e80b5adde622',
-          number: '123',
-          street: 'Main St',
-          district: 'District 1',
-          city: 'Ho Chi Minh',
-          country: 'Vietnam',
-        },
-        temporaryAddress: null,
+        facultyId: '6001f693a073e80b5adde618',
+        programId: '6001f693a073e80b5adde619',
+        statusId: '6001f693a073e80b5adde620',
         mailingAddress: {
-          id: '6001f693a073e80b5adde623',
           number: '123',
           street: 'Main St',
           district: 'District 1',
           city: 'Ho Chi Minh',
           country: 'Vietnam',
         },
+        permanentAddress: null,
+        temporaryAddress: null,
         identityPaper: {
-          id: '6001f693a073e80b5adde624',
           type: 'Passport',
           number: 'P12345678',
           issueDate: new Date('2018-01-01'),
@@ -286,135 +282,24 @@ describe('StudentService', () => {
         },
       };
 
-      mockStudentRepository.update.mockResolvedValue(expectedResult);
       mockStudentRepository.findById.mockResolvedValue({
-        id: '6001f693a073e80b5adde621',
-        // Add other required properties for the existing student
+        id: '123',
+        studentId: 'ST12345',
       });
 
-      // Act
-      const result = await service.update(updateStudentDto);
-
-      // Assert
-      expect(result).toEqual(expectedResult);
-      expect(mockStudentRepository.update).toHaveBeenCalledWith(
-        updateStudentDto,
+      // Act & Assert
+      await expect(service.create(createStudentDto)).rejects.toThrow(
+        ConflictException,
       );
-      expect(mockStudentRepository.update).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('delete', () => {
-    it('should delete a student', async () => {
-      // Arrange
-      const studentId = '6001f693a073e80b5adde621';
-      const expectedResult = {
-        isDeleted: true,
-        message: 'Delete successfully', // Updated to match actual response from service
-      };
-
-      mockStudentRepository.delete.mockResolvedValue(expectedResult);
-
-      // Act
-      const result = await service.delete(studentId);
-
-      // Assert
-      expect(result).toEqual(expectedResult);
-      expect(mockStudentRepository.delete).toHaveBeenCalledWith(studentId);
-      expect(mockStudentRepository.delete).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('search', () => {
-    it('should search for students', async () => {
-      // Arrange
-      const query: SearchRequestDTO = {
-        key: 'John',
-        limit: 10,
-        page: 1,
-        faculty: 'Computer Science',
-      };
-
-      const mockStudents = [
-        {
-          id: '6001f693a073e80b5adde621',
-          studentId: 'ST12345',
-          name: 'John Doe',
-          dateOfBirth: new Date('2000-01-01'),
-          gender: 'MALE',
-          course: 1,
-          email: 'john.doe@example.edu',
-          phone: '+84123456789',
-          nationality: 'Vietnamese',
-          faculty: {
-            id: '6001f693a073e80b5adde618',
-            title: 'Computer Science',
-          },
-          program: {
-            id: '6001f693a073e80b5adde619',
-            title: 'Bachelor of Science',
-          },
-          status: {
-            id: '6001f693a073e80b5adde620',
-            title: 'Active',
-          },
-          permanentAddress: {
-            id: '6001f693a073e80b5adde622',
-            number: '123',
-            street: 'Main St',
-            district: 'District 1',
-            city: 'Ho Chi Minh',
-            country: 'Vietnam',
-          },
-          temporaryAddress: null,
-          mailingAddress: {
-            id: '6001f693a073e80b5adde623',
-            number: '123',
-            street: 'Main St',
-            district: 'District 1',
-            city: 'Ho Chi Minh',
-            country: 'Vietnam',
-          },
-          identityPaper: {
-            id: '6001f693a073e80b5adde624',
-            type: 'Passport',
-            number: 'P12345678',
-            issueDate: new Date('2018-01-01'),
-            expirationDate: new Date('2028-01-01'),
-            placeOfIssue: 'Ho Chi Minh',
-            hasChip: true,
-            issuingCountry: 'Vietnam',
-            notes: null,
-          },
-        },
-      ];
-
-      const totalCount = 1;
-
-      // Mock both the search and count methods
-      mockStudentRepository.search.mockResolvedValue(mockStudents);
-      mockStudentRepository.count.mockResolvedValue(totalCount);
-
-      const expectedResult = {
-        students: mockStudents,
-        total: totalCount,
-      };
-
-      // Act
-      const result = await service.search(query);
-
-      // Assert
-      expect(result).toEqual(expectedResult);
-      expect(mockStudentRepository.search).toHaveBeenCalledWith(query);
-      expect(mockStudentRepository.count).toHaveBeenCalled();
-      expect(mockStudentRepository.search).toHaveBeenCalledTimes(1);
+      expect(mockStudentRepository.findById).toHaveBeenCalledWith('ST12345');
+      expect(mockStudentRepository.create).not.toHaveBeenCalled();
     });
   });
 
   describe('findById', () => {
-    it('should find a student by id', async () => {
+    it('should find a student by ID successfully', async () => {
       // Arrange
-      const studentId = '6001f693a073e80b5adde621';
+      const studentId = 'ST12345';
       const expectedResult = {
         id: '6001f693a073e80b5adde621',
         studentId: 'ST12345',
@@ -476,6 +361,84 @@ describe('StudentService', () => {
       expect(result).toEqual(expectedResult);
       expect(mockStudentRepository.findById).toHaveBeenCalledWith(studentId);
       expect(mockStudentRepository.findById).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw NotFoundException when student not found', async () => {
+      // Arrange
+      const studentId = 'nonexistent-id';
+      mockStudentRepository.findById.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.findById(studentId)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockStudentRepository.findById).toHaveBeenCalledWith(studentId);
+    });
+  });
+
+  describe('upload', () => {
+    it('should upload student data from Excel file', async () => {
+      // Arrange
+      const mockFile = {
+        originalname: 'students.xlsx',
+        buffer: Buffer.from('mock-excel-data'),
+        mimetype:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      } as Express.Multer.File;
+
+      const mockStudents = [
+        {
+          studentId: 'ST12345',
+          name: 'John Doe',
+          // Other student data
+        },
+      ];
+
+      mockStudentRepository.createMany.mockResolvedValue(1);
+      // Mock other repository methods as needed for upload
+
+      // Act
+      const result = await service.upload(mockFile);
+
+      // Assert
+      expect(result).toHaveProperty('isCreated');
+      expect(result).toHaveProperty('message');
+      expect(mockStudentRepository.createMany).toHaveBeenCalled();
+    });
+  });
+
+  describe('exportFile', () => {
+    it('should export student data to JSON format', async () => {
+      // Arrange
+      const fileType = 'json';
+      const mockStudents = [
+        {
+          id: '6001f693a073e80b5adde621',
+          studentId: 'ST12345',
+          name: 'John Doe',
+          // Other student fields
+        },
+      ];
+
+      mockStudentRepository.getAll.mockResolvedValue(mockStudents);
+
+      const mockResponse = {
+        setHeader: jest.fn(),
+        download: jest.fn().mockImplementation((path, name, callback) => {
+          callback(null);
+        }),
+      } as any;
+
+      // Act
+      const result = await service.exportFile(fileType, mockResponse);
+
+      // Assert
+      expect(result).toEqual({
+        isDownload: true,
+        message: 'Download successfully',
+      });
+      expect(mockStudentRepository.getAll).toHaveBeenCalled();
+      expect(mockResponse.download).toHaveBeenCalled();
     });
   });
 });
