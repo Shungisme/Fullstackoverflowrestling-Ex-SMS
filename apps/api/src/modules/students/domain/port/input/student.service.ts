@@ -4,6 +4,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { IStudentService } from './IStudentService';
 import {
@@ -22,6 +23,7 @@ import {
   isUniqueConstraintPrismaError,
 } from 'src/shared/helpers/error';
 import {
+  StudentResponse,
   StudentResponseDTO,
   StudentsResponseDTO,
 } from '../../dto/student-response-dto';
@@ -57,9 +59,11 @@ import * as XLSX from 'xlsx';
 import { Response } from 'express';
 import { CreateStudentWithAddressDTO } from '../../dto/create-student-dto';
 import { calculateGPA } from 'src/shared/utils/calculate-gpa';
+import { TranslationService } from 'src/modules/translations/domain/port/input/translation.service';
 
 @Injectable()
 export class StudentService implements IStudentService {
+  private readonly logger = new Logger(StudentService.name);
   constructor(
     @Inject(STUDENT_REPOSITORY)
     private readonly studentRepository: IStudentRepository,
@@ -73,6 +77,7 @@ export class StudentService implements IStudentService {
     private readonly addressesRepository: IAddressesRepository,
     @Inject(IDENTITY_REPOSITORY)
     private readonly identityRepository: IIdentityPapersRepository,
+    private readonly translationService: TranslationService,
   ) {}
 
   async exportTranscript(studentId: string, res: Response): Promise<void> {
@@ -525,10 +530,20 @@ export class StudentService implements IStudentService {
 
   async search(query: SearchRequestDTO): Promise<StudentsResponseDTO> {
     try {
+      const { limit, page, lang } = query; // Lấy tham số lang từ query
       const students = await this.studentRepository.search(query);
       const total = await this.studentRepository.count();
+
+      // Áp dụng translation nếu có tham số lang
+      if (lang && students.length > 0) {
+        await this.applyTranslationsToList(students, lang);
+      }
+
       return {
-        students: students,
+        data: students,
+        page,
+        totalPage: Math.ceil(total / limit),
+        limit,
         total: total,
       };
     } catch (error) {
@@ -623,5 +638,245 @@ export class StudentService implements IStudentService {
       throw new NotFoundException(`Student with ID ${studentId} not found: `);
     }
     return student;
+  }
+
+  /**
+   * Áp dụng bản dịch cho một đối tượng sinh viên và tất cả đối tượng liên quan
+   * @param student Đối tượng sinh viên cần dịch
+   * @param lang Mã ngôn ngữ cần dịch (vd: 'en', 'vi', 'fr')
+   */
+  private async applyTranslation(
+    student: StudentResponse,
+    lang: string,
+  ): Promise<void> {
+    try {
+      // 1. Dịch các trường của sinh viên
+      const studentTranslations =
+        await this.translationService.getAllTranslations(
+          'Student',
+          student.id,
+          undefined,
+          lang,
+        );
+
+      if (studentTranslations.length > 0) {
+        // Áp dụng các bản dịch vào đối tượng sinh viên
+        for (const translation of studentTranslations) {
+          if (student[translation.field] !== undefined) {
+            student[translation.field] = translation.value;
+            this.logger.debug(
+              `Applied student ${translation.field} translation: ${translation.value}`,
+            );
+          }
+        }
+      }
+
+      // 2. Dịch faculty nếu có
+      if (student.faculty && student.faculty.id) {
+        const facultyTranslations =
+          await this.translationService.getAllTranslations(
+            'Faculty',
+            student.faculty.id,
+            undefined,
+            lang,
+          );
+
+        if (facultyTranslations.length > 0) {
+          // Áp dụng các bản dịch vào đối tượng faculty
+          for (const translation of facultyTranslations) {
+            if (translation.field === 'title' && student.faculty.title) {
+              student.faculty.title = translation.value;
+              this.logger.debug(
+                `Applied faculty title translation: ${translation.value}`,
+              );
+            }
+          }
+        }
+      }
+
+      // 3. Dịch program nếu có
+      if (student.program && student.program.id) {
+        const programTranslations =
+          await this.translationService.getAllTranslations(
+            'Program',
+            student.program.id,
+            undefined,
+            lang,
+          );
+
+        if (programTranslations.length > 0) {
+          // Áp dụng các bản dịch vào đối tượng program
+          for (const translation of programTranslations) {
+            if (translation.field === 'title' && student.program.title) {
+              student.program.title = translation.value;
+              this.logger.debug(
+                `Applied program title translation: ${translation.value}`,
+              );
+            }
+          }
+        }
+      }
+
+      // 4. Dịch status nếu có
+      if (student.status && student.status.id) {
+        const statusTranslations =
+          await this.translationService.getAllTranslations(
+            'Status',
+            student.status.id,
+            undefined,
+            lang,
+          );
+
+        if (statusTranslations.length > 0) {
+          // Áp dụng các bản dịch vào đối tượng status
+          for (const translation of statusTranslations) {
+            if (translation.field === 'title' && student.status.title) {
+              student.status.title = translation.value;
+              this.logger.debug(
+                `Applied status title translation: ${translation.value}`,
+              );
+            }
+          }
+        }
+      }
+
+      // 5. Dịch permanentAddress nếu có
+      if (student.permanentAddress && student.permanentAddress.id) {
+        const addressTranslations =
+          await this.translationService.getAllTranslations(
+            'Address',
+            student.permanentAddress.id,
+            undefined,
+            lang,
+          );
+
+        if (addressTranslations.length > 0) {
+          // Áp dụng các bản dịch vào đối tượng địa chỉ
+          for (const translation of addressTranslations) {
+            if (
+              ['street', 'district', 'city', 'country'].includes(
+                translation.field,
+              ) &&
+              student.permanentAddress[translation.field]
+            ) {
+              student.permanentAddress[translation.field] = translation.value;
+              this.logger.debug(
+                `Applied permanentAddress ${translation.field} translation: ${translation.value}`,
+              );
+            }
+          }
+        }
+      }
+
+      // 6. Dịch temporaryAddress nếu có
+      if (student.temporaryAddress && student.temporaryAddress.id) {
+        const addressTranslations =
+          await this.translationService.getAllTranslations(
+            'Address',
+            student.temporaryAddress.id,
+            undefined,
+            lang,
+          );
+
+        if (addressTranslations.length > 0) {
+          // Áp dụng các bản dịch vào đối tượng địa chỉ
+          for (const translation of addressTranslations) {
+            if (
+              ['street', 'district', 'city', 'country'].includes(
+                translation.field,
+              ) &&
+              student.temporaryAddress[translation.field]
+            ) {
+              student.temporaryAddress[translation.field] = translation.value;
+              this.logger.debug(
+                `Applied temporaryAddress ${translation.field} translation: ${translation.value}`,
+              );
+            }
+          }
+        }
+      }
+
+      // 7. Dịch mailingAddress nếu có
+      if (student.mailingAddress && student.mailingAddress.id) {
+        const addressTranslations =
+          await this.translationService.getAllTranslations(
+            'Address',
+            student.mailingAddress.id,
+            undefined,
+            lang,
+          );
+
+        if (addressTranslations.length > 0) {
+          // Áp dụng các bản dịch vào đối tượng địa chỉ
+          for (const translation of addressTranslations) {
+            if (
+              ['street', 'district', 'city', 'country'].includes(
+                translation.field,
+              ) &&
+              student.mailingAddress[translation.field]
+            ) {
+              student.mailingAddress[translation.field] = translation.value;
+              this.logger.debug(
+                `Applied mailingAddress ${translation.field} translation: ${translation.value}`,
+              );
+            }
+          }
+        }
+      }
+
+      // 8. Dịch identityPaper nếu có (các trường như placeOfIssue, issuingCountry)
+      if (student.identityPaper && student.identityPaper.id) {
+        const identityTranslations =
+          await this.translationService.getAllTranslations(
+            'IdentityPaper',
+            student.identityPaper.id,
+            undefined,
+            lang,
+          );
+
+        if (identityTranslations.length > 0) {
+          // Áp dụng các bản dịch vào đối tượng giấy tờ
+          for (const translation of identityTranslations) {
+            if (
+              ['placeOfIssue', 'issuingCountry', 'notes', 'type'].includes(
+                translation.field,
+              ) &&
+              student.identityPaper[translation.field]
+            ) {
+              student.identityPaper[translation.field] = translation.value;
+              this.logger.debug(
+                `Applied identityPaper ${translation.field} translation: ${translation.value}`,
+              );
+            }
+          }
+        }
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error applying translations to student ${student.id}: ${error.message}`,
+      );
+      this.logger.debug(error.stack);
+    }
+  }
+
+  /**
+   * Áp dụng bản dịch cho danh sách sinh viên
+   * @param students Danh sách sinh viên cần dịch
+   * @param lang Mã ngôn ngữ cần dịch
+   */
+  private async applyTranslationsToList(
+    students: StudentResponse[],
+    lang: string,
+  ): Promise<void> {
+    try {
+      await Promise.all(
+        students.map((student) => this.applyTranslation(student, lang)),
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error applying translations to student list: ${error.message}`,
+      );
+      this.logger.debug(error.stack);
+    }
   }
 }

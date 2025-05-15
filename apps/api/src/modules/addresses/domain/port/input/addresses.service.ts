@@ -1,66 +1,151 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { AddressesDto } from '../../dto/addresses.dto';
 import { CreateAddressDTO } from '../../dto/create-address.dto';
 import { UpdateAddressDTO } from '../../dto/update-address.dto';
+import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
+import { IAddressesService } from './IAddressesService';
 import {
   ADDRESSES_REPOSITORY,
   IAddressesRepository,
 } from '../output/IAddressesRepository';
-import { IAddressesService } from './IAddressesService';
-import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
-import { AddressesDto } from '../../dto/addresses.dto';
-import { isNotFoundPrismaError } from 'src/shared/helpers/error';
+import { TranslationService } from '../../../../translations/domain/port/input/translation.service';
+
+// Các trường có thể dịch
+const TRANSLATABLE_FIELDS = ['street', 'district', 'city', 'country'];
 
 @Injectable()
 export class AddressesService implements IAddressesService {
+  private readonly logger = new Logger(AddressesService.name);
+
   constructor(
     @Inject(ADDRESSES_REPOSITORY)
     private readonly addressesRepository: IAddressesRepository,
+    private readonly translationService: TranslationService,
   ) {}
 
-  async count(): Promise<number> {
+  async create(address: CreateAddressDTO): Promise<AddressesDto> {
     try {
-      return await this.addressesRepository.count();
-    } catch (error) {
-      throw new Error(`Error counting addresses: ${error.message}`);
-    }
-  }
+      // Tạo địa chỉ trong cơ sở dữ liệu
+      const createdAddress = await this.addressesRepository.create(address);
+      this.logger.log(`Created address with ID: ${createdAddress.id}`);
 
-  async create(address: CreateAddressDTO) {
-    try {
-      return await this.addressesRepository.create(address);
+      // Lưu bản dịch
+      const fieldsToTranslate: Record<string, string> = {};
+      for (const field of TRANSLATABLE_FIELDS) {
+        if (address[field]) {
+          fieldsToTranslate[field] = address[field];
+        }
+      }
+
+      if (Object.keys(fieldsToTranslate).length > 0) {
+        try {
+          await this.translationService.translateAndSave({
+            entity: 'Address',
+            entityId: createdAddress.id!,
+            fields: fieldsToTranslate,
+          });
+          this.logger.log(
+            `Translations created for address ${createdAddress.id}`,
+          );
+        } catch (translationError) {
+          this.logger.error(
+            `Failed to create translations: ${translationError.message}`,
+          );
+        }
+      }
+
+      return createdAddress;
     } catch (error) {
       throw new Error(`Error creating address: ${error.message}`);
     }
   }
 
-  async createForStudent(
-    studentId: string,
-    type: 'permanentAddress' | 'temporaryAddress' | 'mailingAddress',
-    address: CreateAddressDTO,
+  async findById(addressId: string, lang?: string): Promise<AddressesDto> {
+    try {
+      const address = await this.addressesRepository.findById(addressId);
+
+      // Áp dụng bản dịch nếu có chỉ định ngôn ngữ
+      if (lang) {
+        await this.applyTranslation(address, lang);
+      }
+
+      return address;
+    } catch (error) {
+      throw new Error(
+        `Error finding address with ID ${addressId}: ${error.message}`,
+      );
+    }
+  }
+
+  async findAll(
+    page: number,
+    limit: number,
+    lang?: string,
+  ): Promise<PaginatedResponse<AddressesDto>> {
+    try {
+      const addresses = await this.addressesRepository.findAll(page, limit);
+      const total = await this.addressesRepository.count();
+
+      // Áp dụng bản dịch nếu có chỉ định ngôn ngữ
+      if (lang) {
+        await this.applyTranslationsToList(addresses, lang);
+      }
+
+      return {
+        data: addresses,
+        total,
+        page,
+        limit,
+        totalPage: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      throw new Error(`Error finding addresses: ${error.message}`);
+    }
+  }
+
+  async update(
+    addressId: string,
+    data: UpdateAddressDTO,
   ): Promise<AddressesDto> {
     try {
-      if (!studentId) {
-        throw new BadRequestException('studentId must have');
+      // Cập nhật địa chỉ
+      const updatedAddress = await this.addressesRepository.update(
+        addressId,
+        data,
+      );
+
+      // Cập nhật bản dịch nếu các trường có thể dịch được thay đổi
+      const fieldsToTranslate: Record<string, string> = {};
+      for (const field of TRANSLATABLE_FIELDS) {
+        if (data[field] !== undefined) {
+          fieldsToTranslate[field] = data[field];
+        }
       }
 
-      return await this.addressesRepository.createAndLinkAddressForStudent(
-        studentId,
-        type,
-        address,
-      );
-    } catch (error) {
-      if (isNotFoundPrismaError(error)) {
-        throw new NotFoundException(error.message);
+      if (Object.keys(fieldsToTranslate).length > 0) {
+        try {
+          await this.translationService.translateAndSave({
+            entity: 'Address',
+            entityId: addressId,
+            fields: fieldsToTranslate,
+          });
+          this.logger.log(`Updated translations for address ${addressId}`);
+        } catch (translationError) {
+          this.logger.error(
+            `Failed to update translations: ${translationError.message}`,
+          );
+        }
       }
-      throw new Error(`Error creating address: ${error.message}`);
+
+      return updatedAddress;
+    } catch (error) {
+      throw new Error(
+        `Error updating address with ID ${addressId}: ${error.message}`,
+      );
     }
   }
-  async delete(addressId: string) {
+
+  async delete(addressId: string): Promise<AddressesDto> {
     try {
       return await this.addressesRepository.delete(addressId);
     } catch (error) {
@@ -70,43 +155,89 @@ export class AddressesService implements IAddressesService {
     }
   }
 
-  async findAll(
-    page: number,
-    limit: number,
-  ): Promise<PaginatedResponse<AddressesDto>> {
+  async createAndLinkAddressForStudent(
+    studentId: string,
+    type: string,
+    address: CreateAddressDTO,
+  ): Promise<AddressesDto> {
     try {
-      const addresses = await this.addressesRepository.findAll(page, limit);
-      const totalAddresses = await this.addressesRepository.count();
+      // Tạo địa chỉ và liên kết với sinh viên
+      const createdAddress =
+        await this.addressesRepository.createAndLinkAddressForStudent(
+          studentId,
+          type,
+          address,
+        );
+      this.logger.log(
+        `Created and linked address with ID: ${createdAddress.id} to student ${studentId}`,
+      );
 
-      return {
-        data: addresses,
-        page,
-        totalPage: Math.ceil(totalAddresses / limit),
-        limit,
-        total: totalAddresses,
-      };
-    } catch (error) {
-      throw new Error(`Error finding all addresses: ${error.message}`);
-    }
-  }
+      // Lưu bản dịch
+      const fieldsToTranslate: Record<string, string> = {};
+      for (const field of TRANSLATABLE_FIELDS) {
+        if (address[field]) {
+          fieldsToTranslate[field] = address[field];
+        }
+      }
 
-  async findById(addressId: string) {
-    try {
-      return await this.addressesRepository.findById(addressId);
+      if (Object.keys(fieldsToTranslate).length > 0) {
+        try {
+          await this.translationService.translateAndSave({
+            entity: 'Address',
+            entityId: createdAddress.id!,
+            fields: fieldsToTranslate,
+          });
+          this.logger.log(
+            `Translations created for address ${createdAddress.id}`,
+          );
+        } catch (translationError) {
+          this.logger.error(
+            `Failed to create translations: ${translationError.message}`,
+          );
+        }
+      }
+
+      return createdAddress;
     } catch (error) {
       throw new Error(
-        `Error finding address with ID ${addressId}: ${error.message}`,
+        `Error creating and linking address for student ${studentId}: ${error.message}`,
       );
     }
   }
 
-  async update(addressId: string, data: UpdateAddressDTO) {
+  // Helper method để áp dụng bản dịch cho một địa chỉ
+  private async applyTranslation(
+    address: AddressesDto,
+    lang: string,
+  ): Promise<void> {
     try {
-      return await this.addressesRepository.update(addressId, data);
-    } catch (error) {
-      throw new Error(
-        `Error updating address with ID ${addressId}: ${error.message}`,
+      const translations = await this.translationService.getAllTranslations(
+        'Address',
+        address.id!,
+        undefined,
+        lang,
       );
+
+      if (translations.length === 0) {
+        return;
+      }
+
+      // Áp dụng các bản dịch vào đối tượng địa chỉ
+      for (const translation of translations) {
+        address[translation.field] = translation.value;
+      }
+    } catch (error) {
+      this.logger.error(`Error applying translations: ${error.message}`);
+    }
+  }
+
+  // Helper method để áp dụng bản dịch cho một danh sách địa chỉ
+  private async applyTranslationsToList(
+    addresses: AddressesDto[],
+    lang: string,
+  ): Promise<void> {
+    for (const address of addresses) {
+      await this.applyTranslation(address, lang);
     }
   }
 }

@@ -10,13 +10,18 @@ import {
   HttpCode,
   HttpStatus,
   Res,
+  Headers,
 } from '@nestjs/common';
 import { CreateAddressDTO } from '../../domain/dto/create-address.dto';
 import { UpdateAddressDTO } from '../../domain/dto/update-address.dto';
-import { PaginatedResponse } from 'src/shared/types/PaginatedResponse';
-import { AddressesDto } from '../../domain/dto/addresses.dto';
 import { AddressesService } from '../../domain/port/input/addresses.service';
-import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiHeader,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Response } from 'express';
 
 @ApiTags('Addresses')
@@ -30,7 +35,7 @@ export class AddressesController {
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Create an address',
-    type: AddressesDto,
+    type: CreateAddressDTO,
   })
   async create(
     @Res() response: Response,
@@ -59,7 +64,7 @@ export class AddressesController {
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Create an address link with student',
-    type: AddressesDto,
+    type: CreateAddressDTO,
   })
   async createForStudent(
     @Res() response: Response,
@@ -69,14 +74,15 @@ export class AddressesController {
     @Param('studentId') studentId: string,
   ): Promise<Response> {
     try {
-      const address = await this.addressesService.createForStudent(
-        studentId,
-        type,
-        createAddressDto,
-      );
+      const address =
+        await this.addressesService.createAndLinkAddressForStudent(
+          studentId,
+          type,
+          createAddressDto,
+        );
       return response.status(HttpStatus.CREATED).json({
         statusCode: HttpStatus.CREATED,
-        message: 'Address created for student successfully',
+        message: 'Address created and linked successfully',
         data: address,
       });
     } catch (error: any) {
@@ -97,13 +103,33 @@ export class AddressesController {
   })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    type: String,
+    description: 'Language code for translations (e.g., en, vi)',
+  })
+  @ApiHeader({
+    name: 'Accept-Language',
+    required: false,
+    description: 'Language preference',
+  })
   async findAll(
     @Res() response: Response,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Query('lang') queryLang?: string,
+    @Headers('accept-language') acceptLanguage?: string,
   ): Promise<Response> {
     try {
-      const addresses = await this.addressesService.findAll(page, limit);
+      // Ưu tiên query param, sau đó dùng header
+      const lang =
+        queryLang ||
+        (acceptLanguage
+          ? acceptLanguage.split(',')[0].split(';')[0]
+          : undefined);
+
+      const addresses = await this.addressesService.findAll(page, limit, lang);
       return response.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: 'Addresses fetched successfully',
@@ -124,14 +150,34 @@ export class AddressesController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Get address by id',
-    type: AddressesDto,
+    type: CreateAddressDTO,
+  })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    type: String,
+    description: 'Language code for translations (e.g., en, vi)',
+  })
+  @ApiHeader({
+    name: 'Accept-Language',
+    required: false,
+    description: 'Language preference',
   })
   async findById(
     @Res() response: Response,
     @Param('id') id: string,
+    @Query('lang') queryLang?: string,
+    @Headers('accept-language') acceptLanguage?: string,
   ): Promise<Response> {
     try {
-      const address = await this.addressesService.findById(id);
+      // Ưu tiên query param, sau đó dùng header
+      const lang =
+        queryLang ||
+        (acceptLanguage
+          ? acceptLanguage.split(',')[0].split(';')[0]
+          : undefined);
+
+      const address = await this.addressesService.findById(id, lang);
       return response.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: 'Address fetched successfully',
@@ -153,7 +199,7 @@ export class AddressesController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Update address',
-    type: AddressesDto,
+    type: CreateAddressDTO,
   })
   async update(
     @Res() response: Response,
@@ -182,7 +228,7 @@ export class AddressesController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Delete address',
-    type: AddressesDto,
+    type: CreateAddressDTO,
   })
   async delete(
     @Res() response: Response,
