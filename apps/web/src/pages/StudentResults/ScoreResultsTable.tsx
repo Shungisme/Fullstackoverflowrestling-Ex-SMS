@@ -86,7 +86,7 @@ const ScoreResultsTable: React.FC<ScoreResultsTableProps> = ({
           <p className="text-gray-500">{t("notiNodata")}</p>
         </div>
       ) : (
-        <Table className="min-w-full bg-white border border-gray-200">
+        <Table className="min-w-full bg-background border border-gray-200">
           <TableHeader>
             <TableRow>
               <TableHead className="px-4 py-2 border">

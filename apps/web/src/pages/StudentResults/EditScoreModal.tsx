@@ -91,7 +91,7 @@ const EditScoreModal: React.FC<EditScoreModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+      <div className="bg-background p-6 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">
           {t("StudentResults_EditModal_Title")}
         </h2>

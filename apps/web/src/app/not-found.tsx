@@ -26,7 +26,7 @@ const NotFound = () => {
         </div>
 
         {/* Suggested actions */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <div className="bg-background rounded-xl shadow-sm p-6 mb-8">
           <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center justify-center gap-2">
             <Compass className="h-5 w-5 text-blue-500" />
             Bạn có thể thử:

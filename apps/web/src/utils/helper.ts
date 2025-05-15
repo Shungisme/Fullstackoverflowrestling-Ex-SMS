@@ -27,12 +27,3 @@ export function getTypeString(type: IdentityPaperType | string) {
       break;
   }
 }
-export function getAddressTypeName(type: string): string {
-  const { t } = useLanguage();
-  const typeMap: Record<string, string> = {
-    mailingAddress: t("AddressTypeName_Mailing"),
-    permanentAddress: t("AddressTypeName_Permanent"),
-    temporaryAddress: t("AddressTypeName_Temporary"),
-  };
-  return typeMap[type] || type;
-}

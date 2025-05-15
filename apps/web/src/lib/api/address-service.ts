@@ -1,5 +1,5 @@
-import { BASE_URL } from "@/src/constants/constants";
-import { Address } from "@/src/types";
+import { BASE_URL, Language } from "@/src/constants/constants";
+import { Address, AddressType } from "@/src/types";
 import { toQueryString } from "@/src/utils/helper";
 
 export const AddressService = {
@@ -42,5 +42,4 @@ export const AddressService = {
       throw new Error("Failed to add address");
     }
   },
-
 };

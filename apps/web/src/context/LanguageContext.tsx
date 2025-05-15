@@ -19,8 +19,7 @@ const LanguageContext = createContext<LanguageContextType>(contextValue);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   // Get the initial language from localStorage
-  const initialLanguage = (typeof window !== "undefined" && localStorage.getItem("language")) as Language;
-  const [language, setLanguage] = useState<Language>(initialLanguage || Language.VIETNAMESE);
+  const [language, setLanguage] = useState<Language>(Language.VIETNAMESE);
 
   const t = (key: keyof typeof TRANSLATIONS[Language.VIETNAMESE]) => {
     return TRANSLATIONS[language][key];
@@ -28,9 +27,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLanguageHandler = (lang: Language) => {
     setLanguage(lang);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("language", lang);
-    }
   };
 
   const value = useMemo(() => ({ language, setLanguageHandler, t }), [language]);

@@ -38,7 +38,7 @@ const ResultsSearch: React.FC<ResultsSearchProps> = ({
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow mb-6">
+    <div className="bg-background p-4 rounded-lg shadow mb-6">
       <h2 className="text-lg font-semibold mb-3">
         {t("StudentResults_Search_Title")}
       </h2>

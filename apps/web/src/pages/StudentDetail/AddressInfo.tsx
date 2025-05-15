@@ -2,7 +2,8 @@ import { MapPin, Pencil } from "lucide-react";
 import { Address, AddressType } from "@/src/types";
 import React from "react";
 import { Button } from "@/src/components/atoms/Button";
-import { getAddressTypeName } from "@/src/utils/helper";
+import { useLanguage } from "@/src/context/LanguageContext";
+import AddressTypeName from "./AddressTypeName";
 
 interface AddressInfoProps {
   type: AddressType;
@@ -15,12 +16,13 @@ const AddressInfo = ({
   openAddressDialog,
   address,
 }: AddressInfoProps) => {
+  const {t} = useLanguage();
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-semibold flex items-center gap-2">
           <MapPin size={16} className="text-muted-foreground" />
-          {getAddressTypeName(type)}
+          {<AddressTypeName type={type} />}
         </h4>
         <Button
           variant="outline"
@@ -29,7 +31,7 @@ const AddressInfo = ({
           onClick={() => openAddressDialog(type, "edit")}
         >
           <Pencil size={14} className="mr-1" />
-          Edit
+          {t("editBtn")}
         </Button>
       </div>
       <div className="bg-muted p-3 rounded-md text-sm">
