@@ -150,7 +150,7 @@ export default function StudentForm({
 
     if (formData.email && !validateEmail(formData.email)) {
       newErrors.email = `Email không hợp lệ. Hãy kiểm tra và chắc chắn rằng email của bạn là hợp lệ. Chỉ chấp nhận email của miền trường đại học: ${allowedEmailDomains.join(
-        ", ",
+        ", "
       )}`;
     }
 
@@ -256,6 +256,7 @@ export default function StudentForm({
               errors={errors}
               data={facultyOptions}
             />
+
             <InputField
               label={t("StudentForm_Year")}
               name="course"
@@ -346,7 +347,7 @@ export default function StudentForm({
                 identityPaper={formData.identityPaper}
                 onChange={(
                   field: keyof IdentityPapers,
-                  value: string | boolean,
+                  value: string | boolean
                 ) => {
                   setFormData({
                     ...formData,

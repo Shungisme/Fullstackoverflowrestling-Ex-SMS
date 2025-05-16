@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,6 +44,7 @@ export function TranscriptPrinter() {
   const { semesters } = useSchoolConfigContext();
   const { language } = useLanguage();
   const studentService = new StudentService(language);
+  const { t } = useLanguage();
 
   const form = useForm<z.infer<typeof transcriptSchema>>({
     resolver: zodResolver(transcriptSchema),
@@ -54,7 +55,7 @@ export function TranscriptPrinter() {
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     const loadStudents = async () => {
       setIsLoadingStudents(true);
       try {
@@ -101,7 +102,7 @@ export function TranscriptPrinter() {
                 name="studentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Sinh viên</FormLabel>
+                    <FormLabel>{t("TranscriptPrinter_Student")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -112,8 +113,8 @@ export function TranscriptPrinter() {
                           <SelectValue
                             placeholder={
                               isLoadingStudents
-                                ? "Đang tải..."
-                                : "Chọn sinh viên"
+                                ? t("notiLoading")
+                                : t("TranscriptPrinter_SelectStudent")
                             }
                           />
                         </SelectTrigger>
@@ -139,7 +140,7 @@ export function TranscriptPrinter() {
                 name="semesterId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Học kỳ (không bắt buộc)</FormLabel>
+                    <FormLabel>{t("TranscriptPrinter_Semester")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
@@ -147,11 +148,17 @@ export function TranscriptPrinter() {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Tất cả các học kỳ" />
+                          <SelectValue
+                            placeholder={t(
+                              "TranscriptPrinter_SemesterPlaceholder"
+                            )}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="all">Tất cả các học kỳ</SelectItem>
+                        <SelectItem value="all">
+                          {t("TranscriptPrinter_SemesterPlaceholder")}
+                        </SelectItem>
                         {semesters?.map((semester) => (
                           <SelectItem
                             key={semester.id}

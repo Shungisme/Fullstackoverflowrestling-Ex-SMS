@@ -6,6 +6,7 @@ import {
     TabsTrigger,
 } from "@/src/components/atoms/Tabs";
 import React from "react";
+import ClassList from "@/src/pages/Courses/ClassList";
 
 const CoursesPage = () => {
     return (
@@ -23,7 +24,7 @@ const CoursesPage = () => {
                     <CourseListPage />
                 </TabsContent>
                 <TabsContent value="class-list">
-                    <div className="space-y-4">class-list</div>
+                    <ClassList />
                 </TabsContent>
             </div>
         </Tabs>

@@ -7,6 +7,7 @@ import { ListConfig } from "../constants/constants";
 import { StudentSearchParams } from "../types/search";
 import { useLanguage } from "../context/LanguageContext";
 import { StudentService } from "../lib/api/student-service";
+import { getErrorMessage } from "../utils/helper";
 
 export function useStudents() {
   const [students, setStudents] = useState<StudentList>({
@@ -40,7 +41,7 @@ export function useStudents() {
         total: allData.data.total,
       });
     } catch (e) {
-      toast.error("Có lỗi server diễn ra!");
+      toast.error(getErrorMessage(e));
     } finally {
       setIsLoading(false);
     }
@@ -69,9 +70,7 @@ export function useStudents() {
       toast.success("Đã thêm sinh viên mới vào hệ thống");
       return true;
     } catch (e) {
-      const message =
-        e instanceof Error ? e.message : "Đã xảy ra lỗi không xác định";
-      toast.error(message);
+      toast.error(getErrorMessage(e));
       return false;
     }
   };
@@ -83,7 +82,7 @@ export function useStudents() {
       toast.success("Đã cập nhật thông tin sinh viên");
       return true;
     } catch (e) {
-      toast.error("Không thể cập nhật được sinh viên!");
+      toast.error(getErrorMessage(e));
       return false;
     }
   };
@@ -99,7 +98,7 @@ export function useStudents() {
       await fetchData();
       toast.info("Sinh viên đã được xóa khỏi hệ thống");
     } catch (e) {
-      toast.error("Không thể xóa được sinh viên!");
+      toast.error(getErrorMessage(e));
     }
   };
 
@@ -107,9 +106,12 @@ export function useStudents() {
     try {
       setIsLoading(true);
       const data = await studentService.searchStudents(searchTerm);
-      setStudents(data.data);
+      setStudents({
+        students: data.data.data,
+        total: data.data.total
+      });
     } catch (e) {
-      toast.error("Có lỗi server diễn ra!");
+      toast.error(getErrorMessage(e));
     } finally {
       setIsLoading(false);
     }

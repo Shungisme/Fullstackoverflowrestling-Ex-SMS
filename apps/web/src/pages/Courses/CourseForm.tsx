@@ -33,7 +33,7 @@ export const formSchema = z.object({
     id: z.string().optional(),
     code: z.string().min(1, { message: "Mã môn học không được để trống" }),
     title: z.string().min(1, { message: "Tên môn học không được để trống" }),
-    credit: z.number().min(2, { message: "Số tín chỉ phải lớn hơn 1" }),
+    credit: z.coerce.number().gte(2, { message: "Số tín chỉ phải lớn hơn 1" }),
     facultyId: z.string().min(1, { message: "Khoa không được để trống" }),
     description: z.string().min(1, { message: "Mô tả không được để trống" }),
     prerequisite: z.array(z.string()).optional(),
