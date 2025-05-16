@@ -7,13 +7,13 @@ import {
 } from "@/src/components/atoms/Card";
 import { AddressType, Student } from "@/src/types";
 import { Separator } from "@radix-ui/react-dropdown-menu";
-import { TabsContent } from "@repo/ui";
 import { formatDate } from "date-fns";
 import { Cake, Flag } from "lucide-react";
 
 import React from "react";
 import AddressInfo from "../AddressInfo";
 import AddAddressPlaceholder from "../AddAddressPlaceholder";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 interface OverviewTabProps {
   student: Student;
@@ -22,77 +22,85 @@ interface OverviewTabProps {
 
 const OverviewTab = ({ student, openAddressDialog }: OverviewTabProps) => {
   if (!student) return <div></div>;
+  const { t } = useLanguage();
   return (
-      <div className="grid gap-6 md:grid-cols-2">
-        {student && <InfoCard student={student} />}
+    <div className="grid gap-6 md:grid-cols-2">
+      {student && <InfoCard student={student} />}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Thông tin địa chỉ</CardTitle>
-            <CardDescription>
-              Các địa chỉ được đăng ký của sinh viên
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Mailing Address */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">
+            {t("OverviewTab_AddressInfo_Title")}
+          </CardTitle>
+          <CardDescription>
+            {t("OverviewTab_AddressInfo_HeaderDesc")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Mailing Address */}
+          <AddressInfo
+            type="mailingAddress"
+            openAddressDialog={openAddressDialog}
+            address={student?.mailingAddress}
+          />
+          {/* Permanent Address */}
+          {student?.permanentAddress ? (
             <AddressInfo
-              type="mailingAddress"
+              type="permanentAddress"
               openAddressDialog={openAddressDialog}
-              address={student?.mailingAddress}
+              address={student?.permanentAddress}
             />
-            {/* Permanent Address */}
-            {student?.permanentAddress ? (
-              <AddressInfo
-                type="permanentAddress"
-                openAddressDialog={openAddressDialog}
-                address={student?.permanentAddress}
-              />
-            ) : (
-              <AddAddressPlaceholder
-                openAddressDialog={openAddressDialog}
-                type="permanentAddress"
-              />
-            )}
-            {/* Temporary Address */}
-            {student?.temporaryAddress ? (
-              <AddressInfo
-                type="temporaryAddress"
-                openAddressDialog={openAddressDialog}
-                address={student?.temporaryAddress}
-              />
-            ) : (
-              <AddAddressPlaceholder
-                openAddressDialog={openAddressDialog}
-                type="temporaryAddress"
-              />
-            )}
-          </CardContent>
-        </Card>
-      </div>
+          ) : (
+            <AddAddressPlaceholder
+              openAddressDialog={openAddressDialog}
+              type="permanentAddress"
+            />
+          )}
+          {/* Temporary Address */}
+          {student?.temporaryAddress ? (
+            <AddressInfo
+              type="temporaryAddress"
+              openAddressDialog={openAddressDialog}
+              address={student?.temporaryAddress}
+            />
+          ) : (
+            <AddAddressPlaceholder
+              openAddressDialog={openAddressDialog}
+              type="temporaryAddress"
+            />
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
 export default OverviewTab;
 
 function InfoCard({ student }: { student: Student }) {
+  const { t } = useLanguage();
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Thông tin cá nhân</CardTitle>
-        <CardDescription>Các thông tin cơ bản về sinh viên</CardDescription>
+        <CardTitle className="text-xl">
+          {t("OverviewTab_InfoCard_Title")}
+        </CardTitle>
+        <CardDescription>
+          {t("OverviewTab_InfoCard_HeaderDesc")}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col gap-4">
           <div className="flex items-start">
             <div className="w-32 flex-shrink-0 text-muted-foreground">
-              Họ tên
+              {t("studentName")}
             </div>
             <div className="font-medium">{student?.name}</div>
           </div>
 
           <div className="flex items-start">
             <div className="w-32 flex-shrink-0 text-muted-foreground">
-              Ngày sinh
+              {t("studentDOB")}
             </div>
             <div className="flex items-center gap-2">
               <Cake size={16} className="text-muted-foreground" />
@@ -102,14 +110,14 @@ function InfoCard({ student }: { student: Student }) {
 
           <div className="flex items-start">
             <div className="w-32 flex-shrink-0 text-muted-foreground">
-              Giới tính
+              {t("studentGender")}
             </div>
             <div>{student?.gender === "MALE" ? "Nam" : "Nữ"}</div>
           </div>
 
           <div className="flex items-start">
             <div className="w-32 flex-shrink-0 text-muted-foreground">
-              Quốc tịch
+              {t("studentNationality")}
             </div>
             <div className="flex items-center gap-2">
               <Flag size={16} className="text-muted-foreground" />
@@ -121,7 +129,7 @@ function InfoCard({ student }: { student: Student }) {
         <Separator />
 
         <div>
-          <h4 className="text-sm font-semibold mb-3">MSSV</h4>
+          <h4 className="text-sm font-semibold mb-3">{t("studentId")}</h4>
           <div className="bg-muted p-3 rounded-md font-mono text-sm">
             {student?.studentId}
           </div>

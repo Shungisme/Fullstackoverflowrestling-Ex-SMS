@@ -1,17 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Student, StudentDataRespose, StudentList } from "../types";
+import { Student, StudentList } from "../types";
 import { toast } from "sonner";
-import {
-  getStudents,
-  searchStudents as searchStudentsApi,
-  addStudent as addStudentApi,
-  updateStudent as updateStudentApi,
-  deleteStudent as deleteStudentApi,
-} from "../lib/api/student-service";
 import { ListConfig } from "../constants/constants";
 import { StudentSearchParams } from "../types/search";
+import { useLanguage } from "../context/LanguageContext";
+import { StudentService } from "../lib/api/student-service";
 
 export function useStudents() {
   const [students, setStudents] = useState<StudentList>({
@@ -26,16 +21,24 @@ export function useStudents() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
   const [page, setPage] = useState(ListConfig.defaultPage);
+  const { language } = useLanguage();
+  const studentService = new StudentService(language);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
       const [data, allData] = await Promise.all([
-        await getStudents(page),
-        await getStudents(1, 1000),
+        await studentService.getAll([`page=${page}`]),
+        await studentService.getAll([`page=1`, `limit=1000`]),
       ]);
-      setStudents(data.data);
-      setAllStudents(allData.data);
+      setStudents({
+        students: data.data.data,
+        total: data.data.total,
+      });
+      setAllStudents({
+        students: allData.data.data,
+        total: allData.data.total,
+      });
     } catch (e) {
       toast.error("Có lỗi server diễn ra!");
     } finally {
@@ -56,7 +59,7 @@ export function useStudents() {
 
   const addStudent = async (newStudent: Student): Promise<boolean> => {
     try {
-      const student = await addStudentApi(newStudent);
+      const student = await studentService.create(newStudent);
 
       if (!student) {
         toast.error("Không thể thêm sinh viên mới vào hệ thống");
@@ -75,7 +78,7 @@ export function useStudents() {
 
   const updateStudent = async (updatedStudent: Student): Promise<boolean> => {
     try {
-      await updateStudentApi(updatedStudent);
+      await studentService.update(updatedStudent.id!, updatedStudent);
       await fetchData();
       toast.success("Đã cập nhật thông tin sinh viên");
       return true;
@@ -92,7 +95,7 @@ export function useStudents() {
 
   const deleteStudent = async (studentId: string): Promise<void> => {
     try {
-      await deleteStudentApi(studentId);
+      await studentService.delete(studentId);
       await fetchData();
       toast.info("Sinh viên đã được xóa khỏi hệ thống");
     } catch (e) {
@@ -103,7 +106,7 @@ export function useStudents() {
   const searchStudents = async (searchTerm: StudentSearchParams): Promise<void> => {
     try {
       setIsLoading(true);
-      const data = await searchStudentsApi(searchTerm);
+      const data = await studentService.searchStudents(searchTerm);
       setStudents(data.data);
     } catch (e) {
       toast.error("Có lỗi server diễn ra!");

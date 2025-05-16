@@ -29,6 +29,7 @@ import ErrorNotifier from "@/src/pages/StudentDetail/ErrorNotifier";
 import HeaderSection from "@/src/pages/StudentDetail/HeaderSection";
 import OverviewTab from "@/src/pages/StudentDetail/Tabs/OverviewTab";
 import EnrollmentTab from "@/src/pages/StudentDetail/Tabs/EnrollmentTab";
+import AddressTypeName from "@/src/pages/StudentDetail/AddressTypeName";
 
 export default function StudentDetailPage({
   params,
@@ -206,15 +207,25 @@ export default function StudentDetailPage({
         </TabsList>
 
         {/* Overview Tab */}
-        <OverviewTab student={student} openAddressDialog={openAddressDialog} />
+        <TabsContent value="overview" className="mt-6">
+          <OverviewTab student={student} openAddressDialog={openAddressDialog} />
+        </TabsContent>
 
-        <AcademicTab student={student} />
+        {/* Academic Tab */}
+        <TabsContent value="academic" className="mt-6">
+          <AcademicTab student={student} />
+        </TabsContent>
+
+        {/* Enrollment Tab */}
 
         <TabsContent value="enrollment" className="mt-6">
           <EnrollmentTab student={student} />
         </TabsContent>
 
-        <ContactTab student={student} />
+        {/* Contact Tab */}
+        <TabsContent value="contact" className="mt-6">
+          <ContactTab student={student} />
+        </TabsContent>
 
         <TabsContent value="indentity" className="mt-6">
           <IdentityPapersTab id={student.identityPaper.id!} />
@@ -227,7 +238,7 @@ export default function StudentDetailPage({
             <DialogTitle>
               {addressAction === "edit" ? "Chỉnh sửa" : "Thêm"}{" "}
               {editingAddress &&
-                AddressService.getAddressTypeName(editingAddress.type)}
+                <AddressTypeName type={editingAddress.type}/>}
             </DialogTitle>
           </DialogHeader>
           <p>{editingAddress?.address.id}</p>

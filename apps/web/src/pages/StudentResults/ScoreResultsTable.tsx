@@ -10,7 +10,8 @@ import {
   TableRow,
 } from "@/src/components/atoms/Table";
 import { mapScoreTypeToLabel } from "@/src/utils/mapper";
-
+import { useLanguage } from "@/src/context/LanguageContext";
+import { Button } from "@/src/components/atoms/Button";
 
 interface ScoreResultsTableProps {
   results: ClassResult[];
@@ -76,22 +77,36 @@ const ScoreResultsTable: React.FC<ScoreResultsTableProps> = ({
     return totalFactor ? Number((totalScore / totalFactor).toFixed(2)) : 0;
   };
 
+  const { t } = useLanguage();
+
   return (
     <div className="overflow-x-auto">
       {results.length === 0 ? (
         <div className="text-center py-10">
-          <p className="text-gray-500">Không có kết quả</p>
+          <p className="text-gray-500">{t("notiNodata")}</p>
         </div>
       ) : (
-        <Table className="min-w-full bg-white border border-gray-200">
+        <Table className="min-w-full bg-background border border-gray-200">
           <TableHeader>
             <TableRow>
-              <TableHead className="px-4 py-2 border">Sinh viên</TableHead>
-              <TableHead className="px-4 py-2 border">Lớp</TableHead>
-              <TableHead className="px-4 py-2 border">Loại điểm</TableHead>
-              <TableHead className="px-4 py-2 border">Hệ số</TableHead>
-              <TableHead className="px-4 py-2 border">Điểm</TableHead>
-              <TableHead className="px-4 py-2 border">Thao tác</TableHead>
+              <TableHead className="px-4 py-2 border">
+                {t("StudentResults_Table_Student")}
+              </TableHead>
+              <TableHead className="px-4 py-2 border">
+                {t("StudentResults_Table_Class")}
+              </TableHead>
+              <TableHead className="px-4 py-2 border">
+                {t("StudentResults_Table_GradeType")}
+              </TableHead>
+              <TableHead className="px-4 py-2 border">
+                {t("StudentResults_Table_GradeFactor")}
+              </TableHead>
+              <TableHead className="px-4 py-2 border">
+                {t("StudentResults_Table_Grade")}
+              </TableHead>
+              <TableHead className="px-4 py-2 border">
+                {t("StudentResults_Table_Actions")}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -120,18 +135,15 @@ const ScoreResultsTable: React.FC<ScoreResultsTableProps> = ({
                       {result.score}
                     </TableCell>
                     <TableCell className="px-4 py-2 border">
-                      <button
-                        onClick={() => handleEditClick(result)}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs"
-                      >
-                        Chỉnh sửa
-                      </button>
+                      <Button onClick={() => handleEditClick(result)}>
+                        {t("StudentResults_Table_EditCellBtn")}
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
                 <TableRow className="bg-gray-100 font-bold">
                   <TableCell className="px-4 py-2 border" colSpan={5}>
-                  Điểm tổng kết
+                    {t("StudentResults_Table_FinalCell_FinalGrade")}
                   </TableCell>
                   <TableCell className="px-4 py-2 border" colSpan={2}>
                     {calculateFinalGrade(group.results)}

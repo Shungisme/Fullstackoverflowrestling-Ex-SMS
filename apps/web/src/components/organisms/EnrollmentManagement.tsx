@@ -36,6 +36,7 @@ import { getStudentEnrollments } from "@/src/lib/api/enrollment-service";
 import { CancelEnrollmentForm } from "./CancelEnrollmentForm";
 import { Alert, AlertDescription } from "@/src/components/atoms/Alert";
 import { formatDate } from "date-fns";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 export function EnrollmentManagement({ studentId }: { studentId?: string }) {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
@@ -46,6 +47,7 @@ export function EnrollmentManagement({ studentId }: { studentId?: string }) {
   const [selectedEnrollment, setSelectedEnrollment] =
     useState<Enrollment | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const {language} = useLanguage();
 
   // Mock deadline date for demonstration
   const currentDeadlineDate = new Date();
@@ -60,6 +62,7 @@ export function EnrollmentManagement({ studentId }: { studentId?: string }) {
     try {
       const response = await getStudentEnrollments(
         filter.studentId || studentId || "",
+        language,
       );
 
       setEnrollments(response.data.data);

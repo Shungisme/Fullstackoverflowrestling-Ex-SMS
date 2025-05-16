@@ -5,13 +5,15 @@ import LoadingSpinner from "@/src/components/LoadingSpinner";
 import ErrorBoundary from "@/src/components/molecules/ErrorBoundary";
 import StudentStats from "../Home/Stats/StudentStats";
 import StudentManagementClient from "./StudentManagementClient";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 const StudentManagementPage = () => {
+  const { t } = useLanguage();
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Hệ thống Quản lý Sinh viên"
-        description="Quản lý và theo dõi sinh viên trong một giao diện đơn giản."
+        title={t("dashboardHeaderTitle")}
+        description={t("dashboardHeaderDesc")}
       />
       <ErrorBoundary fallback={<p>{"Đã xảy ra lỗi khi tải thống kê."}</p>}>
         <Suspense fallback={<LoadingSpinner />}>

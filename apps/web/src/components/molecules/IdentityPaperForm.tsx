@@ -13,6 +13,8 @@ import { CheckedState } from "@radix-ui/react-checkbox";
 import { Button } from "../atoms/Button";
 import { IdentityPaperType } from "@/src/types";
 import { formatDate } from "date-fns";
+import { useLanguage } from "@/src/context/LanguageContext";
+import { getTypeString } from "@/src/utils/helper";
 
 interface IdentityPaperFormProps {
   initial?: IdentityPapers;
@@ -28,23 +30,9 @@ const initialValue: IdentityPapers = {
   placeOfIssue: "",
 };
 
-const getTypeString = (type: IdentityPaperType | string) => {
-  switch (type) {
-    case "CMND":
-      return "Chứng minh nhân dân";
-    case "CCCD":
-      return "Căn cước công dân";
-    case "PASSPORT":
-      return "Hộ chiếu";
-    default:
-      break;
-  }
-};
-
 const IdentityPaperForm = ({
   initial = initialValue,
   onSubmit,
-  onCancel,
   isSubmitting,
 }: IdentityPaperFormProps) => {
   const [formData, setFormData] = useState<IdentityPapers>({
@@ -70,18 +58,21 @@ const IdentityPaperForm = ({
       type,
     });
   };
-
+  const { t } = useLanguage();
   return (
     <form className="space-y-2" onSubmit={handleSubmit}>
       <div className="space-y-2">
-        <Label htmlFor="name">Loại giấy tờ</Label>
+        <Label htmlFor="name">{t("IdentityPaperForm_Type")}</Label>
         <Select
           name="type"
           value={formData.type}
           onValueChange={(value: IdentityPaperType) => changeType(value)}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Chọn loại giấy tờ" defaultValue="CCCD" />
+            <SelectValue
+              placeholder={t("IdentityPaperForm_TypePlaceholder")}
+              defaultValue="CCCD"
+            />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="CMND">{getTypeString("CMND")}</SelectItem>
@@ -94,18 +85,19 @@ const IdentityPaperForm = ({
       </div>
       <div className="space-y-2">
         <Label htmlFor="name">
-          Số <span>{getTypeString(formData.type)}</span>
+          {t("IdentityPaperForm_Number")}{" "}
+          <span>{getTypeString(formData.type)}</span>
         </Label>
         <Input
           name="number"
           value={formData.number}
           onChange={handleChange}
           id="name"
-          placeholder={`Nhập số ${getTypeString(formData.type)}`}
+          placeholder={`${t("IdentityPaperForm_NumberPlaceholder")} ${getTypeString(formData.type)}`}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="issueDate">Ngày cấp</Label>
+        <Label htmlFor="issueDate">{t("IdentityPaperForm_IssueDate")}</Label>
         <Input
           id="issueDate"
           name="issueDate"
@@ -115,7 +107,9 @@ const IdentityPaperForm = ({
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="expirationDate">Ngày hết hạn</Label>
+        <Label htmlFor="expirationDate">
+          {t("IdentityPaperForm_ExpiryDate")}
+        </Label>
         <Input
           id="expirationDate"
           name="expirationDate"
@@ -125,7 +119,9 @@ const IdentityPaperForm = ({
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="placeOfIssue">Nơi cấp</Label>
+        <Label htmlFor="placeOfIssue">
+          {t("IdentityPaperForm_PlaceOfIssue")}
+        </Label>
         <Input
           id="placeOfIssue"
           name="placeOfIssue"
@@ -135,7 +131,7 @@ const IdentityPaperForm = ({
       </div>
       {formData.type === "CCCD" && (
         <div className="flex items-center gap-4">
-          <Label htmlFor="hasChip">Có chip</Label>
+          <Label htmlFor="hasChip">{t("IdentityPaperForm_CCCD_HasChip")}</Label>
           <Checkbox
             id="hasChip"
             name="hasChip"
@@ -156,7 +152,9 @@ const IdentityPaperForm = ({
       {formData.type === "PASSPORT" && (
         <>
           <div className="space-y-2">
-            <Label htmlFor="issuingCountry">Quốc gia cấp</Label>
+            <Label htmlFor="issuingCountry">
+              {t("IdentityPaperForm_PASSPORT_Country")}
+            </Label>
             <Input
               id="issuingCountry"
               name="issuingCountry"
@@ -166,7 +164,7 @@ const IdentityPaperForm = ({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="note">Ghi chú</Label>
+            <Label htmlFor="note">{t("IdentityPaperForm_PASSPORT_Note")}</Label>
             <Input
               id="note"
               name="note"
@@ -180,10 +178,10 @@ const IdentityPaperForm = ({
       <div className="flex justify-end space-x-2 mt-6">
         <Button disabled={isSubmitting}>
           {isSubmitting
-            ? "Đang lưu..."
+            ? t("IdentityPaperForm_SubmitButton_Submiting")
             : initial
-              ? "Cập nhật"
-              : "Thêm giấy tờ"}
+              ? t("IdentityPaperForm_SubmitButton_Edit")
+              : t("IdentityPaperForm_SubmitButton_Add")}
         </Button>
       </div>
     </form>

@@ -8,14 +8,15 @@ import Navbar from "../components/atoms/Navbar";
 import { ThemeProvider } from "../theme/ThemeProvider";
 import { StudentProvider } from "../context/StudentContext";
 import { SchoolConfigProvider } from "../context/SchoolConfigContext";
+import { LanguageProvider } from "../context/LanguageContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Hệ thống Quản lý Sinh viên",
   description: "Ứng dụng quản lý thông tin sinh viên",
   icons: {
-      icon: '/favicon.png',
-  }
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -28,24 +29,27 @@ export default function RootLayout({
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ToastProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <StudentProvider>
-              <SchoolConfigProvider>
-              <Navbar />
-              <main className="flex-1 bg-background scroll-auto">
-                <div className="container mx-auto py-6 px-4 max-w-6xl">
-                  {children}
-                </div>
-              </main>
+            <LanguageProvider>
+              <StudentProvider>
+                <SchoolConfigProvider>
+                  <Navbar />
+                  <main className="flex-1 bg-background scroll-auto">
+                    <div className="container mx-auto py-6 px-4 max-w-6xl">
+                      {children}
+                    </div>
+                  </main>
 
-              <footer className="bg-slate-800 text-white py-4 text-center">
-                <div className="container mx-auto px-4 max-w-6xl">
-                  <p>
-                    © {new Date().getFullYear()} - Hệ thống Quản lý Sinh viên
-                  </p>
-                </div>
-              </footer>
-              </SchoolConfigProvider>
-            </StudentProvider>
+                  <footer className="bg-slate-800 text-white py-4 text-center">
+                    <div className="container mx-auto px-4 max-w-6xl">
+                      <p>
+                        © {new Date().getFullYear()} - Hệ thống Quản lý Sinh
+                        viên
+                      </p>
+                    </div>
+                  </footer>
+                </SchoolConfigProvider>
+              </StudentProvider>
+            </LanguageProvider>
           </ThemeProvider>
           <Toaster richColors />
         </ToastProvider>

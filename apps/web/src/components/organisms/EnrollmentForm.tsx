@@ -23,7 +23,6 @@ import { Button } from "@/src/components/atoms/Button";
 import { toast } from "sonner";
 import LoadingSpinner from "@/src/components/LoadingSpinner";
 import { useSchoolConfigContext } from "@/src/context/SchoolConfigContext";
-import { getStudent } from "@/src/lib/api/student-service";
 import { Course, Class } from "@/src/types/course";
 import {
   addEnrollment,
@@ -37,6 +36,8 @@ import {
 } from "@/src/components/atoms/Alert";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { ClassService, CourseService } from "@/src/lib/api/school-service";
+import { useLanguage } from "@/src/context/LanguageContext";
+import { StudentService } from "@/src/lib/api/student-service";
 
 const enrollmentFormSchema = z.object({
   studentId: z.string().min(1, { message: "Mã sinh viên không được để trống" }),
@@ -64,6 +65,7 @@ export function EnrollmentForm({
     valid: boolean;
     message?: string;
   } | null>(null);
+  const {language} = useLanguage();
 
   const form = useForm<z.infer<typeof enrollmentFormSchema>>({
     resolver: zodResolver(enrollmentFormSchema),
@@ -110,7 +112,8 @@ export function EnrollmentForm({
       setStudentInfo(null);
 
       try {
-        const response = await getStudent(debouncedStudentId);
+        const service = new StudentService(language);
+        const response = await service.getById(debouncedStudentId);
         setStudentInfo(response.data);
         form.clearErrors("studentId");
       } catch (error) {
@@ -128,7 +131,8 @@ export function EnrollmentForm({
   useEffect(() => {
     async function fetchCourses() {
       try {
-        const response = await CourseService.getAll();
+        const service = new CourseService(language);
+        const response = await service.getAll();
         setCourses(response.data.data);
       } catch (error) {
         toast.error("Không thể tải danh sách môn học");
@@ -149,7 +153,7 @@ export function EnrollmentForm({
       try {
         // In a real implementation, this would be replaced with an actual API call to get classes for the course
         // For now, creating mock classes
-        const classService = new ClassService();
+        const classService = new ClassService(language);
         const response = await classService.getAllClassesByCourseCode(
           selectedCourseId,
           selectedSemester,

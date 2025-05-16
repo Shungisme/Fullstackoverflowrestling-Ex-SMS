@@ -1,3 +1,5 @@
+"use client";
+import { useLanguage } from "@/src/context/LanguageContext";
 import { Student } from "../../../types";
 import StatCard from "./StatCard";
 import { Users2, Rows, BarChart4 } from "lucide-react";
@@ -7,38 +9,40 @@ interface StatsListProps {
 
 export default function StatsList({ students }: StatsListProps) {
   if (!Array.isArray(students)) return <div></div>;
+  const { t } = useLanguage();
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <StatCard
-        title="Tổng sinh viên"
+        title={t("statTotalStudents")}
         value={students.length}
-        description="Tổng số sinh viên trong hệ thống"
+        description={t("statTotalStudentsDesc")}
         Icon={Users2}
       />
       <StatCard
-        title="Đang học"
+        title={t("statStudying")}
         value={students.filter((s) => s.status.title === "Đang học").length}
-        description="Sinh viên đang học tập"
+        description={t("statStudyingDesc")}
         Icon={Rows}
       />
       <StatCard
-        title="Tốt nghiệp"
+        title={t("statGraduated")}
         value={students.filter((s) => s.status.title === "Tốt nghiệp").length}
-        description="Sinh viên đã tốt nghiệp"
+        description={t("statGraduatedDesc")}
         Icon={BarChart4}
       />
       <StatCard
-        title="Tỷ lệ tốt nghiệp"
+        title={t("statGraduationRate")}
         value={
           students.length
             ? Math.round(
-                (students.filter((s) => s.status.title === "Tốt nghiệp").length /
+                (students.filter((s) => s.status.title === "Tốt nghiệp")
+                  .length /
                   students.length) *
-                  100
+                  100,
               ) + "%"
             : "0%"
         }
-        description="Phần trăm sinh viên tốt nghiệp"
+        description={t("statGraduationRateDesc")}
         Icon={BarChart4}
       />
     </div>

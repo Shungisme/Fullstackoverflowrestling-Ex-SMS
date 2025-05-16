@@ -1,5 +1,5 @@
-import { BASE_URL } from "@/src/constants/constants";
-import { Address } from "@/src/types";
+import { BASE_URL, Language } from "@/src/constants/constants";
+import { Address, AddressType } from "@/src/types";
 import { toQueryString } from "@/src/utils/helper";
 
 export const AddressService = {
@@ -41,14 +41,5 @@ export const AddressService = {
     if (!response.ok) {
       throw new Error("Failed to add address");
     }
-  },
-
-  getAddressTypeName(type: string): string {
-    const typeMap: Record<string, string> = {
-      mailingAddress: "Địa chỉ nhận thư",
-      permanentAddress: "Địa chỉ thường trú",
-      temporaryAddress: "Địa chỉ tạm trú",
-    };
-    return typeMap[type] || type;
   },
 };

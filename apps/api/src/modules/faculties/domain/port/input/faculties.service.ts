@@ -99,6 +99,11 @@ export class FacultiesService implements IFacultiesService {
         await this.applyTranslationsToList(faculties, lang);
       }
 
+      // Nếu có yêu cầu ngôn ngữ, áp dụng bản dịch
+      if (lang) {
+        await this.applyTranslationsToList(faculties, lang);
+      }
+
       return {
         data: faculties,
         page,

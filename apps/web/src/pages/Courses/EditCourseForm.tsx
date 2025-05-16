@@ -4,11 +4,14 @@ import CourseForm from "./CourseForm";
 import { Course } from "@/src/types/course";
 import { CourseService } from "@/src/lib/api/school-service";
 import { toast } from "sonner";
+import { useLanguage } from "@/src/context/LanguageContext";
 
 const EditCourseForm = ({ courseData }: { courseData: Course }) => {
     if (!courseData) {
         return <div>Không tìm thấy thông tin môn học</div>;
     }
+    const { language } = useLanguage();
+    const service = new CourseService(language);
     return (
         <CourseForm
             variant="edit"
@@ -21,7 +24,7 @@ const EditCourseForm = ({ courseData }: { courseData: Course }) => {
                 description: courseData.description,
             }}
             onSubmit={async (data) => {
-                const res = await CourseService.update(data.id!, {
+                const res = await service.update(data.id!, {
                     code: data.code,
                     title: data.title,
                     credit: data.credit,

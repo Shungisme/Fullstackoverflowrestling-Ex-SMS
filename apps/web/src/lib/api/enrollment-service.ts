@@ -1,4 +1,4 @@
-import { BASE_URL } from "@/src/constants/constants";
+import { BASE_URL, Language } from "@/src/constants/constants";
 import {
     EnrollmentFormData,
     EnrollmentResponse,
@@ -6,11 +6,12 @@ import {
     SingleEnrollmentResponse,
 } from "@/src/types/enrollment";
 import { IAPIResponse } from "@/src/types";
-import { ClassService } from "./school-service";
+import { ClassService, CRUDService } from "./school-service";
 import { ClassResult } from "@/src/types/course";
 
 export async function getStudentEnrollments(
     studentId: string,
+    lang: Language,
 ): Promise<EnrollmentResponse> {
     try {
         const response = await fetch(
@@ -98,7 +99,7 @@ export async function checkPrerequisites(
     // by getting all the results of the student and checking if the student has passed the prerequisites
     // This should be done in the backend but for now we will do it in the frontend
     try {
-        const classService = new ClassService();
+        const classService = new ClassService(Language.VIETNAMESE);
         const res = await classService.getClassResultsOfStudent(
             studentId,
             courseCode,
