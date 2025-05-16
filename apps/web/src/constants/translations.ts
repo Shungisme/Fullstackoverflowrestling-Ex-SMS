@@ -299,6 +299,7 @@ export const TRANSLATIONS = {
         ClassList_ClassTable_Subject: "Subject",
         ClassList_ClassTable_Classroom: "Classroom",
         ClassList_Title: "Class List",
+        selectBtn: "Select",
     },
     [Language.VIETNAMESE]: {
         language: "Ngôn ngữ",
