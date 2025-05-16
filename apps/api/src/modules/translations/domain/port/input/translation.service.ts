@@ -1,5 +1,4 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import axios from 'axios';
 import { translate } from '@vitalets/google-translate-api';
 import { CreateTranslationDTO } from '../../dto/create-translation.dto';
 import { GetTranslationDTO } from '../../dto/get-translation.dto';
@@ -10,15 +9,13 @@ import {
 } from '../output/ITranslationRepository';
 import { ITranslationService } from './ITranslationSerive';
 
-// Get supported languages from environment or use defaults
-const DEFAULT_TARGET_LANGS = ['en', 'vi']; // Added Vietnamese
+const DEFAULT_TARGET_LANGS = ['en', 'vi']; // English and Vietnamese
 const TARGET_LANGS = process.env.SUPPORTED_LANGUAGES
   ? process.env.SUPPORTED_LANGUAGES.split(',').map((lang) =>
       lang.trim().toLowerCase(),
     )
   : DEFAULT_TARGET_LANGS;
 
-// ISO language codes for validation
 const ISO_LANGUAGE_CODES = [
   'en',
   'de',
@@ -47,7 +44,6 @@ const ISO_LANGUAGE_CODES = [
   'sv',
 ];
 
-// Define Translation interface at the module level
 interface Translation {
   entity: string;
   entityId: string;
@@ -59,30 +55,12 @@ interface Translation {
 @Injectable()
 export class TranslationService implements ITranslationService {
   private readonly logger = new Logger(TranslationService.name);
-  private isGoogleTranslateEnabled = true;
-  private isLibreTranslateEnabled = false;
-  private libreTranslateUrl: string;
-  private libreTranslateApiKey: string | null = null;
 
   constructor(
     @Inject(TRANSLATION_REPOSITORY)
     private translationRepository: ITranslationRepository,
   ) {
-    // Get LibreTranslate configuration from environment (for backward compatibility)
-    this.libreTranslateUrl =
-      process.env.LIBRE_TRANSLATE_URL || 'https://libretranslate.com';
-    this.libreTranslateApiKey = process.env.LIBRE_TRANSLATE_API_KEY || null;
-
-    // Check if we should use LibreTranslate or Google Translate
-    this.isLibreTranslateEnabled = process.env.USE_LIBRE_TRANSLATE === 'true';
-
-    if (this.isLibreTranslateEnabled) {
-      this.logger.log(`Using LibreTranslate at: ${this.libreTranslateUrl}`);
-    } else {
-      this.logger.log('Using Google Translate API (free version)');
-      this.isGoogleTranslateEnabled = true;
-    }
-
+    this.logger.log('Using Google Translate API (free version)');
     this.logger.log(`Supported target languages: ${TARGET_LANGS.join(', ')}`);
   }
 
@@ -113,90 +91,34 @@ export class TranslationService implements ITranslationService {
       // Use a sample of the text if it's very long
       const sampleText = text.length > 500 ? text.substring(0, 500) : text;
 
-      if (this.isLibreTranslateEnabled) {
-        // Legacy LibreTranslate implementation (keeping for backward compatibility)
-        try {
-          // LibreTranslate language detection API
-          const requestBody: any = { q: sampleText };
+      // Use Google Translate for language detection
+      const result = await translate(sampleText, { to: 'en' });
+      const detectedLang = this.normalizeLanguageCode(
+        result.raw.src || 'en', // Use the raw response's source language or default to 'en'
+      );
 
-          if (this.libreTranslateApiKey) {
-            requestBody.api_key = this.libreTranslateApiKey;
-          }
+      this.logger.debug(
+        `Google detected language: ${detectedLang} for text: "${text.substring(0, 30)}..."`,
+      );
 
-          const response = await axios.post(
-            `${this.libreTranslateUrl}/detect`,
-            requestBody,
-          );
-
-          if (
-            response.data &&
-            Array.isArray(response.data) &&
-            response.data.length > 0
-          ) {
-            const sortedDetections = response.data.sort(
-              (a, b) => b.confidence - a.confidence,
-            );
-            const detectedLang = this.normalizeLanguageCode(
-              sortedDetections[0].language,
-            );
-
-            this.logger.debug(
-              `Detected language: ${detectedLang} (confidence: ${sortedDetections[0].confidence}) for text: "${text.substring(0, 30)}..."`,
-            );
-
-            return detectedLang;
-          }
-        } catch (error) {
-          this.logger.warn(
-            `LibreTranslate detection failed: ${error.message}, falling back to Google Translate`,
-          );
-          // Continue to Google Translate fallback
-        }
-      }
-
-      // Google Translate language detection (new implementation)
-      try {
-        const result = await translate(sampleText, { to: 'en' });
-        const detectedLang = this.normalizeLanguageCode(
-          result.raw.src || 'en', // Use the raw response's source language or default to 'en'
-        );
-
-        this.logger.debug(
-          `Google detected language: ${detectedLang} for text: "${text.substring(0, 30)}..."`,
-        );
-
-        return detectedLang;
-      } catch (googleError) {
-        this.logger.error(
-          `Google Translate detection error: ${googleError.message}`,
-        );
-
-        // Fallback: Simple Vietnamese detection
-        const vietnamesePattern =
-          /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
-        if (vietnamesePattern.test(text)) {
-          return 'vi';
-        }
-
-        // Default to English on error
-        return 'en';
-      }
+      return detectedLang;
     } catch (error) {
-      this.logger.error(`Overall language detection error: ${error.message}`);
+      this.logger.error(`Language detection error: ${error.message}`);
 
-      // Fallback to basic detection for Vietnamese
+      // Fallback: Simple Vietnamese detection
       const vietnamesePattern =
         /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
       if (vietnamesePattern.test(text)) {
         return 'vi';
       }
 
-      return 'en'; // Default to English on error
+      // Default to English on error
+      return 'en';
     }
   }
 
   /**
-   * Translate text using Google Translate or LibreTranslate
+   * Translate text using Google Translate
    */
   private async translateText(
     text: string,
@@ -204,40 +126,6 @@ export class TranslationService implements ITranslationService {
     targetLang: string,
   ): Promise<string> {
     try {
-      if (this.isLibreTranslateEnabled) {
-        // Legacy LibreTranslate implementation
-        try {
-          const requestBody: any = {
-            q: text,
-            source: sourceLang,
-            target: targetLang,
-          };
-
-          if (this.libreTranslateApiKey) {
-            requestBody.api_key = this.libreTranslateApiKey;
-          }
-
-          const response = await axios.post(
-            `${this.libreTranslateUrl}/translate`,
-            requestBody,
-          );
-
-          if (response.data && response.data.translatedText) {
-            return response.data.translatedText;
-          }
-
-          throw new Error(
-            'Translation API did not return expected response format',
-          );
-        } catch (libreError) {
-          this.logger.warn(
-            `LibreTranslate error: ${libreError.message}, falling back to Google Translate`,
-          );
-          // Continue to Google Translate
-        }
-      }
-
-      // Google Translate implementation
       const result = await translate(text, {
         from: sourceLang,
         to: targetLang,
@@ -307,7 +195,7 @@ export class TranslationService implements ITranslationService {
             const normalizedTargetLang = this.normalizeLanguageCode(targetLang);
             const normalizedSourceLang = this.normalizeLanguageCode(sourceLang);
 
-            // Translate using Google Translate or LibreTranslate
+            // Translate using Google Translate
             const translatedText = await this.translateText(
               value,
               normalizedSourceLang,
@@ -376,6 +264,30 @@ export class TranslationService implements ITranslationService {
     } catch (error) {
       this.logger.error(`Error getting translations: ${error.message}`);
       throw new Error(`Failed to get translations: ${error.message}`);
+    }
+  }
+
+  /**
+   * Delete translations for a given entity and entityId
+   * Optional field parameter to delete only translations for a specific field
+   */
+  async deleteTranslations(
+    entity: string,
+    entityId: string,
+    field?: string,
+  ): Promise<number> {
+    try {
+      const count = await this.translationRepository.deleteMany(
+        entity,
+        entityId,
+      );
+      this.logger.log(
+        `Deleted ${count} translations for ${entity} ${entityId}${field ? `, field ${field}` : ''}`,
+      );
+      return count;
+    } catch (error) {
+      this.logger.error(`Error deleting translations: ${error.message}`);
+      throw new Error(`Failed to delete translations: ${error.message}`);
     }
   }
 }

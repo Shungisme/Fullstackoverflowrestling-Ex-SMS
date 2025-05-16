@@ -115,6 +115,35 @@ export class SubjectsService implements ISubjectsService {
           });
         }
 
+        // Xóa các bản dịch liên quan đến subject trước khi xóa subject
+        try {
+          // Lấy tất cả bản dịch của subject
+          const translations = await this.translationService.getAllTranslations(
+            'Subject',
+            subjectId,
+          );
+
+          // Nếu có bản dịch nào, xóa tất cả
+          if (translations.length > 0) {
+            this.logger.log(
+              `Deleting ${translations.length} translations for subject ${subjectId}`,
+            );
+
+            const deletedCount = await this.translationService[
+              'translationRepository'
+            ].deleteMany('Subject', subjectId);
+
+            this.logger.log(
+              `Successfully deleted ${deletedCount} translations for subject ${subjectId}`,
+            );
+          }
+        } catch (translationError) {
+          this.logger.error(
+            `Error deleting translations for subject ${subjectId}: ${translationError.message}`,
+          );
+        }
+
+        // Xóa subject
         return await this.subjectsRepository.delete(subjectId);
       }
     } catch (error) {
@@ -214,7 +243,7 @@ export class SubjectsService implements ISubjectsService {
         data,
       );
 
-      // Cập nhật bản dịch nếu các trường có thể dịch được thay đổi
+      // Xác định các trường dịch được thay đổi
       const fieldsToTranslate: Record<string, string> = {};
       for (const field of TRANSLATABLE_FIELDS) {
         if (data[field] !== undefined) {
@@ -224,6 +253,34 @@ export class SubjectsService implements ISubjectsService {
 
       if (Object.keys(fieldsToTranslate).length > 0) {
         try {
+          // Xóa các bản dịch cũ cho các trường sẽ được cập nhật
+          for (const field of Object.keys(fieldsToTranslate)) {
+            try {
+              const translations =
+                await this.translationService.getAllTranslations(
+                  'Subject',
+                  subjectId,
+                  field,
+                );
+
+              if (translations.length > 0) {
+                this.logger.log(
+                  `Deleting existing translations for subject ${subjectId}, field ${field}`,
+                );
+
+                // Xóa từng bản dịch của trường này
+                await this.translationService[
+                  'translationRepository'
+                ].deleteMany('Subject', subjectId);
+              }
+            } catch (deleteError) {
+              this.logger.error(
+                `Failed to delete old translations for field ${field}: ${deleteError.message}`,
+              );
+            }
+          }
+
+          // Tạo các bản dịch mới sau khi đã xóa bản dịch cũ
           await this.translationService.translateAndSave({
             entity: 'Subject',
             entityId: subjectId,

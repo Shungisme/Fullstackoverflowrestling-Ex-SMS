@@ -263,7 +263,7 @@ export class StudentService implements IStudentService {
               'identityPaper',
             ],
             ...students.map((student) => [
-              student.studentId,
+              student.studentId!,
               student.name,
               student.dateOfBirth,
               student.gender,
@@ -603,6 +603,120 @@ export class StudentService implements IStudentService {
 
   async delete(studentId: string): Promise<DeleteStudentResponseDTO> {
     try {
+      // Lấy thông tin sinh viên trước khi xóa để có thể xóa các bản dịch liên quan
+      const student = await this.studentRepository.findById(studentId);
+
+      if (!student) {
+        throw new NotFoundException(`Student with ID ${studentId} not found`);
+      }
+
+      // Xóa các bản dịch liên quan đến sinh viên
+      try {
+        // 1. Xóa bản dịch của chính sinh viên
+        const studentTranslations =
+          await this.translationService.getAllTranslations(
+            'Student',
+            student.id,
+          );
+
+        if (studentTranslations.length > 0) {
+          this.logger.log(
+            `Deleting ${studentTranslations.length} translations for student ${student.id}`,
+          );
+
+          const deletedCount = await this.translationService[
+            'translationRepository'
+          ].deleteMany('Student', student.id);
+
+          this.logger.log(
+            `Successfully deleted ${deletedCount} translations for student ${student.id}`,
+          );
+        }
+
+        // 2. Xóa bản dịch của các địa chỉ liên quan
+        if (student.permanentAddress && student.permanentAddress.id) {
+          const addressTranslations =
+            await this.translationService.getAllTranslations(
+              'Address',
+              student.permanentAddress.id,
+            );
+
+          if (addressTranslations.length > 0) {
+            this.logger.log(
+              `Deleting ${addressTranslations.length} translations for permanent address ${student.permanentAddress.id}`,
+            );
+
+            await this.translationService['translationRepository'].deleteMany(
+              'Address',
+              student.permanentAddress.id,
+            );
+          }
+        }
+
+        if (student.temporaryAddress && student.temporaryAddress.id) {
+          const addressTranslations =
+            await this.translationService.getAllTranslations(
+              'Address',
+              student.temporaryAddress.id,
+            );
+
+          if (addressTranslations.length > 0) {
+            this.logger.log(
+              `Deleting ${addressTranslations.length} translations for temporary address ${student.temporaryAddress.id}`,
+            );
+
+            await this.translationService['translationRepository'].deleteMany(
+              'Address',
+              student.temporaryAddress.id,
+            );
+          }
+        }
+
+        if (student.mailingAddress && student.mailingAddress.id) {
+          const addressTranslations =
+            await this.translationService.getAllTranslations(
+              'Address',
+              student.mailingAddress.id,
+            );
+
+          if (addressTranslations.length > 0) {
+            this.logger.log(
+              `Deleting ${addressTranslations.length} translations for mailing address ${student.mailingAddress.id}`,
+            );
+
+            await this.translationService['translationRepository'].deleteMany(
+              'Address',
+              student.mailingAddress.id,
+            );
+          }
+        }
+
+        // 3. Xóa bản dịch của giấy tờ tùy thân
+        if (student.identityPaper && student.identityPaper.id) {
+          const identityTranslations =
+            await this.translationService.getAllTranslations(
+              'IdentityPaper',
+              student.identityPaper.id,
+            );
+
+          if (identityTranslations.length > 0) {
+            this.logger.log(
+              `Deleting ${identityTranslations.length} translations for identity paper ${student.identityPaper.id}`,
+            );
+
+            await this.translationService['translationRepository'].deleteMany(
+              'IdentityPaper',
+              student.identityPaper.id,
+            );
+          }
+        }
+      } catch (translationError) {
+        this.logger.error(
+          `Error deleting translations for student ${studentId}: ${translationError.message}`,
+        );
+      }
+
+      // Xóa sinh viên
       await this.studentRepository.delete(studentId);
 
       return {
@@ -621,7 +735,124 @@ export class StudentService implements IStudentService {
 
   async update(student: UpdateStudentRequestDTO): Promise<StudentResponseDTO> {
     try {
-      return await this.studentRepository.update(student);
+      const existingStudent = await this.studentRepository.findById(
+        student.studentId!,
+      );
+
+      if (!existingStudent) {
+        throw new NotFoundException(
+          `Student with ID ${student.studentId} not found`,
+        );
+      }
+
+      // Xóa các bản dịch liên quan đến sinh viên
+      try {
+        // 1. Xóa bản dịch của chính sinh viên
+        const studentTranslations =
+          await this.translationService.getAllTranslations(
+            'Student',
+            existingStudent.id,
+          );
+
+        if (studentTranslations.length > 0) {
+          this.logger.log(
+            `Deleting ${studentTranslations.length} translations for student ${existingStudent.id}`,
+          );
+
+          await this.translationService['translationRepository'].deleteMany(
+            'Student',
+            existingStudent.id,
+          );
+
+          this.logger.log(
+            `Successfully deleted translations for student ${existingStudent.id}`,
+          );
+        }
+
+        if (existingStudent.permanentAddress?.id) {
+          const addressTranslations =
+            await this.translationService.getAllTranslations(
+              'Address',
+              existingStudent.permanentAddress.id,
+            );
+
+          if (addressTranslations.length > 0) {
+            this.logger.log(
+              `Deleting translations for permanent address ${existingStudent.permanentAddress.id}`,
+            );
+
+            await this.translationService['translationRepository'].deleteMany(
+              'Address',
+              existingStudent.permanentAddress.id,
+            );
+          }
+        }
+
+        if (existingStudent.temporaryAddress?.id) {
+          const addressTranslations =
+            await this.translationService.getAllTranslations(
+              'Address',
+              existingStudent.temporaryAddress.id,
+            );
+
+          if (addressTranslations.length > 0) {
+            this.logger.log(
+              `Deleting translations for temporary address ${existingStudent.temporaryAddress.id}`,
+            );
+
+            await this.translationService['translationRepository'].deleteMany(
+              'Address',
+              existingStudent.temporaryAddress.id,
+            );
+          }
+        }
+
+        if (existingStudent.mailingAddress?.id) {
+          const addressTranslations =
+            await this.translationService.getAllTranslations(
+              'Address',
+              existingStudent.mailingAddress.id,
+            );
+
+          if (addressTranslations.length > 0) {
+            this.logger.log(
+              `Deleting translations for mailing address ${existingStudent.mailingAddress.id}`,
+            );
+
+            await this.translationService['translationRepository'].deleteMany(
+              'Address',
+              existingStudent.mailingAddress.id,
+            );
+          }
+        }
+
+        if (existingStudent.identityPaper?.id) {
+          const identityTranslations =
+            await this.translationService.getAllTranslations(
+              'IdentityPaper',
+              existingStudent.identityPaper.id,
+            );
+
+          if (identityTranslations.length > 0) {
+            this.logger.log(
+              `Deleting translations for identity paper ${existingStudent.identityPaper.id}`,
+            );
+
+            await this.translationService['translationRepository'].deleteMany(
+              'IdentityPaper',
+              existingStudent.identityPaper.id,
+            );
+          }
+        }
+      } catch (translationError) {
+        this.logger.error(
+          `Error deleting translations for student ${student.studentId}: ${translationError.message}`,
+        );
+      }
+
+      const updatedStudent = await this.studentRepository.update(student);
+
+      return updatedStudent;
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
         throw new NotFoundException(
@@ -632,11 +863,19 @@ export class StudentService implements IStudentService {
     }
   }
 
-  async findById(studentId: string): Promise<StudentResponseDTO> {
+  async findById(
+    studentId: string,
+    lang?: string,
+  ): Promise<StudentResponseDTO> {
     const student = await this.studentRepository.findById(studentId);
     if (!student) {
       throw new NotFoundException(`Student with ID ${studentId} not found: `);
     }
+
+    if (lang) {
+      await this.applyTranslation(student, lang);
+    }
+
     return student;
   }
 

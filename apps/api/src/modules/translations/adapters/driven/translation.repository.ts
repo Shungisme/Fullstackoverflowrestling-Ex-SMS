@@ -55,4 +55,15 @@ export class TranslationRepository implements ITranslationRepository {
       orderBy: [{ field: 'asc' }, { lang: 'asc' }],
     });
   }
+
+  async deleteMany(entity: string, entityId: string): Promise<number> {
+    const result = await this.prisma.translation.deleteMany({
+      where: {
+        entity,
+        entityId,
+      },
+    });
+
+    return result.count;
+  }
 }

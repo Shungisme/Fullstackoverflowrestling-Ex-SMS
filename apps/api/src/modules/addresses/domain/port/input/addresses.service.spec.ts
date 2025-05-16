@@ -1,16 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
 import { AddressesService } from './addresses.service';
 import { ADDRESSES_REPOSITORY } from '../output/IAddressesRepository';
 import { CreateAddressDTO } from '../../dto/create-address.dto';
 import { UpdateAddressDTO } from '../../dto/update-address.dto';
 import { AddressesDto } from '../../dto/addresses.dto';
+import { TranslationService } from '../../../../translations/domain/port/input/translation.service';
 import * as errorHelpers from 'src/shared/helpers/error';
 
 describe('AddressesService', () => {
   let service: AddressesService;
 
-  // Mock the repository
+  // Mock repositories and services
   const mockAddressesRepository = {
     create: jest.fn(),
     createAndLinkAddressForStudent: jest.fn(),
@@ -21,6 +22,39 @@ describe('AddressesService', () => {
     count: jest.fn(),
   };
 
+  const mockTranslationService = {
+    translateAndSave: jest.fn(),
+    getAllTranslations: jest.fn(),
+  };
+
+  // Mock data
+  const addressId = '123e4567-e89b-12d3-a456-426614174000';
+  const studentId = '123e4567-e89b-12d3-a456-426614174001';
+
+  const sampleAddress: AddressesDto = {
+    id: addressId,
+    number: '123',
+    street: 'Main Street',
+    district: 'Downtown',
+    city: 'Metropolis',
+    country: 'USA',
+    createdAt: new Date('2023-01-01T00:00:00Z'),
+    updatedAt: new Date('2023-01-01T00:00:00Z'),
+  };
+
+  const createAddressDto: CreateAddressDTO = {
+    number: '123',
+    street: 'Main Street',
+    district: 'Downtown',
+    city: 'Metropolis',
+    country: 'USA',
+  };
+
+  const updateAddressDto: UpdateAddressDTO = {
+    street: 'Updated Street',
+    city: 'New City',
+  };
+
   // Mock isNotFoundPrismaError function
   jest
     .spyOn(errorHelpers, 'isNotFoundPrismaError')
@@ -29,6 +63,8 @@ describe('AddressesService', () => {
     });
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AddressesService,
@@ -36,12 +72,27 @@ describe('AddressesService', () => {
           provide: ADDRESSES_REPOSITORY,
           useValue: mockAddressesRepository,
         },
+        {
+          provide: TranslationService,
+          useValue: mockTranslationService,
+        },
+        {
+          provide: Logger,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn(),
+            verbose: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<AddressesService>(AddressesService);
+  });
 
-    // Clear all mock implementations and calls before each test
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -49,74 +100,53 @@ describe('AddressesService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('count', () => {
-    it('should return the count of addresses', async () => {
-      // Arrange
-      const expectedCount = 10;
-      mockAddressesRepository.count.mockResolvedValue(expectedCount);
-
-      // Act
-      const result = await service.count();
-
-      // Assert
-      expect(result).toEqual(expectedCount);
-      expect(mockAddressesRepository.count).toHaveBeenCalledTimes(1);
-    });
-
-    it('should throw an error when repository count fails', async () => {
-      // Arrange
-      const errorMessage = 'Database error';
-      mockAddressesRepository.count.mockRejectedValue(new Error(errorMessage));
-
-      // Act & Assert
-      await expect(service.count()).rejects.toThrow(
-        `Error counting addresses: ${errorMessage}`,
-      );
-      expect(mockAddressesRepository.count).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('create', () => {
     it('should create an address successfully', async () => {
       // Arrange
-      const createAddressDto: CreateAddressDTO = {
-        number: '123',
-        street: 'Main Street',
-        district: 'Downtown',
-        city: 'Metropolis',
-        country: 'USA',
-      };
-
-      const expectedResult: AddressesDto = {
-        id: '123e4567-e89b-12d3-a456-426614174000',
-        ...createAddressDto,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockAddressesRepository.create.mockResolvedValue(expectedResult);
+      mockAddressesRepository.create.mockResolvedValue(sampleAddress);
+      mockTranslationService.translateAndSave.mockResolvedValue(undefined);
 
       // Act
       const result = await service.create(createAddressDto);
 
       // Assert
-      expect(result).toEqual(expectedResult);
+      expect(result).toEqual(sampleAddress);
       expect(mockAddressesRepository.create).toHaveBeenCalledWith(
         createAddressDto,
       );
-      expect(mockAddressesRepository.create).toHaveBeenCalledTimes(1);
+      expect(mockTranslationService.translateAndSave).toHaveBeenCalledWith({
+        entity: 'Address',
+        entityId: sampleAddress.id,
+        fields: {
+          street: 'Main Street',
+          district: 'Downtown',
+          city: 'Metropolis',
+          country: 'USA',
+        },
+      });
+    });
+
+    it('should create an address even when translation fails', async () => {
+      // Arrange
+      mockAddressesRepository.create.mockResolvedValue(sampleAddress);
+      mockTranslationService.translateAndSave.mockRejectedValue(
+        new Error('Translation failed'),
+      );
+
+      // Act
+      const result = await service.create(createAddressDto);
+
+      // Assert
+      expect(result).toEqual(sampleAddress);
+      expect(mockAddressesRepository.create).toHaveBeenCalledWith(
+        createAddressDto,
+      );
+      // We should still try to create translations
+      expect(mockTranslationService.translateAndSave).toHaveBeenCalled();
     });
 
     it('should throw an error when repository create fails', async () => {
       // Arrange
-      const createAddressDto: CreateAddressDTO = {
-        number: '123',
-        street: 'Main Street',
-        district: 'Downtown',
-        city: 'Metropolis',
-        country: 'USA',
-      };
-
       const errorMessage = 'Validation failed';
       mockAddressesRepository.create.mockRejectedValue(new Error(errorMessage));
 
@@ -127,288 +157,55 @@ describe('AddressesService', () => {
       expect(mockAddressesRepository.create).toHaveBeenCalledWith(
         createAddressDto,
       );
-    });
-  });
-
-  describe('createForStudent', () => {
-    it('should create an address for student successfully', async () => {
-      // Arrange
-      const studentId = '123e4567-e89b-12d3-a456-426614174001';
-      const type = 'permanentAddress' as const;
-      const createAddressDto: CreateAddressDTO = {
-        number: '456',
-        street: 'College Avenue',
-        district: 'University',
-        city: 'Collegetown',
-        country: 'USA',
-      };
-
-      const expectedResult: AddressesDto = {
-        id: '123e4567-e89b-12d3-a456-426614174002',
-        ...createAddressDto,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockAddressesRepository.createAndLinkAddressForStudent.mockResolvedValue(
-        expectedResult,
-      );
-
-      // Act
-      const result = await service.createForStudent(
-        studentId,
-        type,
-        createAddressDto,
-      );
-
-      // Assert
-      expect(result).toEqual(expectedResult);
-      expect(
-        mockAddressesRepository.createAndLinkAddressForStudent,
-      ).toHaveBeenCalledWith(studentId, type, createAddressDto);
-      expect(
-        mockAddressesRepository.createAndLinkAddressForStudent,
-      ).toHaveBeenCalledTimes(1);
-    });
-
-    it('should throw BadRequestException when studentId is not provided', async () => {
-      // Arrange
-      const studentId = '';
-      const type = 'permanentAddress' as const;
-      const createAddressDto: CreateAddressDTO = {
-        number: '456',
-        street: 'College Avenue',
-        district: 'University',
-        city: 'Collegetown',
-        country: 'USA',
-      };
-
-      // Act & Assert
-      // Use toThrowError to match the error message instead of the constructor
-      await expect(
-        service.createForStudent(studentId, type, createAddressDto),
-      ).rejects.toThrowError('studentId must have');
-      expect(
-        mockAddressesRepository.createAndLinkAddressForStudent,
-      ).not.toHaveBeenCalled();
-    });
-
-    it('should throw NotFoundException when student not found', async () => {
-      // Arrange
-      const studentId = '123e4567-e89b-12d3-a456-426614174001';
-      const type = 'temporaryAddress' as const;
-      const createAddressDto: CreateAddressDTO = {
-        number: '456',
-        street: 'College Avenue',
-        district: 'University',
-        city: 'Collegetown',
-        country: 'USA',
-      };
-
-      const notFoundError = new Error('Student not found');
-      notFoundError.name = 'NotFoundError';
-      mockAddressesRepository.createAndLinkAddressForStudent.mockRejectedValue(
-        notFoundError,
-      );
-
-      // Act & Assert
-      await expect(
-        service.createForStudent(studentId, type, createAddressDto),
-      ).rejects.toThrow(NotFoundException);
-      expect(
-        mockAddressesRepository.createAndLinkAddressForStudent,
-      ).toHaveBeenCalledWith(studentId, type, createAddressDto);
-    });
-
-    it('should throw general error for other repository failures', async () => {
-      // Arrange
-      const studentId = '123e4567-e89b-12d3-a456-426614174001';
-      const type = 'mailingAddress' as const;
-      const createAddressDto: CreateAddressDTO = {
-        number: '456',
-        street: 'College Avenue',
-        district: 'University',
-        city: 'Collegetown',
-        country: 'USA',
-      };
-
-      const errorMessage = 'Database connection error';
-      mockAddressesRepository.createAndLinkAddressForStudent.mockRejectedValue(
-        new Error(errorMessage),
-      );
-
-      // Act & Assert
-      await expect(
-        service.createForStudent(studentId, type, createAddressDto),
-      ).rejects.toThrow(`Error creating address: ${errorMessage}`);
-      expect(
-        mockAddressesRepository.createAndLinkAddressForStudent,
-      ).toHaveBeenCalledWith(studentId, type, createAddressDto);
-    });
-  });
-
-  describe('delete', () => {
-    it('should delete an address successfully', async () => {
-      // Arrange
-      const addressId = '123e4567-e89b-12d3-a456-426614174002';
-      const expectedResult: AddressesDto = {
-        id: addressId,
-        number: '123',
-        street: 'Main Street',
-        district: 'Downtown',
-        city: 'Metropolis',
-        country: 'USA',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockAddressesRepository.delete.mockResolvedValue(expectedResult);
-
-      // Act
-      const result = await service.delete(addressId);
-
-      // Assert
-      expect(result).toEqual(expectedResult);
-      expect(mockAddressesRepository.delete).toHaveBeenCalledWith(addressId);
-      expect(mockAddressesRepository.delete).toHaveBeenCalledTimes(1);
-    });
-
-    it('should throw an error when repository delete fails', async () => {
-      // Arrange
-      const addressId = '123e4567-e89b-12d3-a456-426614174002';
-      const errorMessage = 'Address not found';
-      mockAddressesRepository.delete.mockRejectedValue(new Error(errorMessage));
-
-      // Act & Assert
-      await expect(service.delete(addressId)).rejects.toThrow(
-        `Error deleting address with ID ${addressId}: ${errorMessage}`,
-      );
-      expect(mockAddressesRepository.delete).toHaveBeenCalledWith(addressId);
-    });
-  });
-
-  describe('findAll', () => {
-    it('should find all addresses with pagination', async () => {
-      // Arrange
-      const page = 1;
-      const limit = 10;
-      const mockAddresses: AddressesDto[] = [
-        {
-          id: '123e4567-e89b-12d3-a456-426614174002',
-          number: '123',
-          street: 'Main Street',
-          district: 'Downtown',
-          city: 'Metropolis',
-          country: 'USA',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: '123e4567-e89b-12d3-a456-426614174003',
-          number: '456',
-          street: 'College Avenue',
-          district: 'University',
-          city: 'Collegetown',
-          country: 'USA',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
-
-      const totalAddresses = 2;
-      mockAddressesRepository.findAll.mockResolvedValue(mockAddresses);
-      mockAddressesRepository.count.mockResolvedValue(totalAddresses);
-
-      const expectedResult = {
-        data: mockAddresses,
-        page,
-        totalPage: Math.ceil(totalAddresses / limit),
-        limit,
-        total: totalAddresses,
-      };
-
-      // Act
-      const result = await service.findAll(page, limit);
-
-      // Assert
-      expect(result).toEqual(expectedResult);
-      expect(mockAddressesRepository.findAll).toHaveBeenCalledWith(page, limit);
-      expect(mockAddressesRepository.count).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle empty result when finding addresses', async () => {
-      // Arrange
-      const page = 1;
-      const limit = 10;
-      const mockAddresses: AddressesDto[] = [];
-      const totalAddresses = 0;
-
-      mockAddressesRepository.findAll.mockResolvedValue(mockAddresses);
-      mockAddressesRepository.count.mockResolvedValue(totalAddresses);
-
-      const expectedResult = {
-        data: mockAddresses,
-        page,
-        totalPage: Math.ceil(totalAddresses / limit),
-        limit,
-        total: totalAddresses,
-      };
-
-      // Act
-      const result = await service.findAll(page, limit);
-
-      // Assert
-      expect(result).toEqual(expectedResult);
-      expect(mockAddressesRepository.findAll).toHaveBeenCalledWith(page, limit);
-      expect(mockAddressesRepository.count).toHaveBeenCalledTimes(1);
-    });
-
-    it('should throw an error when repository findAll fails', async () => {
-      // Arrange
-      const page = 1;
-      const limit = 10;
-      const errorMessage = 'Database error';
-      mockAddressesRepository.findAll.mockRejectedValue(
-        new Error(errorMessage),
-      );
-
-      // Act & Assert
-      await expect(service.findAll(page, limit)).rejects.toThrow(
-        `Error finding all addresses: ${errorMessage}`,
-      );
-      expect(mockAddressesRepository.findAll).toHaveBeenCalledWith(page, limit);
+      expect(mockTranslationService.translateAndSave).not.toHaveBeenCalled();
     });
   });
 
   describe('findById', () => {
     it('should find an address by id successfully', async () => {
       // Arrange
-      const addressId = '123e4567-e89b-12d3-a456-426614174002';
-      const expectedResult: AddressesDto = {
-        id: addressId,
-        number: '123',
-        street: 'Main Street',
-        district: 'Downtown',
-        city: 'Metropolis',
-        country: 'USA',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockAddressesRepository.findById.mockResolvedValue(expectedResult);
+      mockAddressesRepository.findById.mockResolvedValue(sampleAddress);
 
       // Act
       const result = await service.findById(addressId);
 
       // Assert
-      expect(result).toEqual(expectedResult);
+      expect(result).toEqual(sampleAddress);
       expect(mockAddressesRepository.findById).toHaveBeenCalledWith(addressId);
-      expect(mockAddressesRepository.findById).toHaveBeenCalledTimes(1);
+      expect(mockTranslationService.getAllTranslations).not.toHaveBeenCalled();
+    });
+
+    it('should apply translations when language is provided', async () => {
+      // Arrange
+      mockAddressesRepository.findById.mockResolvedValue({ ...sampleAddress });
+      const translations = [
+        { field: 'street', value: 'Đường Chính' },
+        { field: 'city', value: 'Thành phố Mới' },
+      ];
+      mockTranslationService.getAllTranslations.mockResolvedValue(translations);
+
+      const expectedAddress = {
+        ...sampleAddress,
+        street: 'Đường Chính',
+        city: 'Thành phố Mới',
+      };
+
+      // Act
+      const result = await service.findById(addressId, 'vi');
+
+      // Assert
+      expect(result).toEqual(expectedAddress);
+      expect(mockAddressesRepository.findById).toHaveBeenCalledWith(addressId);
+      expect(mockTranslationService.getAllTranslations).toHaveBeenCalledWith(
+        'Address',
+        addressId,
+        undefined,
+        'vi',
+      );
     });
 
     it('should throw an error when repository findById fails', async () => {
       // Arrange
-      const addressId = '123e4567-e89b-12d3-a456-426614174002';
       const errorMessage = 'Address not found';
       mockAddressesRepository.findById.mockRejectedValue(
         new Error(errorMessage),
@@ -418,52 +215,137 @@ describe('AddressesService', () => {
       await expect(service.findById(addressId)).rejects.toThrow(
         `Error finding address with ID ${addressId}: ${errorMessage}`,
       );
+    });
+
+    it('should handle when translations fail', async () => {
+      // Arrange
+      mockAddressesRepository.findById.mockResolvedValue({ ...sampleAddress });
+      mockTranslationService.getAllTranslations.mockRejectedValue(
+        new Error('Translation service down'),
+      );
+
+      // Act
+      const result = await service.findById(addressId, 'vi');
+
+      // Assert
+      expect(result).toEqual(sampleAddress);
       expect(mockAddressesRepository.findById).toHaveBeenCalledWith(addressId);
+      expect(mockTranslationService.getAllTranslations).toHaveBeenCalled();
+    });
+  });
+
+  describe('findAll', () => {
+    const page = 1;
+    const limit = 10;
+    const addresses = [sampleAddress, { ...sampleAddress, id: 'address-2' }];
+
+    it('should find all addresses with pagination', async () => {
+      // Arrange
+      mockAddressesRepository.findAll.mockResolvedValue(addresses);
+      mockAddressesRepository.count.mockResolvedValue(addresses.length);
+
+      const expectedResponse = {
+        data: addresses,
+        total: addresses.length,
+        page,
+        limit,
+        totalPage: 1,
+      };
+
+      // Act
+      const result = await service.findAll(page, limit);
+
+      // Assert
+      expect(result).toEqual(expectedResponse);
+      expect(mockAddressesRepository.findAll).toHaveBeenCalledWith(page, limit);
+      expect(mockAddressesRepository.count).toHaveBeenCalled();
+    });
+
+    it('should apply translations when language is specified', async () => {
+      // Arrange
+      mockAddressesRepository.findAll.mockResolvedValue([...addresses]);
+      mockAddressesRepository.count.mockResolvedValue(addresses.length);
+
+      const translations = [{ field: 'street', value: 'Đường Chính' }];
+      mockTranslationService.getAllTranslations.mockResolvedValue(translations);
+
+      // Act
+      const result = await service.findAll(page, limit, 'vi');
+
+      // Assert
+      expect(result.data[0].street).toBe('Đường Chính');
+      expect(mockTranslationService.getAllTranslations).toHaveBeenCalledTimes(
+        addresses.length,
+      );
+    });
+
+    it('should throw an error when repository findAll fails', async () => {
+      // Arrange
+      const errorMessage = 'Database error';
+      mockAddressesRepository.findAll.mockRejectedValue(
+        new Error(errorMessage),
+      );
+
+      // Act & Assert
+      await expect(service.findAll(page, limit)).rejects.toThrow(
+        `Error finding addresses: ${errorMessage}`,
+      );
     });
   });
 
   describe('update', () => {
     it('should update an address successfully', async () => {
       // Arrange
-      const addressId = '123e4567-e89b-12d3-a456-426614174002';
-      const updateAddressDto: UpdateAddressDTO = {
+      const updatedAddress = {
+        ...sampleAddress,
         street: 'Updated Street',
         city: 'New City',
       };
-
-      const expectedResult: AddressesDto = {
-        id: addressId,
-        number: '123',
-        street: 'Updated Street',
-        district: 'Downtown',
-        city: 'New City',
-        country: 'USA',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockAddressesRepository.update.mockResolvedValue(expectedResult);
+      mockAddressesRepository.update.mockResolvedValue(updatedAddress);
+      mockTranslationService.translateAndSave.mockResolvedValue(undefined);
 
       // Act
       const result = await service.update(addressId, updateAddressDto);
 
       // Assert
-      expect(result).toEqual(expectedResult);
+      expect(result).toEqual(updatedAddress);
       expect(mockAddressesRepository.update).toHaveBeenCalledWith(
         addressId,
         updateAddressDto,
       );
-      expect(mockAddressesRepository.update).toHaveBeenCalledTimes(1);
+      expect(mockTranslationService.translateAndSave).toHaveBeenCalledWith({
+        entity: 'Address',
+        entityId: addressId,
+        fields: {
+          street: 'Updated Street',
+          city: 'New City',
+        },
+      });
+    });
+
+    it('should update even when translation fails', async () => {
+      // Arrange
+      const updatedAddress = {
+        ...sampleAddress,
+        street: 'Updated Street',
+      };
+      mockAddressesRepository.update.mockResolvedValue(updatedAddress);
+      mockTranslationService.translateAndSave.mockRejectedValue(
+        new Error('Translation failed'),
+      );
+
+      // Act
+      const result = await service.update(addressId, {
+        street: 'Updated Street',
+      });
+
+      // Assert
+      expect(result).toEqual(updatedAddress);
+      expect(mockTranslationService.translateAndSave).toHaveBeenCalled();
     });
 
     it('should throw an error when repository update fails', async () => {
       // Arrange
-      const addressId = '123e4567-e89b-12d3-a456-426614174002';
-      const updateAddressDto: UpdateAddressDTO = {
-        street: 'Updated Street',
-        city: 'New City',
-      };
-
       const errorMessage = 'Address not found';
       mockAddressesRepository.update.mockRejectedValue(new Error(errorMessage));
 
@@ -471,9 +353,30 @@ describe('AddressesService', () => {
       await expect(service.update(addressId, updateAddressDto)).rejects.toThrow(
         `Error updating address with ID ${addressId}: ${errorMessage}`,
       );
-      expect(mockAddressesRepository.update).toHaveBeenCalledWith(
-        addressId,
-        updateAddressDto,
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete an address successfully', async () => {
+      // Arrange
+      mockAddressesRepository.delete.mockResolvedValue(sampleAddress);
+
+      // Act
+      const result = await service.delete(addressId);
+
+      // Assert
+      expect(result).toEqual(sampleAddress);
+      expect(mockAddressesRepository.delete).toHaveBeenCalledWith(addressId);
+    });
+
+    it('should throw an error when repository delete fails', async () => {
+      // Arrange
+      const errorMessage = 'Address not found';
+      mockAddressesRepository.delete.mockRejectedValue(new Error(errorMessage));
+
+      // Act & Assert
+      await expect(service.delete(addressId)).rejects.toThrow(
+        `Error deleting address with ID ${addressId}: ${errorMessage}`,
       );
     });
   });

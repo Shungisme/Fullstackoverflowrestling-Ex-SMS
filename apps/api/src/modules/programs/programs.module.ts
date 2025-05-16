@@ -7,7 +7,7 @@ import { PrismaService } from 'src/shared/services/database/prisma.service';
 import { TranslationsModule } from '../translations/translation.module';
 
 @Module({
-  imports: [TranslationsModule], // Thêm TranslationsModule
+  imports: [TranslationsModule],
   exports: [ProgramsService],
   controllers: [ProgramsController],
   providers: [

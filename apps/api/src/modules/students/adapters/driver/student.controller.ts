@@ -251,15 +251,22 @@ export class StudentController {
     description: 'find a student by id',
     type: StudentResponseWrapperDTO,
   })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    type: String,
+    description: 'Language code for translations (e.g. en, vi, fr)',
+  })
   async findById(
     @Res() response: Response,
     @Param('studentId') studentId: string,
+    @Query('lang') lang?: string,
   ): Promise<Response> {
     try {
-      const result = await this.studentService.findById(studentId);
+      const result = await this.studentService.findById(studentId, lang);
       return response.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
-        message: 'Student finded successfully',
+        message: 'Student found successfully',
         data: result,
       });
     } catch (error) {

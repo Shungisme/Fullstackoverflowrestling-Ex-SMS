@@ -71,8 +71,36 @@ export class ProgramsService implements IProgramsService {
 
   async delete(programId: string) {
     try {
+      // Xóa các bản dịch liên quan đến chương trình
+      try {
+        // Lấy tất cả bản dịch của chương trình
+        const translations = await this.translationService.getAllTranslations(
+          'Program',
+          programId,
+        );
+
+        // Nếu có bản dịch nào, xóa tất cả
+        if (translations.length > 0) {
+          this.logger.log(
+            `Deleting ${translations.length} translations for program ${programId}`,
+          );
+
+          const deletedCount = await this.translationService[
+            'translationRepository'
+          ].deleteMany('Program', programId);
+
+          this.logger.log(
+            `Successfully deleted ${deletedCount} translations for program ${programId}`,
+          );
+        }
+      } catch (translationError) {
+        this.logger.error(
+          `Error deleting translations for program ${programId}: ${translationError.message}`,
+        );
+      }
+
+      // Xóa chương trình
       return await this.programsRepository.delete(programId);
-      // Translation data không cần xóa (giữ lại lịch sử)
     } catch (error) {
       throw new Error(
         `Error deleting program with ID ${programId}: ${error.message}`,
@@ -136,7 +164,7 @@ export class ProgramsService implements IProgramsService {
         data,
       );
 
-      // Cập nhật bản dịch nếu các trường có thể dịch được thay đổi
+      // Xác định các trường dịch được thay đổi
       const fieldsToTranslate: Record<string, string> = {};
       for (const field of TRANSLATABLE_FIELDS) {
         if (data[field] !== undefined) {
@@ -146,6 +174,34 @@ export class ProgramsService implements IProgramsService {
 
       if (Object.keys(fieldsToTranslate).length > 0) {
         try {
+          // Xóa các bản dịch cũ cho các trường sẽ được cập nhật
+          for (const field of Object.keys(fieldsToTranslate)) {
+            try {
+              const translations =
+                await this.translationService.getAllTranslations(
+                  'Program',
+                  programId,
+                  field,
+                );
+
+              if (translations.length > 0) {
+                this.logger.log(
+                  `Deleting existing translations for program ${programId}, field ${field}`,
+                );
+
+                // Xóa từng bản dịch của trường này
+                await this.translationService[
+                  'translationRepository'
+                ].deleteMany('Program', programId);
+              }
+            } catch (deleteError) {
+              this.logger.error(
+                `Failed to delete old translations for field ${field}: ${deleteError.message}`,
+              );
+            }
+          }
+
+          // Tạo các bản dịch mới sau khi đã xóa bản dịch cũ
           await this.translationService.translateAndSave({
             entity: 'Program',
             entityId: programId,
@@ -156,7 +212,6 @@ export class ProgramsService implements IProgramsService {
           this.logger.error(
             `Failed to update translations: ${translationError.message}`,
           );
-          // Không fail update nếu dịch bị lỗi
         }
       }
 
