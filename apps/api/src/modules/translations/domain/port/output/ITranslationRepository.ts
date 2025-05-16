@@ -16,6 +16,8 @@ export interface ITranslationRepository {
     field?: string,
     lang?: string,
   ): Promise<TranslationDto[]>;
+
+  deleteMany(entity: string, entityId: string): Promise<number>;
 }
 
 export const TRANSLATION_REPOSITORY = Symbol('ITranslationRepository');
