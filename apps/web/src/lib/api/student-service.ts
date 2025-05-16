@@ -9,7 +9,7 @@ import { BASE_URL, Language, ListConfig } from "@/src/constants/constants";
 import { stripEmptyValues } from "@/src/utils/cleaner";
 import { toQueryString } from "@/src/utils/helper";
 import { StudentSearchParams } from "@/src/types/search";
-import { CRUDService } from "./school-service";
+import { CRUDService, PaginatedResponse } from "./school-service";
 
 const studentURL = BASE_URL + "/students";
 
@@ -20,7 +20,7 @@ export class StudentService extends CRUDService<Student> {
 
   async searchStudents(
     searchTerm: StudentSearchParams
-  ): Promise<IAPIResponse<StudentList>> {
+  ): Promise<IAPIResponse<PaginatedResponse<Student>>> {
     const queryString = toQueryString(searchTerm);
     const res = await fetch(`${studentURL}?${queryString}&lang=${this.lang}`, {
     headers: { "Content-Type": "application/json" },

@@ -563,5 +563,12 @@ export const TRANSLATIONS = {
     editBtn: "Chỉnh sửa",
     saving: "Đang lưu...",
     saveBtn: "Lưu",
+    selectBtn: "Chọn",
+    TranscriptPrinter_Student: "Sinh viên",
+    TranscriptPrinter_SelectStudent: "Chọn sinh viên",
+    TranscriptPrinter_Semester: "Học kỳ (không bắt buộc)",
+    TranscriptPrinter_SemesterPlaceholder: "Tất cả các học kỳ",
+    ClassList_AddBtn: "Thêm lớp học",
+    ClassList_Filter: "Lọc",
   },
 };
