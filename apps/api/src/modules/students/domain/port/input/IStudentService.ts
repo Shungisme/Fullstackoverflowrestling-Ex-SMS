@@ -12,7 +12,7 @@ export interface IStudentService {
   create(student: CreateStudentWithAddressDTO): Promise<StudentResponseDTO>;
   delete(studentId: string): Promise<DeleteStudentResponseDTO>;
   update(student: UpdateStudentRequestDTO): Promise<StudentResponseDTO>;
-  findById(studentId: string): Promise<StudentResponseDTO>;
+  findById(studentId: string, lang?: string): Promise<StudentResponseDTO>;
   search(query: SearchRequestDTO): Promise<StudentsResponseDTO>;
   upload(
     file: Express.Multer.File,

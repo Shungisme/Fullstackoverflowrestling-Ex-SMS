@@ -863,11 +863,19 @@ export class StudentService implements IStudentService {
     }
   }
 
-  async findById(studentId: string): Promise<StudentResponseDTO> {
+  async findById(
+    studentId: string,
+    lang?: string,
+  ): Promise<StudentResponseDTO> {
     const student = await this.studentRepository.findById(studentId);
     if (!student) {
       throw new NotFoundException(`Student with ID ${studentId} not found: `);
     }
+
+    if (lang) {
+      await this.applyTranslation(student, lang);
+    }
+
     return student;
   }
 
