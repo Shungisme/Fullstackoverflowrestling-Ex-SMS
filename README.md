@@ -732,6 +732,35 @@ pnpm dev
 
   ![update-score-list](./images/update-score.png)
 
+### Quy trình dịch thuật
+
+1. **Khi tạo/cập nhật đối tượng**:
+
+   - Ngôn ngữ nguồn được phát hiện tự động
+   - Văn bản gốc được lưu trong ngôn ngữ nguồn
+   - Hệ thống dịch nội dung sang các ngôn ngữ đích (trừ ngôn ngữ nguồn)
+   - Các bản dịch được lưu vào cơ sở dữ liệu
+
+2. **Khi hiển thị nội dung**:
+
+   - Hệ thống xác định ngôn ngữ người dùng
+   - Truy vấn bản dịch phù hợp từ cơ sở dữ liệu
+   - Hiển thị nội dung theo ngôn ngữ được chọn
+
+3. **Ý tưởng thiết kế**:
+
+   - Tách biệt dữ liệu gốc và bản dịch để không ảnh hưởng đến cấu trúc dữ liệu
+   - Lưu trữ bản dịch theo mô hình "đối tượng-trường-ngôn ngữ"
+   - Tự động hóa quá trình dịch thuật để giảm thiểu công sức quản lý
+   - Hỗ trợ thêm ngôn ngữ mới không cần thay đổi cơ sở dữ liệu
+
+4. **Cấu trúc lưu trữ bản dịch**:
+   - entity: Xác định loại đối tượng (Faculty, Program, Subject...)
+   - entityId: ID của đối tượng cụ thể
+   - field: Trường cần dịch (title, description...)
+   - lang: Mã ngôn ngữ đích (en, vi, fr...)
+   - value: Nội dung đã được dịch
+
 ### Xử lý sự cố
 
 1. **Lỗi khi cài đặt dependencies**
