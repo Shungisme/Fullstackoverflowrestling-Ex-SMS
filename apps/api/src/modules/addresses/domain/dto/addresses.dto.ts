@@ -1,4 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
+import { createResponseWrapperSchema } from 'src/shared/helpers/api-response';
 import { z } from 'zod';
 
 export const addressesSchema = z.object({
@@ -13,3 +14,10 @@ export const addressesSchema = z.object({
 });
 
 export class AddressesDto extends createZodDto(addressesSchema) {}
+
+const addressResponseWrapperSchema =
+  createResponseWrapperSchema(addressesSchema);
+
+export class AddressResponseWrapperDTO extends createZodDto(
+  addressResponseWrapperSchema,
+) {}

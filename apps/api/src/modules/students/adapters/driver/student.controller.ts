@@ -21,7 +21,7 @@ import {
 import { ZodSerializerDto } from 'nestjs-zod';
 import {
   DeleteStudentResponseDTO,
-  DeleteStudentWrapperResponseDTO,
+  DeleteStudentResponseWrapperDTO,
 } from '../../domain/dto/delete-dto';
 import { SearchRequestDTO } from '../../domain/dto/search-dto';
 import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -112,7 +112,7 @@ export class StudentController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'delete a student',
-    type: DeleteStudentWrapperResponseDTO,
+    type: DeleteStudentResponseWrapperDTO,
   })
   async delete(
     @Res() response: Response,
@@ -140,7 +140,7 @@ export class StudentController {
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Create a student',
+    description: 'Students searched successfully',
     type: StudentsResponseWrapperDTO,
   })
   @ApiQuery({ name: 'limit', required: false, type: Number })

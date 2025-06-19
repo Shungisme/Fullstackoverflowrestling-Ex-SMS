@@ -13,9 +13,9 @@ export class DeleteStudentResponseDTO extends createZodDto(
   DeleteStudentSchema,
 ) {}
 
-const createDeleteStudentSchema =
+const DeleteStudentResponseWrapper =
   createResponseWrapperSchema(DeleteStudentSchema);
 
-export class DeleteStudentWrapperResponseDTO extends createZodDto(
-  createDeleteStudentSchema,
+export class DeleteStudentResponseWrapperDTO extends createZodDto(
+  DeleteStudentResponseWrapper,
 ) {}

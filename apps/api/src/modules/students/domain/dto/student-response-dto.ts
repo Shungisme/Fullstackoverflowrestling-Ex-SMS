@@ -71,18 +71,18 @@ export type StudentResponse = z.infer<typeof StudentSchema>;
 export class StudentResponseDTO extends createZodDto(StudentSchema) {}
 export class StudentsResponseDTO extends createZodDto(StudentsResponseSchema) {}
 
-const StudentsResponseSchemaWrapper = createResponseWrapperSchema(
+const StudentsResponseWrapperSchema = createResponseWrapperSchema(
   StudentsResponseSchema,
 );
 
 export class StudentsResponseWrapperDTO extends createZodDto(
-  StudentsResponseSchemaWrapper,
+  StudentsResponseWrapperSchema,
 ) {}
 
-const StudentResponseSchemaWrapper = createResponseWrapperSchema(
+const StudentResponseWrapperSchema = createResponseWrapperSchema(
   StudentsResponseSchema,
 );
 
 export class StudentResponseWrapperDTO extends createZodDto(
-  StudentResponseSchemaWrapper,
+  StudentResponseWrapperSchema,
 ) {}
